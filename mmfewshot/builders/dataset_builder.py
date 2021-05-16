@@ -6,6 +6,9 @@ from mmdet.datasets.builder import build_dataset as build_det_dataset
 
 def build_dataloader(dataset=None, task_type='mmdet', round_up=True, **kwargs):
     # TODO: identify how to bulid the dataloader via the type of dataset
+    # just an example
+    # if isinstance(dataset,base_meta_learning_dataset):
+    # data_loader=build_det_metalearning_dataloader(dataset=dataset, **kwargs)
     if task_type == 'mmdet':
         data_loader = build_det_dataloader(dataset=dataset, **kwargs)
     elif task_type == 'mmcls':
@@ -25,3 +28,8 @@ def build_dataset(*args, task_type='mmdet', **kwargs):
     else:
         raise NotImplementedError
     return dataset
+
+
+# TODO: check whether det and cls can use same dataloader for meta_learnig
+def build_det_metalearning_dataloader():
+    pass
