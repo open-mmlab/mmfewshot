@@ -13,7 +13,7 @@ def readme():
     return content
 
 
-version_file = 'mmdet/version.py'
+version_file = 'mmfewshot/version.py'
 
 
 def get_version():
@@ -127,7 +127,7 @@ def parse_requirements(fname='requirements.txt', with_version=True):
 
 if __name__ == '__main__':
     setup(
-        name='mmdet',
+        name='mmfewshot',
         version=get_version(),
         description='OpenMMLab Detection Toolbox and Benchmark',
         long_description=readme(),
