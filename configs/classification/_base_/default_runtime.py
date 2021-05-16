@@ -1,6 +1,7 @@
 # checkpoint saving
 checkpoint_config = dict(interval=1)
 # yapf:disable
+task_type = 'mmcls'
 log_config = dict(
     interval=100,
     hooks=[

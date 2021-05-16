@@ -125,15 +125,6 @@ def main():
     if cfg.get('cudnn_benchmark', False):
         torch.backends.cudnn.benchmark = True
     cfg.model.pretrained = None
-    if cfg.model.get('neck'):
-        if isinstance(cfg.model.neck, list):
-            for neck_cfg in cfg.model.neck:
-                if neck_cfg.get('rfp_backbone'):
-                    if neck_cfg.rfp_backbone.get('pretrained'):
-                        neck_cfg.rfp_backbone.pretrained = None
-        elif cfg.model.neck.get('rfp_backbone'):
-            if cfg.model.neck.rfp_backbone.get('pretrained'):
-                cfg.model.neck.rfp_backbone.pretrained = None
 
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
@@ -143,7 +134,7 @@ def main():
         init_dist(args.launcher, **cfg.dist_params)
 
     # build the dataloader
-    dataset = build_dataset(cfg.data.test)
+    dataset = build_dataset(cfg.data.test, task_type=cfg.task_type)
     data_loader = build_dataloader(
         dataset,
         samples_per_gpu=cfg.data.samples_per_gpu,
@@ -154,7 +145,7 @@ def main():
 
     # build the model and load checkpoint
     cfg.model.train_cfg = None
-    model = build_model(cfg.model)
+    model = build_model(cfg.model, task_type=cfg.task_type)
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
@@ -173,15 +164,25 @@ def main():
         elif cfg.task_type == 'mmcls':
             show_kwargs = {} if args.show_options is None\
                 else args.show_options
-        outputs = single_gpu_test(model, data_loader, args.show, args.show_dir,
-                                  **show_kwargs)
+        outputs = single_gpu_test(
+            model,
+            data_loader,
+            args.show,
+            args.show_dir,
+            task_type=cfg.task_type,
+            **show_kwargs)
     else:
         model = MMDistributedDataParallel(
             model.cuda(),
             device_ids=[torch.cuda.current_device()],
             broadcast_buffers=False)
-        outputs = multi_gpu_test(model, data_loader, args.tmpdir,
-                                 args.gpu_collect)
+        outputs = multi_gpu_test(
+            model,
+            data_loader,
+            args.tmpdir,
+            args.gpu_collect,
+            task_type=cfg.task_type,
+        )
 
     rank, _ = get_dist_info()
     if rank == 0:

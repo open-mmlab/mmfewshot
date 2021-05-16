@@ -1,4 +1,6 @@
+import mmcls  # noqa: F401, F403
 import mmcv
+import mmdet  # noqa: F401, F403
 
 from .builders import *  # noqa: F401, F403
 from .classification import *  # noqa: F401, F403
