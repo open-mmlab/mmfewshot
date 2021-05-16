@@ -4,12 +4,15 @@ from mmdet.datasets.builder import build_dataloader as build_det_dataloader
 from mmdet.datasets.builder import build_dataset as build_det_dataset
 
 
-def build_dataloader(*args, task_type='mmdet', **kwargs):
-
+def build_dataloader(dataset=None, task_type='mmdet', round_up=True, **kwargs):
+    # TODO: identify how to bulid the dataloader via the type of dataset
     if task_type == 'mmdet':
-        data_loader = build_det_dataloader(*args, **kwargs)
+        data_loader = build_det_dataloader(dataset=dataset, **kwargs)
     elif task_type == 'mmcls':
-        data_loader = build_cls_dataloader(*args, **kwargs)
+        data_loader = build_cls_dataloader(
+            dataset=dataset, round_up=round_up, **kwargs)
+    else:
+        raise NotImplementedError
     return data_loader
 
 
@@ -19,4 +22,6 @@ def build_dataset(*args, task_type='mmdet', **kwargs):
         dataset = build_det_dataset(*args, **kwargs)
     elif task_type == 'mmcls':
         dataset = build_cls_dataset(*args, **kwargs)
+    else:
+        raise NotImplementedError
     return dataset
