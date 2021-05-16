@@ -21,7 +21,7 @@ from mmfewshot.utils.check_config import check_config
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Train a detector')
+    parser = argparse.ArgumentParser(description='Train a FewShot model')
     parser.add_argument('config', help='train config file path')
     parser.add_argument('--work-dir', help='the dir to save logs and models')
     parser.add_argument(
@@ -161,11 +161,7 @@ def main():
     meta['seed'] = args.seed
     meta['exp_name'] = osp.basename(args.config)
 
-    model = build_model(
-        cfg.model,
-        train_cfg=cfg.get('train_cfg'),
-        test_cfg=cfg.get('test_cfg'),
-        task_type=cfg.task_type)
+    model = build_model(cfg.model, task_type=cfg.task_type)
     model.init_weights()
 
     datasets = [build_dataset(cfg.data.train, task_type=cfg.task_type)]
@@ -174,7 +170,7 @@ def main():
         val_dataset.pipeline = cfg.data.train.pipeline
         datasets.append(build_dataset(val_dataset, task_type=cfg.task_type))
     if cfg.checkpoint_config is not None:
-        # save mmdet version, config file content and class names in
+        # save mmfewshot version, config file content and class names in
         # checkpoints as meta data
         cfg.checkpoint_config.meta = dict(
             mmfewshot_version=__version__ + get_git_hash()[:7],
@@ -185,6 +181,7 @@ def main():
         model,
         datasets,
         cfg,
+        task_type=cfg.task_type,
         distributed=distributed,
         validate=(not args.no_validate),
         timestamp=timestamp,

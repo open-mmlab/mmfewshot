@@ -1,6 +1,7 @@
 import mmcv
 
 from .builders import *  # noqa: F401, F403
+from .classification import *  # noqa: F401, F403
 from .detection import *  # noqa: F401, F403
 from .version import __version__, short_version
 

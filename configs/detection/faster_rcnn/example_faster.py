@@ -5,6 +5,4 @@ _base_ = [
 ]
 
 model = dict(type='TestDetection')
-data = dict(
-    samples_per_gpu=1
-)
+data = dict(samples_per_gpu=1)

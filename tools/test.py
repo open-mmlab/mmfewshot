@@ -9,37 +9,30 @@ from mmcv.cnn import fuse_conv_bn
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
                          wrap_fp16_model)
-from mmdet.apis import multi_gpu_test, single_gpu_test
-from mmdet.datasets import (build_dataloader, build_dataset,
-                            replace_ImageToTensor)
-from mmdet.models import build_detector
 
 import mmfewshot  # noqa: F401, F403
+from mmfewshot.apis.test import multi_gpu_test, single_gpu_test
+from mmfewshot.builders import build_dataloader, build_dataset, build_model
+from mmfewshot.utils.check_config import check_config
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='MMDet test (and eval) a model')
+        description='MMFewShot test (and eval) a model')
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
     parser.add_argument('--out', help='output result file in pickle format')
     parser.add_argument(
-        '--fuse-conv-bn',
-        action='store_true',
-        help='Whether to fuse conv and bn, this will slightly increase'
-        'the inference speed')
-    parser.add_argument(
-        '--format-only',
-        action='store_true',
-        help='Format the output results without perform evaluation. It is'
-        'useful when you want to format the result to a specific format and '
-        'submit it to the test server')
-    parser.add_argument(
         '--eval',
         type=str,
         nargs='+',
-        help='evaluation metrics, which depends on the dataset, e.g., "bbox",'
-        ' "segm", "proposal" for COCO, and "mAP", "recall" for PASCAL VOC')
+        help='evaluation metrics, which depends on the dataset '
+        'of specific task_type, e.g., "bbox","segm", "proposal" for '
+        'COCO, and "mAP", "recall" for PASCAL VOC in'
+        'MMDet or "accuracy", "precision", "recall", "f1_score", '
+        '"support" for single label dataset, and "mAP", "CP", "CR",'
+        '"CF1", "OP", "OR", "OF1" for '
+        'multi-label dataset in MMCLS')
     parser.add_argument('--show', action='store_true', help='show results')
     parser.add_argument(
         '--show-dir', help='directory where painted images will be saved')
@@ -47,7 +40,8 @@ def parse_args():
         '--show-score-thr',
         type=float,
         default=0.3,
-        help='score threshold (default: 0.3)')
+        help='score threshold (default: 0.3),Only work when task_type is mmdet'
+    )
     parser.add_argument(
         '--gpu-collect',
         action='store_true',
@@ -79,6 +73,13 @@ def parse_args():
         action=DictAction,
         help='custom options for evaluation, the key-value pair in xxx=yyy '
         'format will be kwargs for dataset.evaluate() function')
+    parser.add_argument(
+        '--show-options',
+        nargs='+',
+        action=DictAction,
+        help='custom options for show_result. key-value pair in xxx=yyy.'
+        'Check available options in `model.show_result`. Only work when '
+        'task_type is mmcls')
     parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
@@ -117,6 +118,9 @@ def main():
     cfg = Config.fromfile(args.config)
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
+
+    cfg = check_config(cfg)
+
     # import modules from string list.
     if cfg.get('custom_imports', None):
         from mmcv.utils import import_modules_from_strings
@@ -135,24 +139,6 @@ def main():
             if cfg.model.neck.rfp_backbone.get('pretrained'):
                 cfg.model.neck.rfp_backbone.pretrained = None
 
-    # in case the test dataset is concatenated
-    samples_per_gpu = 1
-    if isinstance(cfg.data.test, dict):
-        cfg.data.test.test_mode = True
-        samples_per_gpu = cfg.data.test.pop('samples_per_gpu', 1)
-        if samples_per_gpu > 1:
-            # Replace 'ImageToTensor' to 'DefaultFormatBundle'
-            cfg.data.test.pipeline = replace_ImageToTensor(
-                cfg.data.test.pipeline)
-    elif isinstance(cfg.data.test, list):
-        for ds_cfg in cfg.data.test:
-            ds_cfg.test_mode = True
-        samples_per_gpu = max(
-            [ds_cfg.pop('samples_per_gpu', 1) for ds_cfg in cfg.data.test])
-        if samples_per_gpu > 1:
-            for ds_cfg in cfg.data.test:
-                ds_cfg.pipeline = replace_ImageToTensor(ds_cfg.pipeline)
-
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         distributed = False
@@ -164,14 +150,15 @@ def main():
     dataset = build_dataset(cfg.data.test)
     data_loader = build_dataloader(
         dataset,
-        samples_per_gpu=samples_per_gpu,
+        samples_per_gpu=cfg.data.samples_per_gpu,
         workers_per_gpu=cfg.data.workers_per_gpu,
         dist=distributed,
-        shuffle=False)
+        shuffle=False,
+        round_up=False)
 
     # build the model and load checkpoint
     cfg.model.train_cfg = None
-    model = build_detector(cfg.model, test_cfg=cfg.get('test_cfg'))
+    model = build_model(cfg.model)
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
@@ -187,8 +174,13 @@ def main():
 
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])
+        if cfg.task_type == 'mmdet':
+            show_kwargs = dict(show_score_thr=args.show_score_thr)
+        elif cfg.task_type == 'mmcls':
+            show_kwargs = {} if args.show_options is None\
+                else args.show_options
         outputs = single_gpu_test(model, data_loader, args.show, args.show_dir,
-                                  args.show_score_thr)
+                                  **show_kwargs)
     else:
         model = MMDistributedDataParallel(
             model.cuda(),
