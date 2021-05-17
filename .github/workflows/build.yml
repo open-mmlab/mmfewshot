@@ -20,7 +20,7 @@ jobs:
       - name: Check docstring coverage
         run: |
           pip install interrogate
-          interrogate -v --ignore-init-method --ignore-module --ignore-nested-functions --ignore-regex "__repr__" --fail-under 80 mmdet
+          interrogate -v --ignore-init-method --ignore-module --ignore-nested-functions --ignore-regex "__repr__" --fail-under 80 mmfewshot
 
   build_cpu:
     runs-on: ubuntu-latest
@@ -65,7 +65,7 @@ jobs:
         run: rm -rf .eggs && pip install -e .
       - name: Run unittests and generate coverage report
         run: |
-          coverage run --branch --source mmdet -m pytest tests/
+          coverage run --branch --source mmfewshot -m pytest tests/
           coverage xml
           coverage report -m
 
@@ -136,7 +136,7 @@ jobs:
         if: ${{matrix.torchvision < 0.5}}
       - name: Install PyTorch
         run: pip install torch==${{matrix.torch}} torchvision==${{matrix.torchvision}} -f https://download.pytorch.org/whl/torch_stable.html
-      - name: Install mmdet dependencies
+      - name: Install mmfewshot dependencies
         run: |
           pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/${{matrix.torch_version}}/index.html
           pip install -r requirements.txt
@@ -148,7 +148,7 @@ jobs:
           TORCH_CUDA_ARCH_LIST=7.0 pip install .
       - name: Run unittests and generate coverage report
         run: |
-          coverage run --branch --source mmdet -m pytest tests/
+          coverage run --branch --source mmfewshot -m pytest tests/
           coverage xml
           coverage report -m
       - name: Upload coverage to Codecov
