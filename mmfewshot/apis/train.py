@@ -3,7 +3,8 @@ import random
 import numpy as np
 import torch
 from mmcls.apis.train import train_model as train_classifier
-from mmdet.apis.train import train_detector
+
+from mmfewshot.detection.apis.train import train_detector
 
 
 def set_random_seed(seed, deterministic=False):

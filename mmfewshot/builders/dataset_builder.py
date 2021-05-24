@@ -1,7 +1,11 @@
+# this file only for unittests
 from mmcls.datasets.builder import build_dataloader as build_cls_dataloader
 from mmcls.datasets.builder import build_dataset as build_cls_dataset
-from mmdet.datasets.builder import build_dataloader as build_det_dataloader
-from mmdet.datasets.builder import build_dataset as build_det_dataset
+
+from mmfewshot.detection.datasets.builder import \
+    build_dataloader as build_det_dataloader
+from mmfewshot.detection.datasets.builder import \
+    build_dataset as build_det_dataset
 
 
 def build_dataloader(dataset=None, task_type='mmdet', round_up=True, **kwargs):
