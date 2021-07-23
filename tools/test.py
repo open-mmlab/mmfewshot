@@ -8,10 +8,13 @@ from mmcv import Config, DictAction
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
                          wrap_fp16_model)
+from mmdet.datasets import replace_ImageToTensor
 
 import mmfewshot  # noqa: F401, F403
 from mmfewshot.apis.test import multi_gpu_test, single_gpu_test
 from mmfewshot.builders import build_dataloader, build_dataset, build_model
+from mmfewshot.detection.apis import (multi_gpu_extract_support_template,
+                                      single_gpu_extract_support_template)
 from mmfewshot.utils.check_config import check_config
 
 
@@ -103,15 +106,16 @@ def main():
     args = parse_args()
 
     assert args.out or args.eval or args.format_only or args.show \
-        or args.show_dir, \
-        ('Please specify at least one operation (save/eval/format/show the '
-         'results / save the results) with the argument "--out", "--eval"',
-         '"--show" or "--show-dir"')
+        or args.show_dir, (
+            'Please specify at least one operation (save/eval/format/show the '
+            'results / save the results) with the argument "--out", "--eval"',
+            '"--show" or "--show-dir"')
 
     if args.out is not None and not args.out.endswith(('.pkl', '.pickle')):
         raise ValueError('The output file must be a pkl file.')
 
     cfg = Config.fromfile(args.config)
+
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
 
@@ -126,6 +130,24 @@ def main():
         torch.backends.cudnn.benchmark = True
     cfg.model.pretrained = None
 
+    # in case the test dataset is concatenated
+    samples_per_gpu = 1
+    if isinstance(cfg.data.test, dict):
+        cfg.data.test.test_mode = True
+        samples_per_gpu = cfg.data.test.pop('samples_per_gpu', 1)
+        if samples_per_gpu > 1:
+            # Replace 'ImageToTensor' to 'DefaultFormatBundle'
+            cfg.data.test.pipeline = replace_ImageToTensor(
+                cfg.data.test.pipeline)
+    elif isinstance(cfg.data.test, list):
+        for ds_cfg in cfg.data.test:
+            ds_cfg.test_mode = True
+        samples_per_gpu = max(
+            [ds_cfg.pop('samples_per_gpu', 1) for ds_cfg in cfg.data.test])
+        if samples_per_gpu > 1:
+            for ds_cfg in cfg.data.test:
+                ds_cfg.pipeline = replace_ImageToTensor(ds_cfg.pipeline)
+
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         distributed = False
@@ -133,19 +155,43 @@ def main():
         distributed = True
         init_dist(args.launcher, **cfg.dist_params)
 
+    # currently only support single images testing
+    samples_per_gpu = cfg.data.test.pop('samples_per_gpu', 1)
+    assert samples_per_gpu == 1, 'currently only support single images testing'
+
     # build the dataloader
     dataset = build_dataset(cfg.data.test, task_type=cfg.task_type)
     data_loader = build_dataloader(
         dataset,
-        samples_per_gpu=cfg.data.samples_per_gpu,
+        samples_per_gpu=samples_per_gpu,
         workers_per_gpu=cfg.data.workers_per_gpu,
         dist=distributed,
         shuffle=False,
         round_up=False)
 
+    # for meta-learning methods which require support template
+    if cfg.data.get('support_template', None) is not None:
+        support_template_samples_per_gpu = cfg.data.support_template.pop(
+            'samples_per_gpu', 1)
+        support_template_workers_per_gpu = cfg.data.support_template.pop(
+            'workers_per_gpu', 1)
+        assert cfg.data.support_template.get('ann_cfg', None) is not None, \
+            'during testing ann_cfg of support template can not be None'
+        support_template_dataset = build_dataset(cfg.data.support_template)
+        # disable dist to make all rank get same data
+        support_template_dataloader = build_dataloader(
+            support_template_dataset,
+            samples_per_gpu=support_template_samples_per_gpu,
+            workers_per_gpu=support_template_workers_per_gpu,
+            dist=False,
+            shuffle=False)
+    # pop frozen_parameters
+    cfg.model.pop('frozen_parameters', None)
+
     # build the model and load checkpoint
     cfg.model.train_cfg = None
     model = build_model(cfg.model, task_type=cfg.task_type)
+
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
@@ -162,8 +208,11 @@ def main():
         if cfg.task_type == 'mmdet':
             show_kwargs = dict(show_score_thr=args.show_score_thr)
         elif cfg.task_type == 'mmcls':
-            show_kwargs = {} if args.show_options is None\
+            show_kwargs = {} if args.show_options is None \
                 else args.show_options
+        if cfg.data.get('support_template', None) is not None:
+            single_gpu_extract_support_template(model,
+                                                support_template_dataloader)
         outputs = single_gpu_test(
             model,
             data_loader,
@@ -176,6 +225,9 @@ def main():
             model.cuda(),
             device_ids=[torch.cuda.current_device()],
             broadcast_buffers=False)
+        if cfg.data.get('support_template', None) is not None:
+            multi_gpu_extract_support_template(model,
+                                               support_template_dataloader)
         outputs = multi_gpu_test(
             model,
             data_loader,

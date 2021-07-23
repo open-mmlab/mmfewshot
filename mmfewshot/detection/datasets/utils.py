@@ -1,6 +1,8 @@
 # Copyright (c) Open-MMLab. All rights reserved.
+import json
 from collections.abc import Mapping, Sequence
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from mmcv.parallel.data_container import DataContainer
@@ -90,3 +92,12 @@ def query_support_collate_fn(batch, samples_per_gpu=1):
         }
     else:
         return default_collate(batch)
+
+
+class NumpyEncoder(json.JSONEncoder):
+    """Save numpy array obj to json."""
+
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)

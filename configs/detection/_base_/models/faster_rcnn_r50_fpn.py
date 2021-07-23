@@ -10,7 +10,7 @@ model = dict(
         frozen_stages=1,
         norm_cfg=dict(type='BN', requires_grad=True),
         norm_eval=True,
-        style='pytorch'),
+    ),
     neck=dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],

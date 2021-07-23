@@ -1,6 +1,7 @@
 # this file only for unittests
 from mmcls.models.builder import build_classifier as build_cls_model
-from mmdet.models.builder import build_detector as build_det_model
+
+from mmfewshot.detection.models import build_detector as build_det_model
 
 
 def build_model(*args, task_type='mmdet', **kwargs):

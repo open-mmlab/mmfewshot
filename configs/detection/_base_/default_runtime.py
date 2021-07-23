@@ -1,4 +1,4 @@
-checkpoint_config = dict(interval=1)
+checkpoint_config = dict(interval=5000)
 # Used in MMFewShot to identify the type task, we support mmcls and mmdet now
 task_type = 'mmdet'
 # yapf:disable
@@ -16,3 +16,4 @@ log_level = 'INFO'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]
+seed = 1234567

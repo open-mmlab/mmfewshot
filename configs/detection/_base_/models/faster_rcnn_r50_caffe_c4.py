@@ -1,8 +1,9 @@
 # model settings
 norm_cfg = dict(type='BN', requires_grad=False)
+pretrained = 'open-mmlab://detectron2/resnet50_caffe'
 model = dict(
     type='FasterRCNN',
-    pretrained='open-mmlab://detectron2/resnet50_caffe',
+    pretrained=pretrained,
     backbone=dict(
         type='ResNet',
         depth=50,
@@ -22,6 +23,7 @@ model = dict(
             type='AnchorGenerator',
             scales=[2, 4, 8, 16, 32],
             ratios=[0.5, 1.0, 2.0],
+            scale_major=False,
             strides=[16]),
         bbox_coder=dict(
             type='DeltaXYWHBBoxCoder',
@@ -34,6 +36,7 @@ model = dict(
         type='StandardRoIHead',
         shared_head=dict(
             type='ResLayer',
+            pretrained=pretrained,
             depth=50,
             stage=3,
             stride=2,

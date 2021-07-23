@@ -11,46 +11,7 @@ from mmdet.datasets.samplers import (DistributedGroupSampler,
                                      DistributedSampler, GroupSampler)
 from torch.utils.data import DataLoader
 
-from .dataset_wrappers import MergeDataset, NwayKshotDataset, QueryAwareDataset
-
-
-def _concat_dataset(cfg, default_args=None):
-    ann_files = cfg['ann_file']
-    img_prefixes = cfg.get('img_prefix', None)
-    seg_prefixes = cfg.get('seg_prefix', None)
-    proposal_files = cfg.get('proposal_file', None)
-    separate_eval = cfg.get('separate_eval', True)
-    merge_dataset = cfg.get('merge_dataset', False)
-    ann_shot_filter = cfg.get('ann_shot_filter', None)
-
-    if ann_shot_filter is not None:
-        assert merge_dataset, 'using ann shot filter to load ann file ' \
-              'in FewShotDataset, merge_dataset should be set to True.'
-
-    datasets = []
-    num_dset = len(ann_files)
-    for i in range(num_dset):
-        data_cfg = copy.deepcopy(cfg)
-        # pop 'separate_eval' since it is not a valid key for common datasets.
-        if 'separate_eval' in data_cfg:
-            data_cfg.pop('separate_eval')
-        if 'merge_dataset' in data_cfg:
-            data_cfg.pop('merge_dataset')
-        data_cfg['ann_file'] = ann_files[i]
-        if isinstance(img_prefixes, (list, tuple)):
-            data_cfg['img_prefix'] = img_prefixes[i]
-        if isinstance(seg_prefixes, (list, tuple)):
-            data_cfg['seg_prefix'] = seg_prefixes[i]
-        if isinstance(proposal_files, (list, tuple)):
-            data_cfg['proposal_file'] = proposal_files[i]
-        if isinstance(ann_shot_filter, (list, tuple)):
-            data_cfg['ann_shot_filter'] = ann_shot_filter[i]
-
-        datasets.append(build_dataset(data_cfg, default_args))
-    if merge_dataset:
-        return MergeDataset(datasets)
-    else:
-        return ConcatDataset(datasets, separate_eval)
+from .dataset_wrappers import NwayKshotDataset, QueryAwareDataset
 
 
 def build_dataset(cfg, default_args=None):
@@ -68,17 +29,26 @@ def build_dataset(cfg, default_args=None):
             build_dataset(cfg['dataset'], default_args), cfg['oversample_thr'])
     elif cfg['type'] == 'QueryAwareDataset':
         dataset = QueryAwareDataset(
-            build_dataset(cfg['dataset'], default_args), cfg['support_way'],
-            cfg['support_shot'])
+            query_dataset=build_dataset(cfg['dataset'], default_args),
+            support_dataset=build_dataset(cfg['support_dataset'], default_args)
+            if cfg.get('support_dataset', None) is not None else None,
+            num_support_ways=cfg['num_support_ways'],
+            num_support_shots=cfg['num_support_shots'],
+            repeat_times=cfg.get('repeat_times', 1))
     elif cfg['type'] == 'NwayKshotDataset':
         dataset = NwayKshotDataset(
-            build_dataset(cfg['dataset'], default_args), cfg['support_way'],
-            cfg['support_shot'])
-    elif isinstance(cfg.get('ann_file'), (list, tuple)):
-        dataset = _concat_dataset(cfg, default_args)
+            query_dataset=build_dataset(cfg['dataset'], default_args),
+            support_dataset=build_dataset(cfg['support_dataset'], default_args)
+            if cfg.get('support_dataset', None) is not None else None,
+            num_support_ways=cfg['num_support_ways'],
+            num_support_shots=cfg['num_support_shots'],
+            mutual_support_shot=cfg.get('mutual_support_shot', False),
+            num_used_support_shots=cfg.get('num_used_support_shots', None),
+            shuffle_support=cfg.get('use_shuffle_support', False),
+            repeat_times=cfg.get('repeat_times', 1),
+        )
     else:
         dataset = build_from_cfg(cfg, DATASETS, default_args)
-
     return dataset
 
 
@@ -151,13 +121,14 @@ def build_dataloader(dataset,
             worker_init_fn=init_fn,
             **kwargs)
         # creat support dataset from query dataset and
-        # pre sample batch index with same length as query dataloader
+        # sample batch index with same length as query dataloader
         support_dataset = copy.deepcopy(dataset)
-        support_dataset.convert_query_to_support(len(query_data_loader))
+        support_dataset.convert_query_to_support(
+            len(query_data_loader) * num_gpus)
 
         (support_sampler, _, _) \
             = build_sampler(dist=dist,
-                            shuffle=shuffle,
+                            shuffle=False,
                             dataset=support_dataset,
                             num_gpus=num_gpus,
                             samples_per_gpu=1,

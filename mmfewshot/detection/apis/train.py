@@ -86,7 +86,6 @@ def train_detector(model,
 
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
-
     if 'runner' not in cfg:
         cfg.runner = {
             'type': 'EpochBasedRunner',

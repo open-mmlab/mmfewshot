@@ -2,7 +2,6 @@ import random
 
 import numpy as np
 import torch
-from mmcls.apis.train import train_model as train_classifier
 
 from mmfewshot.detection.apis.train import train_detector
 
@@ -30,6 +29,6 @@ def train_model(*args, task_type='mmdet', **kwargs):
     if task_type == 'mmdet':
         train_detector(*args, **kwargs)
     elif task_type == 'mmcls':
-        train_classifier(*args, **kwargs)
+        raise NotImplementedError
     else:
         raise NotImplementedError

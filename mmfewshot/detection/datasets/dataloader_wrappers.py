@@ -3,25 +3,33 @@ from torch.utils.data import DataLoader
 
 class NwayKshotDataloader(object):
     """A dataloader wrapper of NwayKshotDataset dataset. Create a iterator to
-    generate query and support batch simultaneously. Each batch return a batch
-    of query data (batch_size) and support data.
+    generate query and support batch simultaneously. Each batch return a batch.
 
-       (support_way * support_shot).
+    of query data (batch_size) and support data (support_way * support_shot).
 
     Args:
-        datasets (list[:obj:`NwayKshotDataset`]): A list of datasets.
-        batch_size (int): How many query samples per batch to load.
-        sampler (Sampler): Sampler for query dataloader only.
-        num_workers (int): Num workers for both support and query dataloader.
-        collate_fn (callable): Collate function for query dataloader.
+        query_data_loader (obj:`DataLoader`): DataLoader of query dataset
+        support_dataset (list[:obj:`NwayKshotDataset`]): Support datasets.
+        support_sampler (Sampler): Sampler for support dataloader.
+        num_workers (int): Num workers for support dataloader.
+        support_collate_fn (callable): Collate function for support dataloader.
         pin_memory (bool): Pin memory for both support and query dataloader.
         worker_init_fn (callable): Worker init function for both
             support and query dataloader.
+        shuffle_support_dataset (bool): Shuffle support dataset to generate
+            new batch indexes. Default: False.
         kwargs: any keyword argument to be used to initialize DataLoader.
     """
 
-    def __init__(self, query_data_loader, support_dataset, support_sampler,
-                 num_workers, support_collate_fn, pin_memory, worker_init_fn,
+    def __init__(self,
+                 query_data_loader,
+                 support_dataset,
+                 support_sampler,
+                 num_workers,
+                 support_collate_fn,
+                 pin_memory,
+                 worker_init_fn,
+                 shuffle_support_dataset=False,
                  **kwargs):
         self.dataset = query_data_loader.dataset
         self.query_data_loader = query_data_loader
@@ -31,14 +39,9 @@ class NwayKshotDataloader(object):
         self.support_collate_fn = support_collate_fn
         self.pin_memory = pin_memory
         self.worker_init_fn = worker_init_fn
+        self.shuffle_support_dataset = shuffle_support_dataset
         self.kwargs = kwargs
-
-    def __iter__(self):
-        # generate different support batch index for each epoch
-        self.support_dataset.shuffle_support()
-        # init support dataloader with batch_size 1
-        # each batch are pre-sampler in dataset and use collate
-        # function to generate a batch with support_way*support_shot
+        self.sampler = self.query_data_loader.sampler
         self.support_data_loader = DataLoader(
             self.support_dataset,
             batch_size=1,
@@ -49,7 +52,23 @@ class NwayKshotDataloader(object):
             worker_init_fn=self.worker_init_fn,
             **self.kwargs)
 
-        # init iterator for query and support
+    def __iter__(self):
+        if self.shuffle_support_dataset:
+            # generate different support batch indexes for each epoch
+            self.support_dataset.shuffle_support()
+            # initialize support dataloader with batch_size 1
+            # each batch contains (num_support_ways * num_support_shots)
+            # images, the batch images are determined after generating
+            # support batch indexes
+            self.support_data_loader = DataLoader(
+                self.support_dataset,
+                batch_size=1,
+                sampler=self.support_sampler,
+                num_workers=self.num_workers,
+                collate_fn=self.support_collate_fn,
+                pin_memory=self.pin_memory,
+                worker_init_fn=self.worker_init_fn,
+                **self.kwargs)
         self.query_iter = iter(self.query_data_loader)
         self.support_iter = iter(self.support_data_loader)
         return self
