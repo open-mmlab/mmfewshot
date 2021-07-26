@@ -31,8 +31,7 @@ test_pipeline = [
             dict(type='Collect', keys=['img'])
         ])
 ]
-# Predefined ann_cfg, classes and class_splits are defined in
-# mmfewshot.detection.datasets.few_shot_data_config
+# classes splits are predefined in FewShotCocoDataset
 data_root = 'data/coco/'
 data = dict(
     samples_per_gpu=2,

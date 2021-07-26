@@ -473,7 +473,7 @@ class FewShotVOCDataset(FewShotCustomDataset):
 
 @DATASETS.register_module()
 class FewShotVOCCopyDataset(FewShotVOCDataset):
-    """For some meta learning method, the random sampled sampled support data
+    """For some meta-learning method, the random sampled sampled support data
     is required for evaluation.
 
     FewShotVOCCopyDataset allow copy

@@ -12,6 +12,8 @@ from mmdet.core import DistEvalHook, EvalHook
 from mmdet.datasets import replace_ImageToTensor
 from mmdet.utils import get_root_logger
 
+from mmfewshot.detection.core import (QuerySupportDistEvalHook,
+                                      QuerySupportEvalHook)
 from mmfewshot.detection.datasets import build_dataloader, build_dataset
 
 
@@ -145,8 +147,51 @@ def train_detector(model,
             shuffle=False)
         eval_cfg = cfg.get('evaluation', {})
         eval_cfg['by_epoch'] = cfg.runner['type'] != 'IterBasedRunner'
-        eval_hook = DistEvalHook if distributed else EvalHook
-        runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
+
+        # Prepare dataset for model initialization. In most cases,
+        # the dataset would be used to generate the support templates.
+        if cfg.data.get('model_init', None) is not None:
+
+            if cfg.data.model_init.pop('copy_from_train_dataset', False):
+                if cfg.data.model_init.ann_cfg is not None:
+                    warnings.warn(
+                        'model_init dataset will copy support '
+                        'dataset used for training and original '
+                        'ann_cfg will be discarded', UserWarning)
+                # modify dataset type to support copying data_infos operation
+                if cfg.data.model_init.type == 'FewShotVOCDataset':
+                    cfg.data.model_init.type = 'FewShotVOCCopyDataset'
+                elif cfg.data.model_init.type == 'FewShotCocoDataset':
+                    cfg.data.model_init.type = 'FewShotCocoCopyDataset'
+                else:
+                    raise TypeError(f'{cfg.data.model_init.type} '
+                                    f'not support copy data_infos operation.')
+                if not hasattr(dataset[0], 'get_support_data_infos'):
+                    raise NotImplementedError(
+                        f'`get_support_data_infos` is not implemented '
+                        f'in {dataset[0].__class__.__name__}.')
+                cfg.data.model_init.ann_cfg = [
+                    dict(data_infos=dataset[0].get_support_data_infos())
+                ]
+            samples_per_gpu = cfg.data.model_init.pop('samples_per_gpu', 1)
+            workers_per_gpu = cfg.data.model_init.pop('workers_per_gpu', 1)
+            model_init_dataset = build_dataset(cfg.data.model_init)
+            # disable `dist` to make all gpu get same data
+            model_init_dataloader = build_dataloader(
+                model_init_dataset,
+                samples_per_gpu=samples_per_gpu,
+                workers_per_gpu=workers_per_gpu,
+                dist=False,
+                shuffle=False)
+
+            # eval hook for meta-learning based query-support detector
+            eval_hook = QuerySupportDistEvalHook \
+                if distributed else QuerySupportEvalHook
+            runner.register_hook(
+                eval_hook(model_init_dataloader, val_dataloader, **eval_cfg))
+        else:
+            eval_hook = DistEvalHook if distributed else EvalHook
+            runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
 
     # user-defined hooks
     if cfg.get('custom_hooks', None):

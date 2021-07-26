@@ -231,7 +231,7 @@ class QueryAwareDataset(object):
 
     def get_support_data_infos(self):
         """Return data_infos of support dataset."""
-        return self.support_dataset.data_infos
+        return copy.deepcopy(self.support_dataset.data_infos)
 
 
 @DATASETS.register_module()
@@ -385,7 +385,7 @@ class NwayKshotDataset(object):
             dataset_len: Length of pre sample batch indexes.
 
         Returns:
-            List[List[(data_idx, gt_idx)]]: Pre sample batch indexes.
+            list[list[(data_idx, gt_idx)]]: Pre sample batch indexes.
         """
         total_index = []
         for _ in range(dataset_len):
@@ -429,11 +429,11 @@ class NwayKshotDataset(object):
 
     def get_support_data_infos(self):
         """Get support data infos from batch index."""
-        return [
+        return copy.deepcopy([
             self._get_shot_data_info(idx, gt_idx)
             for class_name in self.data_infos_by_class.keys()
             for (idx, gt_idx) in self.data_infos_by_class[class_name]
-        ]
+        ])
 
     def _get_shot_data_info(self, idx, gt_idx):
         """Get data info by idx and gt idx."""

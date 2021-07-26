@@ -1,4 +1,4 @@
-# this file only for unittests
+# this file is only used for testing the model
 from mmcls.datasets.builder import build_dataloader as build_cls_dataloader
 from mmcls.datasets.builder import build_dataset as build_cls_dataset
 

@@ -20,8 +20,8 @@ train_multi_pipelines = dict(
         dict(type='LoadImageFromFile'),
         dict(type='LoadAnnotations', with_bbox=True),
         dict(
-            type='AttentionRPNCropResizeSupport',
-            context_pixel=16,
+            type='CropResizeInstance',
+            num_context_pixels=16,
             target_size=(320, 320)),
         dict(type='RandomFlip', flip_ratio=0.0),
         dict(type='Normalize', **img_norm_cfg),
@@ -48,7 +48,6 @@ data_root = 'data/VOCdevkit/'
 data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
-    copy_random_support=False,
     train=dict(
         type='QueryAwareDataset',
         num_support_ways=2,
@@ -97,7 +96,8 @@ data = dict(
         classes=None,
     ),
     # random sample 10 shot base instance to evaluate training
-    support_template=dict(
+    model_init=dict(
+        copy_from_train_dataset=False,
         samples_per_gpu=16,
         workers_per_gpu=1,
         type='FewShotVOCDataset',
@@ -116,5 +116,5 @@ data = dict(
         instance_wise=True,
         classes=None,
         min_bbox_area_filter=32 * 32,
-        dataset_name='support template'))
+        dataset_name='model_init'))
 evaluation = dict(interval=20000, metric='mAP')

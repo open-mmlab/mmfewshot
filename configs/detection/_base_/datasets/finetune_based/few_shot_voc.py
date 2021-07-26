@@ -34,7 +34,7 @@ test_pipeline = [
             dict(type='Collect', keys=['img'])
         ])
 ]
-
+# classes splits are predefined in FewShotVOCDataset
 data_root = 'data/VOCdevkit/'
 data = dict(
     samples_per_gpu=2,
