@@ -3,11 +3,11 @@ import numpy as np
 
 def voc_bbox_overlaps(bboxes1, bboxes2, mode='iou', eps=1e-6):
     """Calculate the ious between each bbox of bboxes1 and bboxes2. The
-    calculation follows the official evaluation code.
+    calculation follows the official evaluation code of Pascal VOC dataset.
 
     Args:
-        bboxes1(ndarray): shape (n, 4)
-        bboxes2(ndarray): shape (k, 4)
+        bboxes1(np.ndarray): shape (n, 4)
+        bboxes2(np.ndarray): shape (k, 4)
         mode(str): iou (intersection over union) or iof (intersection
             over foreground)
 

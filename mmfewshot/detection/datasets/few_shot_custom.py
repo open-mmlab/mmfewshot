@@ -17,10 +17,13 @@ from .utils import NumpyEncoder
 class FewShotCustomDataset(CustomDataset):
     """Custom dataset for few shot detection.
 
-    It allow single (normal dataset of fully supervised setting) or
-    multiple (query-support fashion) pipelines for data processing.
-    When annotation shots filter is used, it make sure accessible
-    annotations meet the few shot setting in exact number of instances.
+    The main differences with normal detection dataset fall in two aspect.
+
+        - It allow to specify single (used in normal dataset) or
+          multiple (used in query-support dataset) pipelines
+          for data processing.
+        - It support to control the maximum number of instances of each class
+          when loading the annotation file.
 
     The annotation format is shown as follows. The `ann` field
     is optional for testing.
@@ -45,22 +48,27 @@ class FewShotCustomDataset(CustomDataset):
 
     Args:
         ann_cfg (list[dict]): Annotation config support two type of config.
-            - 'ann_file': loading annotation from common ann_file of dataset
-                with or without specific classes.
-                example:dict(type='ann_file', ann_file='path/to/ann_file',
-                             ann_classes=['dog', 'cat'])
-            - 'saved_dataset': loading annotation from saved dataset.
-                example:dict(type='saved_dataset', ann_file='path/to/ann_file')
+
+            - loading annotation from common ann_file of dataset
+              with or without specific classes.
+              example:dict(type='ann_file', ann_file='path/to/ann_file',
+              ann_classes=['dog', 'cat'])
+            - loading annotation from a json file saved by dataset.
+              example:dict(type='saved_dataset', ann_file='path/to/ann_file')
         classes (str | Sequence[str]): Classes for model training and
             provide fixed label for each class.
-        pipeline (list[dict]): Processing pipeline all data will pass
-            through this pipeline
-        multi_pipelines (dict[list[dict]]): Multiple processing pipeline allow
-            different data pipelines. For example, query and support data
-            will be processed with two different pipelines and the dict
+        pipeline (list[dict]): Config to specify processing pipeline.
+            Used in normal dataset. Default: None.
+        multi_pipelines (dict[list[dict]]): Config to specify
+            data pipelines for corresponding data flow.
+            For example, query and support data
+            can be processed with two different pipelines, the dict
             should contain two keys like:
-                - 'query': list[dict]
-                - 'support': list[dict]
+
+                - query (list[dict]): Config for query-data
+                  process pipeline.
+                - support (list[dict]): Config for support-data
+                  process pipeline.
         data_root (str | None): Data root for ``ann_cfg``,
             ``img_prefix``, ``seg_prefix``, ``proposal_file`` if specified.
         test_mode (bool): If set True, annotation will not be loaded.
@@ -69,16 +77,18 @@ class FewShotCustomDataset(CustomDataset):
             boxes of the dataset's classes will be filtered out. This option
             only works when `test_mode=False`, i.e., we never filter images
             during tests. Default: Ture.
-        ann_shot_filter (dict | None): If set None, all annotation from
-            ann file will be loaded. If not None, annotation shot filter will
-            specific which class and the maximum number of instances to load
-            from annotation file. For example: {'dog': 10, 'person': 5}.
+        ann_shot_filter (dict | None): Used to specify the class and the
+            corresponding maximum number of instances when loading
+            the annotation file. For example: {'dog': 10, 'person': 5}.
+            If set it as None, all annotation from ann file would be loaded.
             Default: None.
-        instance_wise (bool): If set true, each data info only
-            contains one instance, and data info with more than one instance
-            will be split. Default: False.
+        instance_wise (bool): If set true, `self.data_infos`
+            would change to instance-wise, which means if the annotation
+            of single image has more than one instance, the annotation would be
+            split to num_instances items. Often used in support datasets,
+            Default: False.
         dataset_name (str | None): Name of dataset to display. For example:
-            'train dataset' or 'query dataset'. Default: None.
+            'train_dataset' or 'query_dataset'. Default: None.
     """
 
     CLASSES = None
@@ -103,7 +113,8 @@ class FewShotCustomDataset(CustomDataset):
         self.proposal_file = proposal_file
         self.test_mode = test_mode
         self.filter_empty_gt = filter_empty_gt
-        self.CLASSES = self.get_classes(classes)
+        if classes is not None:
+            self.CLASSES = self.get_classes(classes)
         self.instance_wise = instance_wise
         if dataset_name is None:
             self.dataset_name = 'Test dataset' \
@@ -210,9 +221,9 @@ class FewShotCustomDataset(CustomDataset):
         if multi_pipelines is not None:
             assert isinstance(multi_pipelines, dict), \
                 f'{self.dataset_name} : multi_pipelines is type of dict'
-            self.pipeline = {}
+            self.multi_pipelines = {}
             for key in multi_pipelines.keys():
-                self.pipeline[key] = Compose(multi_pipelines[key])
+                self.multi_pipelines[key] = Compose(multi_pipelines[key])
         elif pipeline is not None:
             assert isinstance(pipeline, list), \
                 f'{self.dataset_name} : pipeline is type of list'
@@ -229,6 +240,7 @@ class FewShotCustomDataset(CustomDataset):
 
         Args:
             ann_cfg (list[dict]): Annotation config support two type of config.
+
                 - 'ann_file': loading annotation from common ann_file of
                     dataset. example: dict(type='ann_file',
                     ann_file='path/to/ann_file', ann_classes=['dog', 'cat'])
@@ -277,6 +289,7 @@ class FewShotCustomDataset(CustomDataset):
             idx (int): Index of data.
             pipeline_key (str): Name of pipeline
             gt_idx (list[int]): Index of used annotation.
+
         Returns:
             dict: Training data and annotation after pipeline with new keys \
                 introduced by pipeline.
@@ -305,7 +318,7 @@ class FewShotCustomDataset(CustomDataset):
         if pipeline_key is None:
             return self.pipeline(results)
         else:
-            return self.pipeline[pipeline_key](results)
+            return self.multi_pipelines[pipeline_key](results)
 
     def _filter_annotations(self, data_infos, ann_shot_filter):
         """Filter out extra annotations of specific class, while annotations of
@@ -381,8 +394,8 @@ class FewShotCustomDataset(CustomDataset):
         Images with aspect ratio greater than 1 will be set as group 1,
         otherwise group 0. In few shot setting, the limited number of images
         might cause some mini-batch always sample a certain number of images
-        and thus not fully shuffle the data. Therefore, all flags are simply
-        set to 0.
+        and thus not fully shuffle the data, which may degrade the performance.
+        Therefore, all flags are simply set to 0.
         """
         self.flag = np.zeros(len(self), dtype=np.uint8)
 
@@ -427,7 +440,7 @@ class FewShotCustomDataset(CustomDataset):
                 cls=NumpyEncoder)
 
     def __repr__(self):
-        """Print the number of instance number."""
+        """Print the number of instances of each class."""
         result = (f'\n{self.__class__.__name__} {self.dataset_name} '
                   f'with number of images {len(self)}, '
                   f'and instance counts: \n')

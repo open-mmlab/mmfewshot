@@ -18,9 +18,10 @@ def voc_tpfp_fn(det_bboxes,
     overlaps calculation follows the official evaluation code.
 
     Args:
-        det_bboxes (ndarray): Detected bboxes of this image, of shape (m, 5).
-        gt_bboxes (ndarray): GT bboxes of this image, of shape (n, 4).
-        gt_bboxes_ignore (ndarray): Ignored gt bboxes of this image,
+        det_bboxes (np.ndarray): Detected bboxes of
+            this image, of shape (m, 5).
+        gt_bboxes (np.ndarray): GT bboxes of this image, of shape (n, 4).
+        gt_bboxes_ignore (np.ndarray): Ignored gt bboxes of this image,
             of shape (k, 4). Default: None
         iou_thr (float): IoU threshold to be considered as matched.
             Default: 0.5.
@@ -104,11 +105,11 @@ def eval_map(det_results,
              logger=None,
              tpfp_fn=None,
              nproc=4):
-    """Evaluate mAP of a dataset. eval_map in mmdet predefine the names of
-    classes and thus not support arbitrary class splits.
+    """Evaluate mAP of a dataset. :func:`eval_map` in mmdetection predefine the
+    names of classes and thus not support arbitrary class splits.
 
     Args:
-        det_results (list[list[ndarray]] | list[tuple[ndarray]]):
+        det_results (list[list[np.ndarray]] | list[tuple[np.ndarray]]):
             The outer list indicates images, and the inner list indicates
             per-class detected bboxes.
         annotations (list[dict]): Ground truth annotations where each item of
@@ -130,8 +131,8 @@ def eval_map(det_results,
             "voc07", "imagenet_det", etc. Default: None.
         logger (logging.Logger | str | None): The way to print the mAP
             summary. See `mmcv.utils.print_log()` for details. Default: None.
-        tpfp_fn (callable | None): The function used to determine true/
-            false positives. If None, :func:`tpfp_default` is used as default
+        tpfp_fn (callable | None): The function used to determine true false
+            positives. If None, :func:`tpfp_default` is used as default
             unless dataset is 'det' or 'vid' (:func:`tpfp_imagenet` in this
             case). If it is given as a function, then this function is used
             to evaluate tp & fp. Default None.

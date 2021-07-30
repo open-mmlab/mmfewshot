@@ -65,8 +65,8 @@ data = dict(
             multi_pipelines=train_multi_pipelines,
             classes='BASE_CLASSES',
             instance_wise=False,
-            min_bbox_area_filter=32 * 32,
-            dataset_name='query-support dataset')),
+            min_bbox_area=32 * 32,
+            dataset_name='query_support_dataset')),
     val=dict(
         type='FewShotCocoDataset',
         ann_cfg=[
@@ -99,11 +99,11 @@ data = dict(
                 type='ann_file',
                 ann_file='data/coco/annotations/instances_train2017.json')
         ],
-        img_prefix='data/coco/train2017',
+        img_prefix=data_root,
         pipeline=train_multi_pipelines['support'],
         classes='BASE_CLASSES',
         num_base_shots=10,
         instance_wise=True,
-        min_bbox_area_filter=32 * 32,
-        dataset_name='model_init'))
+        min_bbox_area=32 * 32,
+        dataset_name='model_init_dataset'))
 evaluation = dict(interval=20000, metric='bbox', classwise=True)

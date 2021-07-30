@@ -5,13 +5,10 @@ train_multi_pipelines = dict(
     query=[
         dict(type='LoadImageFromFile'),
         dict(type='LoadAnnotations', with_bbox=True),
-        dict(
-            type='Resize',
-            img_scale=(1000, 600),
-            keep_ratio=True,
-            multiscale_mode='value'),
+        dict(type='Resize', img_scale=(1333, 600), keep_ratio=True),
         dict(type='RandomFlip', flip_ratio=0.5),
         dict(type='Normalize', **img_norm_cfg),
+        dict(type='Pad', size_divisor=32),
         dict(type='DefaultFormatBundle'),
         dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
     ],
@@ -28,12 +25,13 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(1000, 600),
+        img_scale=(1333, 600),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),
             dict(type='Normalize', **img_norm_cfg),
+            dict(type='Pad', size_divisor=32),
             dict(type='ImageToTensor', keys=['img']),
             dict(type='Collect', keys=['img'])
         ])
@@ -42,7 +40,7 @@ test_pipeline = [
 # mmfewshot.detection.datasets.few_shot_data_config
 data_root = 'data/VOCdevkit/'
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=4,
     workers_per_gpu=2,
     train=dict(
         type='NwayKshotDataset',
@@ -68,7 +66,7 @@ data = dict(
             classes=None,
             use_difficult=False,
             instance_wise=False,
-            dataset_name='query-support dataset')),
+            dataset_name='query_support_dataset_dataset')),
     val=dict(
         type='FewShotVOCDataset',
         ann_cfg=[
@@ -102,5 +100,5 @@ data = dict(
         instance_wise=True,
         num_novel_shots=None,
         classes=None,
-        dataset_name='model_init'))
+        dataset_name='model_init_dataset'))
 evaluation = dict(interval=3000, metric='mAP', class_splits=None)

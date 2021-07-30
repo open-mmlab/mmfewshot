@@ -54,22 +54,22 @@ class FewShotCocoDataset(FewShotCustomDataset):
     """COCO dataset for few shot detection.
 
     Args:
-        classes (str | Sequence[str]): Classes for model training and
+        classes (str | Sequence[str] | None): Classes for model training and
             provide fixed label for each class. When classes is string,
-            it will load predefined classes in FewShotCocoDataset.
-            For example: 'BASE_CLASSES'.
+            it will load predefined classes in :obj:`FewShotCocoDataset`.
+            For example: 'BASE_CLASSES', 'NOVEL_CLASSES` or `ALL_CLASSES`.
         num_novel_shots (int | None): Max number of instances used for each
             novel class. If is None, all annotation will be used.
             Default: None.
         num_base_shots (int | None): Max number of instances used for each base
             class. If is None, all annotation will be used. Default: None.
-        ann_shot_filter (dict | None): If set None, `ann_shot_filter` will be
+        ann_shot_filter (dict | None): Used to specify the class and the
+            corresponding maximum number of instances when loading
+            the annotation file. For example: {'dog': 10, 'person': 5}.
+            If set it as None, `ann_shot_filter` will be
             created according to `num_novel_shots` and `num_base_shots`.
-            If not None, annotation shot filter will specific which class and
-            the maximum number of instances to load from annotation file.
-            For example: {'dog': 10, 'person': 5}. Default: None.
-        min_bbox_area_filter (int | None):  Filter images with bbox whose
-            area smaller `min_bbox_area_filter`. If set to None, skip
+        min_bbox_area (int | float | None):  Filter images with bbox whose
+            area smaller `min_bbox_area`. If set to None, skip
             this filter. Default: None.
         dataset_name (str | None): Name of dataset to display. For example:
             'train dataset' or 'query dataset'. Default: None.
@@ -82,7 +82,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
                  num_novel_shots=None,
                  num_base_shots=None,
                  ann_shot_filter=None,
-                 min_bbox_area_filter=None,
+                 min_bbox_area=None,
                  dataset_name=None,
                  test_mode=False,
                  **kwargs):
@@ -94,25 +94,11 @@ class FewShotCocoDataset(FewShotCustomDataset):
         self.SPLIT = COCO_SPLIT
         assert classes is not None, f'{self.dataset_name} : classes ' \
                                     f'in FewShotCocoDataset can not be None.'
-        # configure few shot classes setting
-        if isinstance(classes, str):
-            assert classes in self.SPLIT.keys(), \
-                f'{self.dataset_name} : not a predefine classes or ' \
-                f'split in COCO_SPLIT.'
-            self.CLASSES = self.SPLIT[classes]
-            if 'BASE_CLASSES' in classes:
-                assert num_novel_shots is None, \
-                    f'{self.dataset_name} : BASE_CLASSES do not have ' \
-                    f'novel instances.'
-            elif 'NOVEL_CLASSES' in classes:
-                assert num_base_shots is None, \
-                    f'{self.dataset_name} : NOVEL_CLASSES do not have ' \
-                    f'base instances.'
-
         # configure ann_shot_filter by num_novel_shots and num_base_shots
         self.num_novel_shots = num_novel_shots
         self.num_base_shots = num_base_shots
-        self.min_bbox_area_filter = min_bbox_area_filter
+        self.min_bbox_area = min_bbox_area
+        self.CLASSES = self.get_classes(classes)
         if ann_shot_filter is None:
             if num_novel_shots is not None or num_base_shots is not None:
                 ann_shot_filter = self._create_ann_shot_filter()
@@ -121,16 +107,50 @@ class FewShotCocoDataset(FewShotCustomDataset):
                 f'{self.dataset_name} : can not config ann_shot_filter ' \
                 f'and num_novel_shots/num_base_shots at the same time.'
 
+        # these values would be set in `self.load_annotations_coco`
         self.cat_ids = []
         self.cat2label = {}
         self.coco = None
         self.img_ids = None
+
         super(FewShotCocoDataset, self).__init__(
-            classes=self.CLASSES,
+            classes=None,
             ann_shot_filter=ann_shot_filter,
             dataset_name=dataset_name,
             test_mode=test_mode,
             **kwargs)
+
+    def get_classes(self, classes):
+        """Get class names.
+
+        Args:
+            classes (str | Sequence[str]): Classes for model training and
+            provide fixed label for each class. When classes is string,
+            it will load predefined classes in `FewShotCocoDataset`.
+            For example: 'NOVEL_CLASSES'.
+
+        Returns:
+            list[str]: list of class names.
+        """
+        # configure few shot classes setting
+        if isinstance(classes, str):
+            assert classes in self.SPLIT.keys(), \
+                f'{self.dataset_name} : not a predefine classes or ' \
+                f'split in COCO_SPLIT.'
+            class_names = self.SPLIT[classes]
+            if 'BASE_CLASSES' in classes:
+                assert self.num_novel_shots is None, \
+                    f'{self.dataset_name} : BASE_CLASSES do not have ' \
+                    f'novel instances.'
+            elif 'NOVEL_CLASSES' in classes:
+                assert self.num_base_shots is None, \
+                    f'{self.dataset_name} : NOVEL_CLASSES do not have ' \
+                    f'base instances.'
+        elif isinstance(classes, (tuple, list)):
+            class_names = classes
+        else:
+            raise ValueError(f'Unsupported type {type(classes)} of classes.')
+        return class_names
 
     def _create_ann_shot_filter(self):
         """generate ann_shot_filter by novel and base classes."""
@@ -144,7 +164,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
         return ann_shot_filter
 
     def load_annotations(self, ann_cfg):
-        """Load annotation from two type of ann_cfg.
+        """Support to Load annotation from two type of ann_cfg.
 
             - type of 'ann_file': COCO-style annotation file.
             - type of 'saved_dataset': Saved COCO dataset json.
@@ -209,7 +229,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
         """Get COCO annotation by index.
 
         Args:
-            data_info dict: Data info.
+            data_info(dict): Data info.
 
         Returns:
             dict: Annotation info of specified index.
@@ -220,14 +240,14 @@ class FewShotCocoDataset(FewShotCustomDataset):
         ann_info = self.coco.load_anns(ann_ids)
         return self._parse_ann_info(data_info, ann_info)
 
-    def _filter_imgs(self, min_size=32, min_bbox_area_filter=None):
+    def _filter_imgs(self, min_size=32, min_bbox_area=None):
         """Filter images not meet the demand.
 
         Args:
             min_size (int): Filter images with length or width
                 smaller than `min_size`. Default: 32.
-            min_bbox_area_filter (int | None): Filter images with bbox whose
-                area smaller `min_bbox_area_filter`. If set to None, skip
+            min_bbox_area (int | None): Filter images with bbox whose
+                area smaller `min_bbox_area`. If set to None, skip
                 this filter. Default: None.
 
         Returns:
@@ -235,18 +255,18 @@ class FewShotCocoDataset(FewShotCustomDataset):
         """
         valid_inds = []
         valid_img_ids = []
-        if min_bbox_area_filter is None:
-            min_bbox_area_filter = self.min_bbox_area_filter
+        if min_bbox_area is None:
+            min_bbox_area = self.min_bbox_area
         for i, img_info in enumerate(self.data_infos):
             if self.filter_empty_gt and img_info['ann']['labels'].size == 0:
                 continue
             if min(img_info['width'], img_info['height']) < min_size:
                 continue
-            if min_bbox_area_filter is not None:
+            if min_bbox_area is not None:
                 skip_flag = False
                 for bbox in img_info['ann']['bboxes']:
                     bbox_area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
-                    if bbox_area < min_bbox_area_filter:
+                    if bbox_area < min_bbox_area:
                         skip_flag = True
                 if skip_flag:
                     continue
@@ -419,7 +439,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
         """Format the results to json (standard format for COCO evaluation).
 
         Args:
-            results (list[tuple | numpy.ndarray]): Testing results of the
+            results (list[tuple | np.ndarray]): Testing results of the
                 dataset.
             jsonfile_prefix (str | None): The prefix of json files. It includes
                 the file path and the prefix of filename, e.g., "a/b/prefix".
@@ -459,7 +479,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
         Args:
             results (list[list | tuple]): Testing results of the dataset.
             metric (str | list[str]): Metrics to be evaluated. Options are
-                'bbox', 'proposal', 'proposal_fast'.
+                'bbox', 'proposal', 'proposal_fast'. Default: 'bbox'
             logger (logging.Logger | str | None): Logger used for printing
                 related information during evaluation. Default: None.
             jsonfile_prefix (str | None): The prefix of json files. It includes
@@ -598,7 +618,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
                 ``metric=='bbox'``.
             eval_results dict[str, float]: COCO style evaluation metric.
             classwise (bool): Whether to evaluating the AP for each class.
-            split_name (str): Name of split.
+            split_name (str): Name of split. Default:''.
 
         Returns:
             dict[str, float]: COCO style evaluation metric.
@@ -706,23 +726,28 @@ class FewShotCocoDataset(FewShotCustomDataset):
 
 @DATASETS.register_module()
 class FewShotCocoCopyDataset(FewShotCocoDataset):
-    """For some meta-learning method, the random sampled sampled support data
-    is required for evaluation.
+    """Only used in evaluation of some meta-learning method.
 
-    FewShotVOCCopyDataset allow copy
-    `data_infos` of other dataset by dumping `data_infos` into 'ann_cfg'.
-    For example: ann_cfg = [dict(data_infos=FewShotCocoDataset.data_infos)]
+    For some meta-learning methods, the random sampled support data in the
+    training phase is required for evaluation. The usage of `ann_cfg` is
+    different from :obj:`FewShotCocoDataset`. :obj:`FewShotCocoCopyDataset`
+    support to load `data_infos` of other datasets via `ann_cfg`.
+
+    Args:
+        ann_cfg (list[dict] | dict): contain `data_infos` from other
+            dataset. Example: [dict(data_infos=FewShotCocoDataset.data_infos)]
     """
 
-    def __init__(self, **kwargs):
-        super(FewShotCocoCopyDataset, self).__init__(**kwargs)
+    def __init__(self, ann_cfg, **kwargs):
+        super(FewShotCocoCopyDataset, self).__init__(ann_cfg=ann_cfg, **kwargs)
 
     def ann_cfg_parser(self, ann_cfg):
-        """Parse annotation config from a copy of other dataset.
+        """Parse annotation config from a copy of other dataset's `data_infos`.
 
         Args:
-            ann_cfg (list[dict] | dict): contain other data_infos from dataset.
-                Example: [dict(data_infos=FewShotCocoDataset.data_infos)]
+            ann_cfg (list[dict] | dict): contain `data_infos` from other
+                dataset. Example:
+                [dict(data_infos=FewShotCocoDataset.data_infos)]
 
         Returns:
             list[dict]: Annotation information.
@@ -742,12 +767,19 @@ class FewShotCocoCopyDataset(FewShotCocoDataset):
 
 @DATASETS.register_module()
 class FewShotCocoDefaultDataset(FewShotCocoDataset):
-    """FewShotCocoDefaultDataset provide predefine COCO annotation file for
-    model reproducibility. The predefine annotation file provide fixed training
-    data to avoid random sample few shot data. The `ann_cfg' should contain
-    method and setting. For example: ann_cfg =
+    """FewShot COCO Dataset with some predefine annotation paths.
 
-    [dict(method='TFA', setting='1shot')].
+    :obj:`FewShotCocoDefaultDataset` provides predefine annotation files
+    to ensure the reproducibility. The predefine annotation files provide
+    fixed training data to avoid random sampling. The usage of `ann_cfg' is
+    different from :obj:`FewShotCocoDataset`. The `ann_cfg' should contain
+    two filed: `method` and `setting`.
+
+    Args:
+        ann_cfg (list[dict]): Each dict should contain
+            `method` and `setting` to get corresponding
+            annotation from `DEFAULT_ANN_CONFIG`.
+            For example: [dict(method='TFA', setting='1shot')].
     """
     # predefined annotation config for model reproducibility
     DEFAULT_ANN_CONFIG = dict(
@@ -787,16 +819,18 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
             ]
         })
 
-    def __init__(self, **kwargs):
-        super(FewShotCocoDefaultDataset, self).__init__(**kwargs)
+    def __init__(self, ann_cfg, **kwargs):
+        super(FewShotCocoDefaultDataset, self).__init__(
+            ann_cfg=ann_cfg, **kwargs)
 
     def ann_cfg_parser(self, ann_cfg):
         """Parse predefine annotation config to annotation information.
 
         Args:
-            ann_cfg (list[dict]): contain method and setting
-            of predefined annotation config. example:
-            [dict(method='TFA', setting='1shot')]
+            ann_cfg (list[dict]): Each dict should contain
+                `method` and `setting` to get corresponding
+                annotation from `DEFAULT_ANN_CONFIG`.
+                For example: [dict(method='TFA', setting='1shot')]
 
         Returns:
             list[dict]: Annotation information.

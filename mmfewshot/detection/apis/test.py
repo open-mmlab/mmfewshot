@@ -20,7 +20,6 @@ def single_gpu_test(model,
     Args:
         model (nn.Module): Model to be tested.
         data_loader (nn.Dataloader): Pytorch data loader.
-            Default: 0.
         show (bool): Whether to show the image.
             Default: False.
         out_dir (str or None): The dir to write the image.
@@ -93,8 +92,9 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
         model (nn.Module): Model to be tested.
         data_loader (nn.Dataloader): Pytorch data loader.
         tmpdir (str): Path of directory to save the temporary results from
-            different gpus under cpu mode.
+            different gpus under cpu mode. Default: None.
         gpu_collect (bool): Option to use either gpu or cpu to collect results.
+            Default: False.
 
     Returns:
         list: The prediction results.
@@ -162,7 +162,7 @@ def multi_gpu_model_init(model, data_loader):
     support fashion with multi gpus.
 
     Args:
-        model (nn.Module): Model used for extract support template features.
+        model (nn.Module): Model used for extracting support template features.
         data_loader (nn.Dataloader): Pytorch data loader.
 
     Returns:

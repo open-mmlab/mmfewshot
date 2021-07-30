@@ -25,7 +25,7 @@ class QuerySupportEvalHook(BaseEvalHook):
         self.model_init_dataloader = model_init_dataloader
 
     def _do_evaluate(self, runner):
-        """perform evaluation and save ckpt."""
+        """perform evaluation and save checkpoint."""
         if not self._should_evaluate(runner):
             return
         # extract support template features
@@ -58,7 +58,7 @@ class QuerySupportDistEvalHook(BaseDistEvalHook):
         self.model_init_dataloader = model_init_dataloader
 
     def _do_evaluate(self, runner):
-        """perform evaluation and save ckpt."""
+        """perform evaluation and save checkpoint."""
         # Synchronization of BatchNorm's buffer (running_mean
         # and running_var) is not supported in the DDP of pytorch,
         # which may cause the inconsistent performance of models in

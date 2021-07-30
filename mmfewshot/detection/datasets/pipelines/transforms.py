@@ -4,9 +4,8 @@ import mmcv
 import numpy as np
 from mmdet.datasets import PIPELINES
 
+
 # TODO: Simplify pipelines by decoupling operation.
-
-
 @PIPELINES.register_module()
 class CropResizeInstance(object):
     """Crop and resize instance according to bbox form image.

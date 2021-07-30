@@ -2,15 +2,17 @@ from torch.utils.data import DataLoader
 
 
 class NwayKshotDataloader(object):
-    """A dataloader wrapper of NwayKshotDataset dataset. Create a iterator to
-    generate query and support batch simultaneously. Each batch return a batch.
+    """A dataloader wrapper.
 
-    of query data (batch_size) and support data (support_way * support_shot).
+    It Create a iterator to generate query and support
+    batch simultaneously. Each batch contains query data
+    and support data, and the lengths are batch_size and
+    (num_support_ways * num_support_shots) respectively.
 
     Args:
-        query_data_loader (obj:`DataLoader`): DataLoader of query dataset
+        query_data_loader (nn.DataLoader): DataLoader of query dataset
         support_dataset (list[:obj:`NwayKshotDataset`]): Support datasets.
-        support_sampler (Sampler): Sampler for support dataloader.
+        support_sampler (:obj:`Sampler`): Sampler for support dataloader.
         num_workers (int): Num workers for support dataloader.
         support_collate_fn (callable): Collate function for support dataloader.
         pin_memory (bool): Pin memory for both support and query dataloader.
@@ -18,7 +20,7 @@ class NwayKshotDataloader(object):
             support and query dataloader.
         shuffle_support_dataset (bool): Shuffle support dataset to generate
             new batch indexes. Default: False.
-        kwargs: any keyword argument to be used to initialize DataLoader.
+        kwargs: Any keyword argument to be used to initialize DataLoader.
     """
 
     def __init__(self,
@@ -40,6 +42,9 @@ class NwayKshotDataloader(object):
         self.pin_memory = pin_memory
         self.worker_init_fn = worker_init_fn
         self.shuffle_support_dataset = shuffle_support_dataset
+        if self.shuffle_support_dataset:
+            assert hasattr(self.support_dataset, 'shuffle_support'), \
+                'Support Dataset should support `shuffle_support`'
         self.kwargs = kwargs
         self.sampler = self.query_data_loader.sampler
         self.support_data_loader = DataLoader(
@@ -54,6 +59,7 @@ class NwayKshotDataloader(object):
 
     def __iter__(self):
         if self.shuffle_support_dataset:
+            # TODO: synchronize seeds across all rank
             # generate different support batch indexes for each epoch
             self.support_dataset.shuffle_support()
             # initialize support dataloader with batch_size 1

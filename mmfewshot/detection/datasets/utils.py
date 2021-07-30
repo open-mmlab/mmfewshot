@@ -13,18 +13,31 @@ def query_support_collate_fn(batch, samples_per_gpu=1):
     """Puts each data field into a tensor/DataContainer with outer dimension
     batch size.
 
+    This is mainly used in query_support dataloader. The main
+    difference with the :func:`collate_fn`  in mmcv is it
+    can process list[list[DataContainer]].
+
     Extend default_collate to add support for
     :type:`~mmcv.parallel.DataContainer`. There are 3 cases.
 
     1. cpu_only = True, e.g., meta data
     2. cpu_only = False, stack = True, e.g., images tensors
     3. cpu_only = False, stack = False, e.g., gt bboxes
+
+    Args:
+        batch (list[list[:obj:`mmcv.parallel.DataContainer`]] |
+            list[:obj:`mmcv.parallel.DataContainer`]): Data of
+            single batch.
+        samples_per_gpu (int): The number of samples of single GPU.
     """
 
     if not isinstance(batch, Sequence):
         raise TypeError(f'{batch.dtype} is not supported.')
 
-    # process the support batch data in type of List: [ List: [ DataContainer]]
+    # This is usually a case in query_support dataloader, which
+    # the :func:`__getitem__` of dataset return more than one images.
+    # Here we process the support batch data in type of
+    # List: [ List: [ DataContainer]]
     if isinstance(batch[0], Sequence):
         samples_per_gpu = len(batch[0]) * samples_per_gpu
         batch = sum(batch, [])

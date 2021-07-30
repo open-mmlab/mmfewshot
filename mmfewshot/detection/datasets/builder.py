@@ -72,10 +72,11 @@ def build_dataloader(dataset,
         workers_per_gpu (int): How many subprocesses to use for data loading
             for each GPU.
         num_gpus (int): Number of GPUs. Only used in non-distributed training.
+            Default:1.
         dist (bool): Distributed training/test or not. Default: True.
         shuffle (bool): Whether to shuffle the data at every epoch.
             Default: True.
-        seed (int): Random seed.
+        seed (int): Random seed. Default:None.
         kwargs: any keyword argument to be used to initialize DataLoader
 
     Returns:
@@ -176,6 +177,13 @@ def build_sampler(dist, shuffle, dataset, num_gpus, samples_per_gpu,
         seed (int): Random seed.
 
     Returns:
+        tuple: Contains corresponding sampler and arguments
+
+            - sampler(:obj:`sampler`) : Corresponding sampler
+              used in dataloader.
+            - batch_size(int): Batch size of dataloader.
+            - num_works(int): The number of processes loading data in the
+                data loader.
     """
     rank, world_size = get_dist_info()
     if dist:

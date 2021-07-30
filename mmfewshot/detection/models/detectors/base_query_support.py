@@ -9,10 +9,11 @@ from mmdet.models.detectors import BaseDetector
 
 @DETECTORS.register_module()
 class BaseQuerySupportDetector(BaseDetector):
-    """Base class for two-stage detectors in query-support fashion. Query-
-    support detectors typically consisting of a region proposal network and a
-    task-specific regression head. There are two data pipelines (query and
-    support data) for query-support detectors.
+    """Base class for two-stage detectors in query-support fashion.
+
+    Query-support detectors typically consisting of a region
+    proposal network and a task-specific regression head. There are
+    two pipelines for query and support data respectively.
 
     Args:
         backbone (dict): Config of the backbone for query data.
@@ -63,7 +64,7 @@ class BaseQuerySupportDetector(BaseDetector):
         self.rpn_with_support = False
         if rpn_head is not None:
             self.with_rpn = True
-            if rpn_head.get('aggregation_neck', None) is not None:
+            if rpn_head.get('aggregation_layer', None) is not None:
                 self.rpn_with_support = True
             rpn_train_cfg = train_cfg.rpn if train_cfg is not None else None
             rpn_head_ = copy.deepcopy(rpn_head)
@@ -89,12 +90,13 @@ class BaseQuerySupportDetector(BaseDetector):
                 Typically these should be mean centered and std scaled.
 
         Returns:
-            list[Tensor]: Features of query images.
+            list[Tensor]: Features of support images, each item with shape
+                 (N, C, H, W).
         """
-        x = self.backbone(img)
+        feats = self.backbone(img)
         if self.with_neck:
-            x = self.neck(x)
-        return x
+            feats = self.neck(feats)
+        return feats
 
     def extract_feat(self, img):
         """Extract features of query data.
@@ -109,7 +111,7 @@ class BaseQuerySupportDetector(BaseDetector):
         return self.extract_query_feat(img)
 
     @abstractmethod
-    def extract_support_feat(self, img, gt_bboxes=None):
+    def extract_support_feat(self, img):
         """Extract features of support data."""
         raise NotImplementedError
 
@@ -122,8 +124,8 @@ class BaseQuerySupportDetector(BaseDetector):
                 mode='train',
                 **kwargs):
         """Calls one of (:func:`forward_train`, :func:`forward_test` and
-        :func:`forward_model_init`) depending on which `mode`. Note this
-        setting will change the expected inputs of the corresponding function.
+        :func:`forward_model_init`) according to the `mode`. The inputs
+        of forward function would change with the `mode`.
 
         - When `mode` is 'train', the input will be query and support data
         for training.
@@ -163,7 +165,9 @@ class BaseQuerySupportDetector(BaseDetector):
         elif mode == 'test':
             return self.forward_test(img, img_metas, **kwargs)
         else:
-            raise ValueError(f'invalid forward mode {mode}.')
+            raise ValueError(
+                f'invalid forward mode {mode}, '
+                f'only support `train`, `model_init` and `test` now')
 
     def train_step(self, data, optimizer):
         """The iteration step during training.
@@ -243,12 +247,10 @@ class BaseQuerySupportDetector(BaseDetector):
         Returns:
             dict[str, Tensor]: a dictionary of loss components
         """
-
         query_img = query_data['img']
         support_img = support_data['img']
-        query_x = self.extract_query_feat(query_img)
-        support_x = self.extract_support_feat(support_img,
-                                              support_data['gt_bboxes'])
+        query_feats = self.extract_query_feat(query_img)
+        support_feats = self.extract_support_feat(support_img)
 
         losses = dict()
 
@@ -257,32 +259,47 @@ class BaseQuerySupportDetector(BaseDetector):
             proposal_cfg = self.train_cfg.get('rpn_proposal',
                                               self.test_cfg.rpn)
             if self.rpn_with_support:
-                x = (query_x, support_x)
+                rpn_losses, proposal_list = self.rpn_head.forward_train(
+                    query_feats,
+                    support_feats,
+                    query_img_metas=query_data['img_metas'],
+                    query_gt_bboxes=query_data['gt_bboxes'],
+                    query_gt_labels=None,
+                    query_gt_bboxes_ignore=query_data.get(
+                        'gt_bboxes_ignore', None),
+                    support_img_metas=support_data['img_metas'],
+                    support_gt_bboxes=support_data['gt_bboxes'],
+                    support_gt_labels=support_data['gt_labels'],
+                    support_gt_bboxes_ignore=support_data.get(
+                        'gt_bboxes_ignore', None),
+                    proposal_cfg=proposal_cfg)
             else:
-                x = query_x
-            rpn_losses, proposal_list = self.rpn_head.forward_train(
-                x,
-                copy.deepcopy(query_data['img_metas']),
-                copy.deepcopy(query_data['gt_bboxes']),
-                gt_labels=None,
-                gt_bboxes_ignore=copy.deepcopy(
-                    query_data.get('gt_bboxes_ignore', None)),
-                proposal_cfg=proposal_cfg)
+                rpn_losses, proposal_list = self.rpn_head.forward_train(
+                    query_feats,
+                    copy.deepcopy(query_data['img_metas']),
+                    copy.deepcopy(query_data['gt_bboxes']),
+                    gt_labels=None,
+                    gt_bboxes_ignore=copy.deepcopy(
+                        query_data.get('gt_bboxes_ignore', None)),
+                    proposal_cfg=proposal_cfg)
             losses.update(rpn_losses)
         else:
             proposal_list = proposals
 
-        # ROI head forward and loss
-        x = (query_x, support_x)
-        img_metas = (query_data['img_metas'], support_data['img_metas'])
-        gt_bboxes = (query_data['gt_bboxes'], support_data['gt_bboxes'])
-        gt_labels = (query_data['gt_labels'], support_data['gt_labels'])
-        gt_bboxes_ignore = (query_data.get('gt_bboxes_ignore', None),
-                            support_data.get('gt_bboxes_ignore', None))
-
-        roi_losses = self.roi_head.forward_train(x, img_metas, proposal_list,
-                                                 gt_bboxes, gt_labels,
-                                                 gt_bboxes_ignore, **kwargs)
+        roi_losses = self.roi_head.forward_train(
+            query_feats,
+            support_feats,
+            proposals=proposal_list,
+            query_img_metas=query_data['img_metas'],
+            query_gt_bboxes=query_data['gt_bboxes'],
+            query_gt_labels=query_data['gt_labels'],
+            query_gt_bboxes_ignore=query_data.get('gt_bboxes_ignore', None),
+            support_img_metas=support_data['img_metas'],
+            support_gt_bboxes=support_data['gt_bboxes'],
+            support_gt_labels=support_data['gt_labels'],
+            support_gt_bboxes_ignore=support_data.get('gt_bboxes_ignore',
+                                                      None),
+            **kwargs)
         losses.update(roi_losses)
 
         return losses

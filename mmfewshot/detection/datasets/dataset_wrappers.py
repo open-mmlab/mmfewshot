@@ -8,18 +8,12 @@ from mmdet.datasets.builder import DATASETS
 
 @DATASETS.register_module()
 class QueryAwareDataset(object):
-    """A wrapper of query aware dataset.
-
-    For each item in query aware dataset, there will be one query image and
-    (num_support_ways * num_support_shots) support images. The support images
-    are sampled according to the selected query image and include positive
-    class (random classes in query image) and negative class (any classes not
-    appear in query image).
+    """A wrapper of query-aware dataset.
 
     Args:
-        query_dataset (obj:`FewShotCustomDataset`):
+        query_dataset (:obj:`FewShotCustomDataset`):
             Query dataset to be wrapped.
-        support_dataset (obj:`FewShotCustomDataset` | None):
+        support_dataset (:obj:`FewShotCustomDataset` | None):
             Support dataset to be wrapped. If support dataset is None,
             support dataset will copy from query dataset.
         num_support_ways (int): Number of classes for support in
@@ -95,6 +89,26 @@ class QueryAwareDataset(object):
         self._ori_len = len(self.query_dataset)
 
     def __getitem__(self, idx):
+        """Return query image and support images at the same time.
+
+        For query aware dataset, this function would return one query image
+        and num_support_ways * num_support_shots support images. The support
+        images are sampled according to the selected query image. There should
+        be no intersection between the classes of instances in query data and
+        in support data.
+
+        Args:
+            idx (int): the index of data.
+
+        Returns:
+            dict: A dict contains query data and support data, it
+            usually contains two fields.
+
+                - query_data: A dict of single query data information.
+                - support_data: A list of dict, has
+                  num_support_ways * num_support_shots support images
+                  and corresponding annotations.
+        """
         idx %= self._ori_len
         # sample query data
         try_time = 0
@@ -250,9 +264,9 @@ class NwayKshotDataset(object):
     'support'.
 
     Args:
-        query_dataset (obj:`FewShotCustomDataset`):
+        query_dataset (:obj:`FewShotCustomDataset`):
             Query dataset to be wrapped.
-        support_dataset (obj:`FewShotCustomDataset` | None):
+        support_dataset (:obj:`FewShotCustomDataset` | None):
             Support dataset to be wrapped. If support dataset is None,
             support dataset will copy from query dataset.
         num_support_ways (int): Number of classes for support in

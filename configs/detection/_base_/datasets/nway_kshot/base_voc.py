@@ -5,13 +5,10 @@ train_multi_pipelines = dict(
     query=[
         dict(type='LoadImageFromFile'),
         dict(type='LoadAnnotations', with_bbox=True),
-        dict(
-            type='Resize',
-            img_scale=(1000, 600),
-            keep_ratio=True,
-            multiscale_mode='value'),
+        dict(type='Resize', img_scale=(1333, 600), keep_ratio=True),
         dict(type='RandomFlip', flip_ratio=0.5),
         dict(type='Normalize', **img_norm_cfg),
+        dict(type='Pad', size_divisor=32),
         dict(type='DefaultFormatBundle'),
         dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
     ],
@@ -28,12 +25,13 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(1000, 600),
+        img_scale=(1333, 600),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),
             dict(type='Normalize', **img_norm_cfg),
+            dict(type='Pad', size_divisor=32),
             dict(type='ImageToTensor', keys=['img']),
             dict(type='Collect', keys=['img'])
         ])
@@ -66,9 +64,26 @@ data = dict(
             img_prefix=data_root,
             multi_pipelines=train_multi_pipelines,
             classes=None,
+            use_difficult=True,
+            instance_wise=False,
+            dataset_name='query_dataset'),
+        support_dataset=dict(
+            type='FewShotVOCDataset',
+            ann_cfg=[
+                dict(
+                    type='ann_file',
+                    ann_file=data_root +
+                    'VOC2007/ImageSets/Main/trainval.txt'),
+                dict(
+                    type='ann_file',
+                    ann_file=data_root + 'VOC2012/ImageSets/Main/trainval.txt')
+            ],
+            img_prefix=data_root,
+            multi_pipelines=train_multi_pipelines,
+            classes=None,
             use_difficult=False,
             instance_wise=False,
-            dataset_name='query-support dataset')),
+            dataset_name='support_dataset')),
     val=dict(
         type='FewShotVOCDataset',
         ann_cfg=[
@@ -101,5 +116,5 @@ data = dict(
         use_difficult=False,
         instance_wise=True,
         classes=None,
-        dataset_name='model_init'))
+        dataset_name='model_init_dataset'))
 evaluation = dict(interval=5000, metric='mAP')
