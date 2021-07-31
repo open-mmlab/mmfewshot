@@ -36,12 +36,14 @@ class CosineSimBBoxHead(ConvFCBBoxHead):
         """Forward function.
 
         Args:
-            x (Tensor): Shape of (N, C, H, W).
+            x (Tensor): Shape of (num_proposals, C, H, W).
 
         Returns:
-            tuple(Tensor, Tensor): Box scores with shape of
-                (N, num_classes, H, W) and Box energies /
-                deltas with shape of (N, 4, H, W).
+            tuple:
+                cls_score (Tensor): Cls scores, has shape
+                    (num_proposals, num_classes).
+                bbox_pred (Tensor): Box energies / deltas, has shape
+                    (num_proposals, 4).
         """
         # shared part
         if self.num_shared_convs > 0:

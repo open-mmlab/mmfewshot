@@ -13,8 +13,8 @@ from mmdet.datasets import replace_ImageToTensor
 import mmfewshot  # noqa: F401, F403
 from mmfewshot.apis.test import multi_gpu_test, single_gpu_test
 from mmfewshot.builders import build_dataloader, build_dataset, build_model
-from mmfewshot.detection.apis import (multi_gpu_extract_support_template,
-                                      single_gpu_extract_support_template)
+from mmfewshot.detection.apis import (multi_gpu_model_init,
+                                      single_gpu_model_init)
 from mmfewshot.utils.check_config import check_config
 
 
@@ -169,20 +169,21 @@ def main():
         shuffle=False,
         round_up=False)
 
-    # for meta-learning methods which require support template
-    if cfg.data.get('support_template', None) is not None:
-        support_template_samples_per_gpu = cfg.data.support_template.pop(
+    # for meta-learning methods which require support template dataset
+    # for model initialization.
+    if cfg.data.get('model_init', None) is not None:
+        model_init_samples_per_gpu = cfg.data.model_init.pop(
             'samples_per_gpu', 1)
-        support_template_workers_per_gpu = cfg.data.support_template.pop(
+        model_init_workers_per_gpu = cfg.data.model_init.pop(
             'workers_per_gpu', 1)
-        assert cfg.data.support_template.get('ann_cfg', None) is not None, \
+        assert cfg.data.model_init.get('ann_cfg', None) is not None, \
             'during testing ann_cfg of support template can not be None'
-        support_template_dataset = build_dataset(cfg.data.support_template)
+        model_init_dataset = build_dataset(cfg.data.model_init)
         # disable dist to make all rank get same data
-        support_template_dataloader = build_dataloader(
-            support_template_dataset,
-            samples_per_gpu=support_template_samples_per_gpu,
-            workers_per_gpu=support_template_workers_per_gpu,
+        model_init_dataloader = build_dataloader(
+            model_init_dataset,
+            samples_per_gpu=model_init_samples_per_gpu,
+            workers_per_gpu=model_init_workers_per_gpu,
             dist=False,
             shuffle=False)
     # pop frozen_parameters
@@ -210,9 +211,8 @@ def main():
         elif cfg.task_type == 'mmcls':
             show_kwargs = {} if args.show_options is None \
                 else args.show_options
-        if cfg.data.get('support_template', None) is not None:
-            single_gpu_extract_support_template(model,
-                                                support_template_dataloader)
+        if cfg.data.get('model_init', None) is not None:
+            single_gpu_model_init(model, model_init_dataloader)
         outputs = single_gpu_test(
             model,
             data_loader,
@@ -225,9 +225,8 @@ def main():
             model.cuda(),
             device_ids=[torch.cuda.current_device()],
             broadcast_buffers=False)
-        if cfg.data.get('support_template', None) is not None:
-            multi_gpu_extract_support_template(model,
-                                               support_template_dataloader)
+        if cfg.data.get('model_init', None) is not None:
+            multi_gpu_model_init(model, model_init_dataloader)
         outputs = multi_gpu_test(
             model,
             data_loader,

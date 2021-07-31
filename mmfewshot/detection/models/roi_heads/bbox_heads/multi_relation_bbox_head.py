@@ -95,13 +95,15 @@ class MultiRelationBBoxHead(BBoxHead):
         """Forward function.
 
         Args:
-            query_feat (Tensor): Shape of (N, C, H, W).
+            query_feat (Tensor): Shape of (num_proposals, C, H, W).
             support_feat (Tensor): Shape of (1, C, H, W).
 
         Returns:
-            tuple(Tensor, Tensor): Box scores with shape of
-                (N, num_classes, H, W) and Box energies /
-                deltas with shape of (N, 4, H, W)
+            tuple:
+                cls_score (Tensor): Cls scores, has shape
+                    (num_proposals, num_classes).
+                bbox_pred (Tensor): Box energies / deltas, has shape
+                    (num_proposals, 4).
         """
 
         # global_relation
@@ -166,10 +168,10 @@ class MultiRelationBBoxHead(BBoxHead):
 
         Args:
             cls_scores (Tensor): Box scores with shape of
-                (N, num_anchors * num_classes, H, W)
+                (N, num_anchors * num_classes)
             bbox_preds (Tensor): Box energies / deltas with shape
-                of (N, num_anchors * 4, H, W)
-            rois (Tensor): shape (n, 4) or (n, 5)
+                of (N, num_anchors * 4)
+            rois (Tensor): shape (N, 4) or (N, 5)
             labels (Tensor): Labels of each anchors with shape
                 (N, num_total_anchors).
             label_weights (Tensor): Label weights of each anchor with shape

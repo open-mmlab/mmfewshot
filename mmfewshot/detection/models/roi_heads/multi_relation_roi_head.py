@@ -127,10 +127,10 @@ class MultiRelationRoIHead(StandardRoIHead):
         Args:
             feats (list[Tensor]): Features from backbone, each item with shape
                 (N, C, W, H).
-            rois (Tensor): shape (m, 5).
+            rois (Tensor): shape (num_proposals, 5).
 
         Returns:
-            Tensor: Roi features with shape (N, C, W, H).
+            Tensor: Roi features with shape (num_proposals, C).
         """
         roi_feat = self.bbox_roi_extractor(
             feats[:self.bbox_roi_extractor.num_inputs], rois)
@@ -142,8 +142,8 @@ class MultiRelationRoIHead(StandardRoIHead):
         """Box head forward function used in both training and testing.
 
         Args:
-            query_rois_feats (Tensor): Roi features with shape (N*K, C, H, W).
-            support_rois_feats (Tensor): Roi features with shape (N, C, H, W).
+            query_rois_feats (Tensor): Roi features with shape (N*K, C).
+            support_rois_feats (Tensor): Roi features with shape (N, C).
 
         Returns:
              dict: A dictionary of predicted results.
@@ -225,11 +225,16 @@ class MultiRelationRoIHead(StandardRoIHead):
         labels[num_pos_pair_samples:] = 1
         bbox_weights[num_pos_pair_samples:] = 0
 
-        loss_bbox = self.bbox_head.loss(bbox_results['cls_score'],
-                                        bbox_results['bbox_pred'], query_rois,
-                                        labels, label_weights, bbox_targets,
-                                        bbox_weights, num_pos_pair_samples,
-                                        self.sample_fractions)
+        loss_bbox = self.bbox_head.loss(
+            bbox_results['cls_score'],
+            bbox_results['bbox_pred'],
+            query_rois,
+            labels,
+            label_weights,
+            bbox_targets,
+            bbox_weights,
+            num_pos_pair_samples,
+            sample_fractions=self.sample_fractions)
 
         bbox_results.update(loss_bbox=loss_bbox)
         return bbox_results
