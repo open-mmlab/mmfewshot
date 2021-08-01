@@ -1,7 +1,6 @@
 _base_ = [
     '../../_base_/datasets/finetune_based/few_shot_coco.py',
-    '../../_base_/schedules/schedule.py',
-    '../../_base_/models/faster_rcnn_r50_caffe_fpn.py',
+    '../../_base_/schedules/schedule.py', '../fsce_faster_rcnn_r101_fpn.py',
     '../../_base_/default_runtime.py'
 ]
 # classes splits are predefined in FewShotCocoDataset
@@ -24,16 +23,7 @@ load_from = \
     'faster_rcnn_r101_fpn_coco_base_training/' \
     'model_reset_surgery.pth'
 model = dict(
-    frozen_parameters=[
-        'backbone',
-    ],
-    pretrained='open-mmlab://detectron2/resnet101_caffe',
-    backbone=dict(depth=101, frozen_stages=4),
-    roi_head=dict(
-        bbox_head=dict(
-            type='CosineSimBBoxHead',
-            num_shared_fcs=2,
-            num_classes=80,
-            scale=20)),
+    roi_head=dict(bbox_head=dict(num_classes=80)),
     train_cfg=dict(
-        rpn_proposal=dict(max_per_img=2000), rcnn=dict(sampler=dict(num=256))))
+        rcnn=dict(
+            assigner=dict(pos_iou_thr=0.5, neg_iou_thr=0.5, min_pos_iou=0.5))))

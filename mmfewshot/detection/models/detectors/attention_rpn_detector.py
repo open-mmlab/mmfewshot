@@ -2,11 +2,11 @@ import torch
 from mmdet.core import bbox2roi
 from mmdet.models.builder import DETECTORS
 
-from .base_query_support import BaseQuerySupportDetector
+from .query_support_detector import QuerySupportDetector
 
 
 @DETECTORS.register_module()
-class AttentionRPNDetector(BaseQuerySupportDetector):
+class AttentionRPNDetector(QuerySupportDetector):
     """Implementation of `AttentionRPN <https://arxiv.org/abs/1908.01998>`_.
 
     Args:
