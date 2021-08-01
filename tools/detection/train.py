@@ -14,10 +14,9 @@ from mmdet.utils import collect_env, get_root_logger
 
 import mmfewshot  # noqa: F401, F403
 from mmfewshot import __version__
-from mmfewshot.apis import set_random_seed, train_model
-from mmfewshot.builders.dataset_builder import build_dataset
-from mmfewshot.builders.model_builder import build_model
-from mmfewshot.utils.check_config import check_config
+from mmfewshot.detection.apis import set_random_seed, train_detector
+from mmfewshot.detection.datasets import build_dataset
+from mmfewshot.detection.models import build_detector
 
 
 def parse_args():
@@ -92,8 +91,6 @@ def main():
 
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
-
-    cfg = check_config(cfg)
 
     # import modules from string list.
     if cfg.get('custom_imports', None):
@@ -178,7 +175,7 @@ def main():
     # get fixed parameters
     frozen_parameters = cfg.model.pop('frozen_parameters', None)
 
-    model = build_model(cfg.model, task_type=cfg.task_type)
+    model = build_detector(cfg.model)
     model.init_weights()
     # fix parameters by prefix
     if frozen_parameters is not None:
@@ -188,7 +185,7 @@ def main():
                     param.requires_grad = False
     # If save_dataset is set to True, dataset will be saved into json.
     save_dataset = cfg.data.train.pop('save_dataset', False)
-    datasets = [build_dataset(cfg.data.train, task_type=cfg.task_type)]
+    datasets = [build_dataset(cfg.data.train)]
     if save_dataset:
         save_dataset_path = osp.join(cfg.work_dir,
                                      f'{timestamp}_saved_data.json')
@@ -200,7 +197,7 @@ def main():
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
         val_dataset.pipeline = cfg.data.train.pipeline
-        datasets.append(build_dataset(val_dataset, task_type=cfg.task_type))
+        datasets.append(build_dataset(val_dataset))
     if cfg.checkpoint_config is not None:
         # save mmfewshot version, config file content and class names in
         # checkpoints as meta data
@@ -209,11 +206,10 @@ def main():
             CLASSES=datasets[0].CLASSES)
     # add an attribute for visualization convenience
     model.CLASSES = datasets[0].CLASSES
-    train_model(
+    train_detector(
         model,
         datasets,
         cfg,
-        task_type=cfg.task_type,
         distributed=distributed,
         validate=(not args.no_validate),
         timestamp=timestamp,

@@ -2,7 +2,6 @@ import mmcls  # noqa: F401, F403
 import mmcv
 import mmdet  # noqa: F401, F403
 
-from .builders import *  # noqa: F401, F403
 from .classification import *  # noqa: F401, F403
 from .detection import *  # noqa: F401, F403
 from .version import __version__, short_version
@@ -29,5 +28,16 @@ assert (mmcv_version >= digit_version(mmcv_minimum_version)
         and mmcv_version <= digit_version(mmcv_maximum_version)), \
     f'MMCV=={mmcv.__version__} is used but incompatible. ' \
     f'Please install mmcv>={mmcv_minimum_version}, <={mmcv_maximum_version}.'
+
+mmdet_minimum_version = '2.0.0'
+mmdet_maximum_version = '2.14.0'
+mmdet_version = digit_version(mmdet.__version__)
+
+
+assert (mmdet_version >= digit_version(mmdet_minimum_version)
+        and mmdet_version <= digit_version(mmdet_maximum_version)), \
+    f'MMDET=={mmdet.__version__} is used but incompatible. ' \
+    f'Please install mmdet>={mmdet_minimum_version},\
+     <={mmdet_maximum_version}.'
 
 __all__ = ['__version__', 'short_version']

@@ -11,11 +11,11 @@ from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
 from mmdet.datasets import replace_ImageToTensor
 
 import mmfewshot  # noqa: F401, F403
-from mmfewshot.apis.test import multi_gpu_test, single_gpu_test
-from mmfewshot.builders import build_dataloader, build_dataset, build_model
 from mmfewshot.detection.apis import (multi_gpu_model_init,
                                       single_gpu_model_init)
-from mmfewshot.utils.check_config import check_config
+from mmfewshot.detection.apis.test import multi_gpu_test, single_gpu_test
+from mmfewshot.detection.datasets import build_dataloader, build_dataset
+from mmfewshot.detection.models import build_detector
 
 
 def parse_args():
@@ -28,13 +28,8 @@ def parse_args():
         '--eval',
         type=str,
         nargs='+',
-        help='evaluation metrics, which depends on the dataset '
-        'of specific task_type, e.g., "bbox","segm", "proposal" for '
-        'COCO, and "mAP", "recall" for PASCAL VOC in'
-        'MMDet or "accuracy", "precision", "recall", "f1_score", '
-        '"support" for single label dataset, and "mAP", "CP", "CR",'
-        '"CF1", "OP", "OR", "OF1" for '
-        'multi-label dataset in MMCLS')
+        help='evaluation metrics, which depends on the dataset, e.g., "bbox",'
+        ' "segm", "proposal" for COCO, and "mAP", "recall" for PASCAL VOC')
     parser.add_argument('--show', action='store_true', help='show results')
     parser.add_argument(
         '--show-dir', help='directory where painted images will be saved')
@@ -42,8 +37,7 @@ def parse_args():
         '--show-score-thr',
         type=float,
         default=0.3,
-        help='score threshold (default: 0.3),Only work when task_type is mmdet'
-    )
+        help='score threshold (default: 0.3)')
     parser.add_argument(
         '--gpu-collect',
         action='store_true',
@@ -76,13 +70,6 @@ def parse_args():
         help='custom options for evaluation, the key-value pair in xxx=yyy '
         'format will be kwargs for dataset.evaluate() function')
     parser.add_argument(
-        '--show-options',
-        nargs='+',
-        action=DictAction,
-        help='custom options for show_result. key-value pair in xxx=yyy.'
-        'Check available options in `model.show_result`. Only work when '
-        'task_type is mmcls')
-    parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
         default='none',
@@ -105,9 +92,9 @@ def parse_args():
 def main():
     args = parse_args()
 
-    assert args.out or args.eval or args.format_only or args.show \
+    assert args.out or args.eval or args.show \
         or args.show_dir, (
-            'Please specify at least one operation (save/eval/format/show the '
+            'Please specify at least one operation (save/eval/show the '
             'results / save the results) with the argument "--out", "--eval"',
             '"--show" or "--show-dir"')
 
@@ -118,8 +105,6 @@ def main():
 
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
-
-    cfg = check_config(cfg)
 
     # import modules from string list.
     if cfg.get('custom_imports', None):
@@ -160,7 +145,7 @@ def main():
     assert samples_per_gpu == 1, 'currently only support single images testing'
 
     # build the dataloader
-    dataset = build_dataset(cfg.data.test, task_type=cfg.task_type)
+    dataset = build_dataset(cfg.data.test)
     data_loader = build_dataloader(
         dataset,
         samples_per_gpu=samples_per_gpu,
@@ -191,7 +176,7 @@ def main():
 
     # build the model and load checkpoint
     cfg.model.train_cfg = None
-    model = build_model(cfg.model, task_type=cfg.task_type)
+    model = build_detector(cfg.model)
 
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
@@ -213,13 +198,8 @@ def main():
                 else args.show_options
         if cfg.data.get('model_init', None) is not None:
             single_gpu_model_init(model, model_init_dataloader)
-        outputs = single_gpu_test(
-            model,
-            data_loader,
-            args.show,
-            args.show_dir,
-            task_type=cfg.task_type,
-            **show_kwargs)
+        outputs = single_gpu_test(model, data_loader, args.show, args.show_dir,
+                                  **show_kwargs)
     else:
         model = MMDistributedDataParallel(
             model.cuda(),
@@ -232,7 +212,6 @@ def main():
             data_loader,
             args.tmpdir,
             args.gpu_collect,
-            task_type=cfg.task_type,
         )
 
     rank, _ = get_dist_info()
