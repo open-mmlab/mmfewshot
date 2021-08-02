@@ -83,14 +83,15 @@ def build_dataloader(dataset,
         DataLoader: A PyTorch dataloader.
     """
     rank, world_size = get_dist_info()
-    (sampler, batch_size, num_workers) \
-        = build_sampler(dist=dist,
-                        shuffle=shuffle,
-                        dataset=dataset,
-                        num_gpus=num_gpus,
-                        samples_per_gpu=samples_per_gpu,
-                        workers_per_gpu=workers_per_gpu,
-                        seed=seed, )
+    (sampler, batch_size, num_workers) = build_sampler(
+        dist=dist,
+        shuffle=shuffle,
+        dataset=dataset,
+        num_gpus=num_gpus,
+        samples_per_gpu=samples_per_gpu,
+        workers_per_gpu=workers_per_gpu,
+        seed=seed,
+    )
     init_fn = partial(
         worker_init_fn, num_workers=num_workers, rank=rank,
         seed=seed) if seed is not None else None
@@ -127,15 +128,15 @@ def build_dataloader(dataset,
         support_dataset.convert_query_to_support(
             len(query_data_loader) * num_gpus)
 
-        (support_sampler, _, _) \
-            = build_sampler(dist=dist,
-                            shuffle=False,
-                            dataset=support_dataset,
-                            num_gpus=num_gpus,
-                            samples_per_gpu=1,
-                            workers_per_gpu=workers_per_gpu,
-                            seed=seed,
-                            )
+        (support_sampler, _, _) = build_sampler(
+            dist=dist,
+            shuffle=False,
+            dataset=support_dataset,
+            num_gpus=num_gpus,
+            samples_per_gpu=1,
+            workers_per_gpu=workers_per_gpu,
+            seed=seed,
+        )
 
         data_loader = NwayKshotDataloader(
             query_data_loader=query_data_loader,

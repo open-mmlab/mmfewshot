@@ -39,9 +39,9 @@ class QueryAwareDataset(object):
         self.num_support_shots = num_support_shots
         self.CLASSES = self.query_dataset.CLASSES
         self.repeat_times = repeat_times
-        assert self.num_support_ways <= len(self.CLASSES), \
-            'Please set the num_support_ways smaller than the ' \
-            'number of classes.'
+        assert self.num_support_ways <= len(
+            self.CLASSES
+        ), 'Please set `num_support_ways` smaller than the number of classes.'
         # build data index (idx, gt_idx) by class.
         self.data_infos_by_class = {i: [] for i in range(len(self.CLASSES))}
         # counting max number of anns in one image for each class, which will
@@ -66,11 +66,11 @@ class QueryAwareDataset(object):
                     self.max_anns_num_one_image[i] = class_count[i]
 
         for i in range(len(self.CLASSES)):
-            assert len(self.data_infos_by_class[i]) > 0, \
-                f'Class {self.CLASSES[i]} has zero annotation'
-            if len(self.data_infos_by_class[i]) <= \
-                    self.num_support_shots - \
-                    self.max_anns_num_one_image[i]:
+            assert len(self.data_infos_by_class[i]
+                       ) > 0, f'Class {self.CLASSES[i]} has zero annotation'
+            if len(
+                    self.data_infos_by_class[i]
+            ) <= self.num_support_shots - self.max_anns_num_one_image[i]:
                 warnings.warn(
                     f'During training, instances of class {self.CLASSES[i]} '
                     f'may smaller than the number of support shots which '
@@ -122,15 +122,15 @@ class QueryAwareDataset(object):
             else:
                 idx = self._rand_another(idx) % self._ori_len
             assert try_time < 100, \
-                'Not enough negative support classes for query image,' \
-                ' please try a smaller support way.'
+                'Not enough negative support classes for ' \
+                'query image, please try a smaller support way.'
 
         query_class = np.random.choice(cat_ids)
         query_gt_idx = [
             i for i in range(len(cat_ids)) if cat_ids[i] == query_class
         ]
-        query_data = \
-            self.query_dataset.prepare_train_img(idx, 'query', query_gt_idx)
+        query_data = self.query_dataset.prepare_train_img(
+            idx, 'query', query_gt_idx)
         query_data['query_class'] = [query_class]
 
         # sample negative support classes, which not appear in query image
@@ -308,8 +308,9 @@ class NwayKshotDataset(object):
         self.mutual_support_shot = mutual_support_shot
         self.num_used_support_shots = num_used_support_shots
         self.shuffle_support = shuffle_support
-        assert num_support_ways <= len(self.CLASSES), \
-            'support way can not larger than the number of classes'
+        assert num_support_ways <= len(
+            self.CLASSES
+        ), 'support way can not larger than the number of classes'
         self.num_support_shots = num_support_shots
         self.batch_index = []
         self.data_infos_by_class = {i: [] for i in range(len(self.CLASSES))}
@@ -358,9 +359,9 @@ class NwayKshotDataset(object):
         for idx in range(len(self.support_dataset)):
             labels = self.support_dataset.get_ann_info(idx)['labels']
             for gt_idx, gt in enumerate(labels):
-                if self.num_used_support_shots is None or \
-                        (len(self.data_infos_by_class[gt]) <
-                         self.num_used_support_shots):
+                if self.num_used_support_shots is None or (
+                        len(self.data_infos_by_class[gt]) <
+                        self.num_used_support_shots):
                     self.data_infos_by_class[gt].append((idx, gt_idx))
                     if self.mutual_support_shot:
                         break
@@ -369,9 +370,8 @@ class NwayKshotDataset(object):
         for i in range(len(self.CLASSES)):
             num_gts = len(self.data_infos_by_class[i])
             if num_gts < self.num_support_shots:
-                self.data_infos_by_class[i] = \
-                    self.data_infos_by_class[i] * \
-                    (self.num_support_shots // num_gts + 1)
+                self.data_infos_by_class[i] = self.data_infos_by_class[i] * (
+                    self.num_support_shots // num_gts + 1)
 
     def shuffle_support(self):
         """Generate new batch indexes."""
@@ -453,7 +453,7 @@ class NwayKshotDataset(object):
         """Get data info by idx and gt idx."""
         data_info = copy.deepcopy(self.support_dataset.data_infos[idx])
         data_info['ann']['labels'] = \
-            data_info['ann']['labels'][gt_idx:gt_idx+1]
+            data_info['ann']['labels'][gt_idx:gt_idx + 1]
         data_info['ann']['bboxes'] = \
-            data_info['ann']['bboxes'][gt_idx:gt_idx+1]
+            data_info['ann']['bboxes'][gt_idx:gt_idx + 1]
         return data_info

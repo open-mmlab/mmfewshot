@@ -8,7 +8,7 @@ from mmdet.models.losses.utils import weight_reduce_loss
 class SupervisedContrastiveLoss(nn.Module):
     """`Supervised Contrastive LOSS <https://arxiv.org/abs/2004.11362>`_.
 
-    This part of code is brought from https://github.com/MegviiDetection/FSCE.
+    This part of code is modified from https://github.com/MegviiDetection/FSCE.
 
     Args:
         temperature (float): A constant to be divided by consine similarity

@@ -1,4 +1,5 @@
 import os.path as osp
+import sys
 
 import torch.distributed as dist
 from mmcv.runner import DistEvalHook as BaseDistEvalHook
@@ -7,9 +8,11 @@ from torch.nn.modules.batchnorm import _BatchNorm
 
 
 class QuerySupportEvalHook(BaseEvalHook):
-    """Evaluation hook for query support data pipeline, this hook will first
-    traverse `model_init_dataloader` to extract support features for model
-    initialization and then evaluate the data from `val_dataloader`.
+    """Evaluation hook for query support data pipeline.
+
+    This hook will first traverse `model_init_dataloader` to extract support
+    features for model initialization and then evaluate the data from
+    `val_dataloader`.
 
     Args:
         model_init_dataloader (nn.DataLoader): A PyTorch dataloader of
@@ -30,7 +33,7 @@ class QuerySupportEvalHook(BaseEvalHook):
             return
         # extract support template features
         from mmfewshot.detection.apis import \
-            single_gpu_model_init, single_gpu_test
+            (single_gpu_model_init, single_gpu_test)
         single_gpu_model_init(runner.model, self.model_init_dataloader)
         results = single_gpu_test(runner.model, self.dataloader, show=False)
         runner.log_buffer.output['eval_iter_num'] = len(self.dataloader)
@@ -59,6 +62,9 @@ class QuerySupportDistEvalHook(BaseDistEvalHook):
 
     def _do_evaluate(self, runner):
         """perform evaluation and save checkpoint."""
+
+        if not self._should_evaluate(runner):
+            return
         # Synchronization of BatchNorm's buffer (running_mean
         # and running_var) is not supported in the DDP of pytorch,
         # which may cause the inconsistent performance of models in
@@ -72,16 +78,13 @@ class QuerySupportDistEvalHook(BaseDistEvalHook):
                     dist.broadcast(module.running_var, 0)
                     dist.broadcast(module.running_mean, 0)
 
-        if not self._should_evaluate(runner):
-            return
-
         tmpdir = self.tmpdir
         if tmpdir is None:
             tmpdir = osp.join(runner.work_dir, '.eval_hook')
 
         # extract support template features
         from mmfewshot.detection.apis import \
-            multi_gpu_model_init, multi_gpu_test
+            (multi_gpu_model_init, multi_gpu_test)
         multi_gpu_model_init(runner.model, self.model_init_dataloader)
 
         results = multi_gpu_test(
@@ -90,7 +93,7 @@ class QuerySupportDistEvalHook(BaseDistEvalHook):
             tmpdir=tmpdir,
             gpu_collect=self.gpu_collect)
         if runner.rank == 0:
-            print('\n')
+            sys.stdout.write('\n')
             runner.log_buffer.output['eval_iter_num'] = len(self.dataloader)
             key_score = self.evaluate(runner, results)
 

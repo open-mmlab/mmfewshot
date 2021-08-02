@@ -4,6 +4,7 @@ import time
 import mmcv
 import torch
 from mmcv.image import tensor2imgs
+from mmcv.parallel import is_module_wrapper
 from mmcv.runner import get_dist_info
 from mmdet.apis.test import collect_results_cpu, collect_results_gpu
 from mmdet.core import encode_mask_results
@@ -22,8 +23,7 @@ def single_gpu_test(model,
         data_loader (nn.Dataloader): Pytorch data loader.
         show (bool): Whether to show the image.
             Default: False.
-        out_dir (str or None): The dir to write the image.
-            Default: None.
+        out_dir (str or None): The directory to write the image. Default: None.
         show_score_thr (float, optional): Minimum score of bboxes to be shown.
             Default: 0.3.
 
@@ -60,13 +60,20 @@ def single_gpu_test(model,
                     out_file = osp.join(out_dir, img_meta['ori_filename'])
                 else:
                     out_file = None
-
-                model.module.show_result(
-                    img_show,
-                    result[i],
-                    show=show,
-                    out_file=out_file,
-                    score_thr=show_score_thr)
+                if is_module_wrapper(model):
+                    model.module.show_result(
+                        img_show,
+                        result[i],
+                        show=show,
+                        out_file=out_file,
+                        score_thr=show_score_thr)
+                else:
+                    model.show_result(
+                        img_show,
+                        result[i],
+                        show=show,
+                        out_file=out_file,
+                        score_thr=show_score_thr)
 
         # encode mask results
         if isinstance(result[0], tuple):
@@ -133,7 +140,7 @@ def single_gpu_model_init(model, data_loader):
     support fashion with single gpu.
 
     Args:
-        model (nn.Module): Model used for extract support template features.
+        model (nn.Module): Model used for extracting support template features.
         data_loader (nn.Dataloader): Pytorch data loader.
 
     Returns:
@@ -149,9 +156,11 @@ def single_gpu_model_init(model, data_loader):
         with torch.no_grad():
             result = model(mode='model_init', **data)
         results.append(result)
-        for _ in range(len(data['img_metas'].data[0])):
-            prog_bar.update()
-    model.module.model_init()
+        prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
+    if is_module_wrapper(model):
+        model.module.model_init()
+    else:
+        model.model_init()
     logger.info('model initialization done.')
 
     return results
@@ -182,9 +191,11 @@ def multi_gpu_model_init(model, data_loader):
             result = model(mode='model_init', **data)
         results.append(result)
         if rank == 0:
-            for _ in range(len(data['img_metas'].data[0])):
-                prog_bar.update()
-    model.module.model_init()
+            prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
+    if is_module_wrapper(model):
+        model.module.model_init()
+    else:
+        model.model_init()
     if rank == 0:
         logger.info('model initialization done.')
     return results

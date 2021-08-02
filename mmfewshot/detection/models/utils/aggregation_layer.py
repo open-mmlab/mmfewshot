@@ -28,7 +28,7 @@ class AggregationLayer(BaseModule):
     """
 
     def __init__(self, aggregator_cfgs, init_cfg=None):
-        super(AggregationLayer, self).__init__(init_cfg)
+        super(AggregationLayer, self).__init__(init_cfg=init_cfg)
         self.aggregator_list = nn.ModuleList()
         self.num_aggregators = len(aggregator_cfgs)
         aggregator_cfgs_ = copy.deepcopy(aggregator_cfgs)
@@ -72,7 +72,7 @@ class DepthWiseCorrelationAggregator(BaseModule):
                  out_channels=None,
                  with_fc=False,
                  init_cfg=None):
-        super(DepthWiseCorrelationAggregator, self).__init__(init_cfg)
+        super(DepthWiseCorrelationAggregator, self).__init__(init_cfg=init_cfg)
         assert in_channels is not None, \
             "DepthWiseCorrelationAggregator require config of 'in_channels'."
         self.in_channels = in_channels
@@ -130,7 +130,7 @@ class DifferenceAggregator(BaseModule):
                  out_channels=None,
                  with_fc=False,
                  init_cfg=None):
-        super(DifferenceAggregator, self).__init__(init_cfg)
+        super(DifferenceAggregator, self).__init__(init_cfg=init_cfg)
         self.with_fc = with_fc
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -182,7 +182,7 @@ class DotProductAggregator(BaseModule):
                  out_channels=None,
                  with_fc=False,
                  init_cfg=None):
-        super(DotProductAggregator, self).__init__(init_cfg)
+        super(DotProductAggregator, self).__init__(init_cfg=init_cfg)
         self.with_fc = with_fc
         self.in_channels = in_channels
         self.out_channels = out_channels

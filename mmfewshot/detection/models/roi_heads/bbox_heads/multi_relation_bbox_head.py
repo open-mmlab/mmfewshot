@@ -108,11 +108,11 @@ class MultiRelationBBoxHead(BBoxHead):
 
         # global_relation
         if self.global_relation:
-            global_query_feat = \
-                self.global_relation_avgpool(query_feat).squeeze(3).squeeze(2)
-            global_support_feat = \
-                self.global_relation_avgpool(support_feat).squeeze(3).squeeze(
-                    2).expand_as(global_query_feat)
+            global_query_feat = self.global_relation_avgpool(
+                query_feat).squeeze(3).squeeze(2)
+            global_support_feat = self.global_relation_avgpool(
+                support_feat).squeeze(3).squeeze(2).expand_as(
+                    global_query_feat)
             global_feat = \
                 torch.cat((global_query_feat, global_support_feat), 1)
             global_feat = self.global_relation_branch(global_feat)
@@ -123,18 +123,18 @@ class MultiRelationBBoxHead(BBoxHead):
         if self.local_correlation:
             local_query_feat = self.local_correlation_branch(query_feat)
             local_support_feat = self.local_correlation_branch(support_feat)
-            local_feat = \
-                F.conv2d(local_query_feat,
-                         local_support_feat.permute(1, 0, 2, 3),
-                         groups=2048)
+            local_feat = F.conv2d(
+                local_query_feat,
+                local_support_feat.permute(1, 0, 2, 3),
+                groups=2048)
             local_feat = F.relu(local_feat, inplace=True).squeeze(3).squeeze(2)
-            local_correlation_cls_score = \
-                self.local_correlation_fc_cls(local_feat)
+            local_correlation_cls_score = self.local_correlation_fc_cls(
+                local_feat)
 
         # patch_relation
         if self.patch_relation:
-            patch_feat = \
-                torch.cat((query_feat, support_feat.expand_as(query_feat)), 1)
+            patch_feat = torch.cat(
+                (query_feat, support_feat.expand_as(query_feat)), 1)
             # 7x7 -> 1x1
             patch_feat = self.patch_relation_branch(patch_feat)
             patch_feat = patch_feat.squeeze(3).squeeze(2)
@@ -199,23 +199,23 @@ class MultiRelationBBoxHead(BBoxHead):
 
         bg_cls_scores = cls_scores[bg_samples_inds, :]
 
-        num_pos_pair_bg_samples = \
-            max(1, min(fg_samples_inds.shape[0] * sample_fractions[1],
-                       int(num_instances / sum(sample_fractions))))
-        num_neg_pair_samples = \
-            max(1, min(fg_samples_inds.shape[0] * sample_fractions[2],
-                       num_pos_pair_bg_samples))
+        num_pos_pair_bg_samples = max(
+            1,
+            min(fg_samples_inds.shape[0] * sample_fractions[1],
+                int(num_instances / sum(sample_fractions))))
+        num_neg_pair_samples = max(
+            1,
+            min(fg_samples_inds.shape[0] * sample_fractions[2],
+                num_pos_pair_bg_samples))
 
         _, sorted_inds = torch.sort(bg_cls_scores[:, 0], descending=True)
         sorted_bg_samples_inds = bg_samples_inds[sorted_inds]
-        pos_pair_bg_samples_inds = \
-            sorted_bg_samples_inds[
-                sorted_bg_samples_inds < num_pos_pair_samples][
-                :num_pos_pair_bg_samples]
-        neg_pair_samples_inds = \
-            sorted_bg_samples_inds[
-                sorted_bg_samples_inds >= num_pos_pair_samples][
-                :num_neg_pair_samples]
+        pos_pair_bg_samples_inds = sorted_bg_samples_inds[
+            sorted_bg_samples_inds <
+            num_pos_pair_samples][:num_pos_pair_bg_samples]
+        neg_pair_samples_inds = sorted_bg_samples_inds[
+            sorted_bg_samples_inds >=
+            num_pos_pair_samples][:num_neg_pair_samples]
 
         topk_inds = torch.cat(
             [fg_samples_inds, pos_pair_bg_samples_inds, neg_pair_samples_inds],

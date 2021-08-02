@@ -7,8 +7,6 @@ from mmcv.runner import force_fp32
 from mmdet.models.builder import HEADS, build_loss
 from mmdet.models.roi_heads import ConvFCBBoxHead
 
-EPS = 1e-5
-
 
 @HEADS.register_module()
 class ContrastiveBBoxHead(ConvFCBBoxHead):
@@ -22,6 +20,7 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
         scale (int): Scaling factor of `cls_score`. Default: 20.
         learnable_scale (bool): Learnable global scaling factor.
             Default: False.
+        eps (float): Constant variable to avoid division by zero.
     """
 
     def __init__(self,
@@ -35,6 +34,7 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
                      reweight_type='none'),
                  scale=20,
                  learnable_scale=False,
+                 eps=1e-5,
                  *args,
                  **kwargs):
         super(ContrastiveBBoxHead, self).__init__(*args, **kwargs)
@@ -50,6 +50,7 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
             self.scale = scale
         self.mlp_head_channels = mlp_head_channels
         self.with_weight_decay = with_weight_decay
+        self.eps = eps
         # This will be updated by :class:`ContrastiveLossDecayHook`
         # in the training phase.
         self._decay_rate = 1.0
@@ -118,16 +119,16 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
 
         # normalize the input x along the `input_size` dimension
         x_norm = torch.norm(x_cls, p=2, dim=1).unsqueeze(1).expand_as(x)
-        x_cls_normalized = x_cls.div(x_norm + EPS)
+        x_cls_normalized = x_cls.div(x_norm + self.eps)
         # normalize weight
         with torch.no_grad():
             temp_norm = torch.norm(
                 self.fc_cls.weight, p=2,
                 dim=1).unsqueeze(1).expand_as(self.fc_cls.weight)
-            self.fc_cls.weight.div_(temp_norm + EPS)
+            self.fc_cls.weight.div_(temp_norm + self.eps)
         # calculate and scale cls_score
-        cls_score = self.scale * self.fc_cls(x_cls_normalized) \
-            if self.with_cls else None
+        cls_score = self.scale * self.fc_cls(
+            x_cls_normalized) if self.with_cls else None
 
         # contrastive branch
         contrast_feat = self.contrastive_head(x_contra)
@@ -171,10 +172,10 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
             decay_rate = self._decay_rate
         else:
             decay_rate = None
-        losses['loss_contrast'] = \
-            self.contrast_loss(contrast_feat,
-                               labels,
-                               proposal_ious,
-                               decay_rate=decay_rate,
-                               reduction_override=reduction_override)
+        losses['loss_contrast'] = self.contrast_loss(
+            contrast_feat,
+            labels,
+            proposal_ious,
+            decay_rate=decay_rate,
+            reduction_override=reduction_override)
         return losses

@@ -3,8 +3,6 @@ import torch.nn as nn
 from mmdet.models.builder import HEADS
 from mmdet.models.roi_heads import ConvFCBBoxHead
 
-EPS = 1e-5
-
 
 @HEADS.register_module()
 class CosineSimBBoxHead(ConvFCBBoxHead):
@@ -17,9 +15,15 @@ class CosineSimBBoxHead(ConvFCBBoxHead):
         scale (int): Scaling factor of `cls_score`. Default: 20.
         learnable_scale (bool): Learnable global scaling factor.
             Default: False.
+        eps (float): Constant variable to avoid division by zero.
     """
 
-    def __init__(self, scale=20, learnable_scale=False, *args, **kwargs):
+    def __init__(self,
+                 scale=20,
+                 learnable_scale=False,
+                 eps=1e-5,
+                 *args,
+                 **kwargs):
         super(CosineSimBBoxHead, self).__init__(*args, **kwargs)
         # override the fc_cls in :obj:`ConvFCBBoxHead`
         if self.with_cls:
@@ -31,6 +35,7 @@ class CosineSimBBoxHead(ConvFCBBoxHead):
             self.scale = nn.Parameter(torch.ones(1) * scale)
         else:
             self.scale = scale
+        self.eps = eps
 
     def forward(self, x):
         """Forward function.
@@ -87,15 +92,15 @@ class CosineSimBBoxHead(ConvFCBBoxHead):
 
         # normalize the input x along the `input_size` dimension
         x_norm = torch.norm(x_cls, p=2, dim=1).unsqueeze(1).expand_as(x)
-        x_cls_normalized = x_cls.div(x_norm + EPS)
+        x_cls_normalized = x_cls.div(x_norm + self.eps)
         # normalize weight
         with torch.no_grad():
             temp_norm = torch.norm(
                 self.fc_cls.weight, p=2,
                 dim=1).unsqueeze(1).expand_as(self.fc_cls.weight)
-            self.fc_cls.weight.div_(temp_norm + EPS)
+            self.fc_cls.weight.div_(temp_norm + self.eps)
         # calculate and scale cls_score
-        cls_score = self.scale * self.fc_cls(x_cls_normalized) \
-            if self.with_cls else None
+        cls_score = self.scale * self.fc_cls(
+            x_cls_normalized) if self.with_cls else None
 
         return cls_score, bbox_pred

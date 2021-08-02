@@ -6,13 +6,13 @@ def voc_bbox_overlaps(bboxes1, bboxes2, mode='iou', eps=1e-6):
     calculation follows the official evaluation code of Pascal VOC dataset.
 
     Args:
-        bboxes1(np.ndarray): shape (n, 4)
-        bboxes2(np.ndarray): shape (k, 4)
-        mode(str): iou (intersection over union) or iof (intersection
-            over foreground)
-
+        bboxes1 (np.ndarray): With shape (n, 4).
+        bboxes2 (np.ndarray): With shape (k, 4).
+        mode (str): IoU (intersection over union) or iof (intersection
+            over foreground).
+        eps (float): Constant variable to avoid division by zero.
     Returns:
-        ious(ndarray): shape (n, k)
+        ious (ndarray): With Shape (n, k).
     """
 
     assert mode in ['iou', 'iof']

@@ -14,7 +14,7 @@ from terminaltables import AsciiTable
 
 from .few_shot_custom import FewShotCustomDataset
 
-# predefined classes split for few shot setting
+# pre-defined classes split for few shot setting
 COCO_SPLIT = dict(
     ALL_CLASSES=('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
                  'train', 'truck', 'boat', 'traffic light', 'fire hydrant',
@@ -56,7 +56,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
     Args:
         classes (str | Sequence[str] | None): Classes for model training and
             provide fixed label for each class. When classes is string,
-            it will load predefined classes in :obj:`FewShotCocoDataset`.
+            it will load pre-defined classes in :obj:`FewShotCocoDataset`.
             For example: 'BASE_CLASSES', 'NOVEL_CLASSES` or `ALL_CLASSES`.
         num_novel_shots (int | None): Max number of instances used for each
             novel class. If is None, all annotation will be used.
@@ -92,8 +92,8 @@ class FewShotCocoDataset(FewShotCustomDataset):
         else:
             self.dataset_name = dataset_name
         self.SPLIT = COCO_SPLIT
-        assert classes is not None, f'{self.dataset_name} : classes ' \
-                                    f'in FewShotCocoDataset can not be None.'
+        assert classes is not None, f'{self.dataset_name}: classes in ' \
+                                    f'`FewShotCocoDataset` can not be None.'
         # configure ann_shot_filter by num_novel_shots and num_base_shots
         self.num_novel_shots = num_novel_shots
         self.num_base_shots = num_base_shots
@@ -104,8 +104,8 @@ class FewShotCocoDataset(FewShotCustomDataset):
                 ann_shot_filter = self._create_ann_shot_filter()
         else:
             assert num_novel_shots is not None or num_base_shots is not None, \
-                f'{self.dataset_name} : can not config ann_shot_filter ' \
-                f'and num_novel_shots/num_base_shots at the same time.'
+                f'{self.dataset_name}: can not config ann_shot_filter and ' \
+                f'num_novel_shots/num_base_shots at the same time.'
 
         # these values would be set in `self.load_annotations_coco`
         self.cat_ids = []
@@ -126,7 +126,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
         Args:
             classes (str | Sequence[str]): Classes for model training and
             provide fixed label for each class. When classes is string,
-            it will load predefined classes in `FewShotCocoDataset`.
+            it will load pre-defined classes in `FewShotCocoDataset`.
             For example: 'NOVEL_CLASSES'.
 
         Returns:
@@ -134,17 +134,17 @@ class FewShotCocoDataset(FewShotCustomDataset):
         """
         # configure few shot classes setting
         if isinstance(classes, str):
-            assert classes in self.SPLIT.keys(), \
-                f'{self.dataset_name} : not a predefine classes or ' \
-                f'split in COCO_SPLIT.'
+            assert classes in self.SPLIT.keys(
+            ), f'{self.dataset_name} : not a pre-defined classes or split ' \
+               f'in COCO_SPLIT.'
             class_names = self.SPLIT[classes]
             if 'BASE_CLASSES' in classes:
                 assert self.num_novel_shots is None, \
-                    f'{self.dataset_name} : BASE_CLASSES do not have ' \
+                    f'{self.dataset_name}: BASE_CLASSES do not have ' \
                     f'novel instances.'
             elif 'NOVEL_CLASSES' in classes:
                 assert self.num_base_shots is None, \
-                    f'{self.dataset_name} : NOVEL_CLASSES do not have ' \
+                    f'{self.dataset_name}: NOVEL_CLASSES do not have ' \
                     f'base instances.'
         elif isinstance(classes, (tuple, list)):
             class_names = classes
@@ -220,9 +220,9 @@ class FewShotCocoDataset(FewShotCustomDataset):
             data_infos.append(info)
             ann_ids = self.coco.get_ann_ids(img_ids=[i])
             total_ann_ids.extend(ann_ids)
-        assert len(set(total_ann_ids)) == len(total_ann_ids), \
-            f'{self.dataset_name} : Annotation ids in {ann_file} ' \
-            f'are not unique!'
+        assert len(set(total_ann_ids)) == len(
+            total_ann_ids
+        ), f'{self.dataset_name}: Annotation ids in {ann_file} are not unique!'
         return data_infos
 
     def _get_ann_info(self, data_info):
@@ -394,7 +394,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
                 "somepath/xxx.proposal.json".
 
         Returns:
-            dict[str, str]: Possible keys are "bbox", "proposal", and \
+            dict[str, str]: Possible keys are "bbox", "proposal", and
                 values are corresponding filenames.
         """
         result_files = dict()
@@ -767,10 +767,10 @@ class FewShotCocoCopyDataset(FewShotCocoDataset):
 
 @DATASETS.register_module()
 class FewShotCocoDefaultDataset(FewShotCocoDataset):
-    """FewShot COCO Dataset with some predefine annotation paths.
+    """FewShot COCO Dataset with some pre-defined annotation paths.
 
-    :obj:`FewShotCocoDefaultDataset` provides predefine annotation files
-    to ensure the reproducibility. The predefine annotation files provide
+    :obj:`FewShotCocoDefaultDataset` provides pre-defined annotation files
+    to ensure the reproducibility. The pre-defined annotation files provide
     fixed training data to avoid random sampling. The usage of `ann_cfg' is
     different from :obj:`FewShotCocoDataset`. The `ann_cfg' should contain
     two filed: `method` and `setting`.
@@ -781,7 +781,7 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
             annotation from `DEFAULT_ANN_CONFIG`.
             For example: [dict(method='TFA', setting='1shot')].
     """
-    # predefined annotation config for model reproducibility
+    # pre-defined annotation config for model reproducibility
     DEFAULT_ANN_CONFIG = dict(
         TFA={
             f'{shot}SHOT': [
@@ -824,7 +824,7 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
             ann_cfg=ann_cfg, **kwargs)
 
     def ann_cfg_parser(self, ann_cfg):
-        """Parse predefine annotation config to annotation information.
+        """Parse pre-defined annotation config to annotation information.
 
         Args:
             ann_cfg (list[dict]): Each dict should contain

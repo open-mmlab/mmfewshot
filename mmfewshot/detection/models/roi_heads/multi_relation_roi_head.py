@@ -92,7 +92,7 @@ class MultiRelationRoIHead(StandardRoIHead):
         if self.with_bbox:
             num_imgs = len(query_img_metas)
             assert num_imgs == len(proposals), \
-                'proposals should keep same length with batch_size*(pos+neg)'
+                'proposals should keep same length with batch_size*(pos+neg).'
             if query_gt_bboxes_ignore is None:
                 query_gt_bboxes_ignore = [None for _ in range(num_imgs)]
             for i in range(num_imgs):
@@ -150,11 +150,10 @@ class MultiRelationRoIHead(StandardRoIHead):
         """
         cls_score, bbox_pred = [], []
         batch_size = len(support_rois_feats)
-        for query_rois_feat, support_rois_feat \
-                in zip(torch.chunk(query_rois_feats, batch_size),
-                       support_rois_feats):
-            cls_score_single, bbox_pred_single = \
-                self.bbox_head(query_rois_feat, support_rois_feat)
+        for query_rois_feat, support_rois_feat in zip(
+                torch.chunk(query_rois_feats, batch_size), support_rois_feats):
+            cls_score_single, bbox_pred_single = self.bbox_head(
+                query_rois_feat, support_rois_feat)
             cls_score.append(cls_score_single)
             bbox_pred.append(bbox_pred_single)
 

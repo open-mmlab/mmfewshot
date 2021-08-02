@@ -86,7 +86,7 @@ class AttentionRPNDetector(QuerySupportDetector):
                            gt_bboxes=None,
                            gt_labels=None,
                            **kwargs):
-        """extract and save support features for model initialization.
+        """Extract and save support features for model initialization.
 
         Args:
             img (Tensor): Input images of shape (N, C, H, W).

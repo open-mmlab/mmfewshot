@@ -51,11 +51,12 @@ class QuerySupportDetector(BaseDetector):
         self.neck = build_neck(neck) if neck is not None else None
         # if `support_backbone` is None, then support and query pipeline will
         # share same backbone.
-        self.support_backbone = build_backbone(support_backbone) \
-            if support_backbone is not None else self.backbone
+        self.support_backbone = build_backbone(
+            support_backbone
+        ) if support_backbone is not None else self.backbone
         # support neck only forward support data.
-        self.support_neck = build_neck(support_neck) \
-            if support_neck is not None else None
+        self.support_neck = build_neck(
+            support_neck) if support_neck is not None else None
         assert roi_head is not None, 'missing config of roi_head'
         # when rpn with aggregation neck, the input of rpn will consist of
         # query and support data. otherwise the input of rpn only

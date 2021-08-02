@@ -1,6 +1,5 @@
+from mmcv.parallel import is_module_wrapper
 from mmcv.runner import HOOKS, Hook
-from torch.nn.parallel import DataParallel
-from torch.nn.parallel.distributed import DistributedDataParallel
 
 
 @HOOKS.register_module()
@@ -14,8 +13,9 @@ class ContrastiveLossDecayHook(Hook):
     """
 
     def __init__(self, decay_steps, decay_rate=0.5):
-        assert isinstance(decay_steps, (list, tuple)), \
-            '`decay_steps` should be list or tuple.'
+        assert isinstance(
+            decay_steps,
+            (list, tuple)), '`decay_steps` should be list or tuple.'
         self.decay_steps = decay_steps
         self.decay_rate = decay_rate
 
@@ -25,8 +25,7 @@ class ContrastiveLossDecayHook(Hook):
         for step in self.decay_steps:
             if runner_iter > step:
                 decay_rate *= self.decay_rate
-        if isinstance(runner.model, DataParallel) or \
-                isinstance(runner.model, DistributedDataParallel):
+        if is_module_wrapper(runner.model):
             runner.model.module.roi_head.bbox_head.set_decay_rate(decay_rate)
         else:
             runner.model.roi_head.bbox_head.set_decay_rate(decay_rate)

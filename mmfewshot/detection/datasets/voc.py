@@ -11,7 +11,7 @@ from mmdet.datasets.builder import DATASETS
 from mmfewshot.detection.core import eval_map, voc_tpfp_fn
 from .few_shot_custom import FewShotCustomDataset
 
-# predefined classes split for few shot setting
+# pre-defined classes split for few shot setting
 VOC_SPLIT = dict(
     ALL_CLASSES_SPLIT1=('aeroplane', 'bicycle', 'boat', 'bottle', 'car', 'cat',
                         'chair', 'diningtable', 'dog', 'horse', 'person',
@@ -47,7 +47,7 @@ class FewShotVOCDataset(FewShotCustomDataset):
     Args:
         classes (str | Sequence[str]): Classes for model training and
             provide fixed label for each class. When classes is string,
-            it will load predefined classes in `FewShotVOCDataset`.
+            it will load pre-defined classes in `FewShotVOCDataset`.
             For example: 'NOVEL_CLASSES_SPLIT1'.
         num_novel_shots (int | None): Max number of instances used for each
             novel class. If is None, all annotation will be used.
@@ -97,8 +97,8 @@ class FewShotVOCDataset(FewShotCustomDataset):
         # would be set value in `self.get_classes`
         self.split_id = None
 
-        assert classes is not None, f'{self.dataset_name}: classes ' \
-                                    f'in `FewShotVOCDataset` can not be None.'
+        assert classes is not None, f'{self.dataset_name}: classes in ' \
+                                    f'`FewShotVOCDataset` can not be None.'
         # configure ann_shot_filter by num_novel_shots and num_base_shots
         self.num_novel_shots = num_novel_shots
         self.num_base_shots = num_base_shots
@@ -109,8 +109,8 @@ class FewShotVOCDataset(FewShotCustomDataset):
                 ann_shot_filter = self._create_ann_shot_filter()
         else:
             assert num_novel_shots is not None or num_base_shots is not None, \
-                f'{self.dataset_name}: can not config ann_shot_filter ' \
-                f'and num_novel_shots/num_base_shots at the same time.'
+                f'{self.dataset_name}: can not config ann_shot_filter and ' \
+                f'num_novel_shots/num_base_shots at the same time.'
 
         self.min_bbox_size = min_bbox_size
         self.use_difficult = use_difficult
@@ -127,7 +127,7 @@ class FewShotVOCDataset(FewShotCustomDataset):
         Args:
             classes (str | Sequence[str]): Classes for model training and
             provide fixed label for each class. When classes is string,
-            it will load predefined classes in `FewShotVOCDataset`.
+            it will load pre-defined classes in `FewShotVOCDataset`.
             For example: 'NOVEL_CLASSES_SPLIT1'.
 
         Returns:
@@ -135,18 +135,18 @@ class FewShotVOCDataset(FewShotCustomDataset):
         """
         # configure few shot classes setting
         if isinstance(classes, str):
-            assert classes in self.SPLIT.keys(), \
-                f'{self.dataset_name}: not a predefine classes' \
-                f' or split in VOC_SPLIT'
+            assert classes in self.SPLIT.keys(
+            ), f'{self.dataset_name}: not a pre-defined classes or ' \
+               f'split in VOC_SPLIT'
             class_names = self.SPLIT[classes]
             if 'BASE_CLASSES' in classes:
                 assert self.num_novel_shots is None, \
-                    f'{self.dataset_name}: BASE_CLASSES do not ' \
-                    f'have novel instances'
+                    f'{self.dataset_name}: BASE_CLASSES do not have ' \
+                    f'novel instances.'
             elif 'NOVEL_CLASSES' in classes:
                 assert self.num_base_shots is None, \
-                    f'{self.dataset_name}: NOVEL_CLASSES do not ' \
-                    f'have base instances'
+                    f'{self.dataset_name}: NOVEL_CLASSES do not have ' \
+                    f'base instances.'
             self.split_id = int(classes[-1])
         elif isinstance(classes, (tuple, list)):
             class_names = classes
@@ -193,8 +193,8 @@ class FewShotVOCDataset(FewShotCustomDataset):
                 if ann_classes is not None:
                     for c in ann_classes:
                         assert c in self.CLASSES, \
-                            f'{self.dataset_name}: ann_classes ' \
-                            f'must in dataset classes.'
+                            f'{self.dataset_name}: ann_classes must in ' \
+                            f'dataset classes.'
                 else:
                     ann_classes = self.CLASSES
                 data_infos += self.load_annotations_xml(
@@ -468,14 +468,15 @@ class FewShotVOCDataset(FewShotCustomDataset):
                         ]
                         class_splits_mean_ap = np.array(aps).mean().item()
                         class_splits_mean_aps[k].append(class_splits_mean_ap)
-                        eval_results[f'{k}: AP{int(iou_thr * 100):02d}'] = \
-                            round(class_splits_mean_ap, 3)
+                        eval_results[
+                            f'{k}: AP{int(iou_thr * 100):02d}'] = round(
+                                class_splits_mean_ap, 3)
 
             eval_results['mAP'] = sum(mean_aps) / len(mean_aps)
             if class_splits is not None:
                 for k in class_splits.keys():
-                    mAP = sum(class_splits_mean_aps[k]) / \
-                          len(class_splits_mean_aps[k])
+                    mAP = sum(class_splits_mean_aps[k]) / len(
+                        class_splits_mean_aps[k])
                     print_log(f'{k} mAP: {mAP}', logger=logger)
         elif metric == 'recall':
             gt_bboxes = [ann['bboxes'] for ann in annotations]
@@ -536,10 +537,10 @@ class FewShotVOCCopyDataset(FewShotVOCDataset):
 
 @DATASETS.register_module()
 class FewShotVOCDefaultDataset(FewShotVOCDataset):
-    """FewShot VOC Dataset with some predefine annotation paths.
+    """FewShot VOC Dataset with some pre-defined annotation paths.
 
-    :obj:`FewShotVOCDefaultDataset` provides predefine annotation files
-    to ensure the reproducibility. The predefine annotation files provide
+    :obj:`FewShotVOCDefaultDataset` provides pre-defined annotation files
+    to ensure the reproducibility. The pre-defined annotation files provide
     fixed training data to avoid random sampling. The usage of `ann_cfg' is
     different from :obj:`FewShotVOCDataset`. The `ann_cfg' should contain
     two filed: `method` and `setting`.
@@ -551,7 +552,7 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
             For example: [dict(method='TFA', setting='SPILT1_1shot')].
     """
 
-    # predefined annotation config for model reproducibility
+    # pre-defined annotation config for model reproducibility
     DEFAULT_ANN_CONFIG = dict(
         TFA={
             f'SPLIT{split}_{shot}SHOT': [
@@ -592,11 +593,11 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
             ann_cfg=ann_cfg, **kwargs)
 
     def ann_cfg_parser(self, ann_cfg):
-        """Parse predefine annotation config to annotation information.
+        """Parse pre-defined annotation config to annotation information.
 
         Args:
             ann_cfg (list[dict]): contain method and setting
-                of predefined annotation config. Example:
+                of pre-defined annotation config. Example:
                 [dict(method='TFA', setting='SPILT1_1shot')]
 
         Returns:
@@ -612,7 +613,7 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
             ann_root = ann_cfg_.get('ann_root', None)
             if ann_root is not None:
                 for i in range(len(default_ann_cfg)):
-                    default_ann_cfg[i]['ann_file'] = \
-                        osp.join(ann_root, default_ann_cfg[i]['ann_file'])
+                    default_ann_cfg[i]['ann_file'] = osp.join(
+                        ann_root, default_ann_cfg[i]['ann_file'])
             new_ann_cfg += default_ann_cfg
         return super(FewShotVOCDataset, self).ann_cfg_parser(new_ann_cfg)

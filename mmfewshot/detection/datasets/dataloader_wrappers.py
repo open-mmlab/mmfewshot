@@ -43,10 +43,15 @@ class NwayKshotDataloader(object):
         self.worker_init_fn = worker_init_fn
         self.shuffle_support_dataset = shuffle_support_dataset
         if self.shuffle_support_dataset:
-            assert hasattr(self.support_dataset, 'shuffle_support'), \
-                'Support Dataset should support `shuffle_support`'
+            assert hasattr(
+                self.support_dataset, 'shuffle_support'
+            ), 'Support Dataset should support `shuffle_support`'
         self.kwargs = kwargs
         self.sampler = self.query_data_loader.sampler
+
+        # support dataloader is initialized with batch_size 1 as default.
+        # each batch contains (num_support_ways * num_support_shots) images,
+        # since changing batch_size is equal to changing num_support_shots.
         self.support_data_loader = DataLoader(
             self.support_dataset,
             batch_size=1,

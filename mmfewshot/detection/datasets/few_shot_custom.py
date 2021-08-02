@@ -17,13 +17,12 @@ from .utils import NumpyEncoder
 class FewShotCustomDataset(CustomDataset):
     """Custom dataset for few shot detection.
 
-    The main differences with normal detection dataset fall in two aspect.
+    The main differences with normal detection dataset fall in two aspects.
 
-        - It allow to specify single (used in normal dataset) or
-          multiple (used in query-support dataset) pipelines
-          for data processing.
-        - It support to control the maximum number of instances of each class
-          when loading the annotation file.
+        - It allows to specify single (used in normal dataset) or multiple
+            (used in query-support dataset) pipelines for data processing.
+        - It supports to control the maximum number of instances of each class
+            when loading the annotation file.
 
     The annotation format is shown as follows. The `ann` field
     is optional for testing.
