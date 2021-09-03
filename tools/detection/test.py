@@ -11,9 +11,6 @@ from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
 from mmdet.datasets import replace_ImageToTensor
 
 import mmfewshot  # noqa: F401, F403
-from mmfewshot.detection.apis import (multi_gpu_model_init,
-                                      single_gpu_model_init)
-from mmfewshot.detection.apis.test import multi_gpu_test, single_gpu_test
 from mmfewshot.detection.datasets import build_dataloader, build_dataset
 from mmfewshot.detection.models import build_detector
 
@@ -151,12 +148,12 @@ def main():
         samples_per_gpu=samples_per_gpu,
         workers_per_gpu=cfg.data.workers_per_gpu,
         dist=distributed,
-        shuffle=False,
-        round_up=False)
+        shuffle=False)
 
     # for meta-learning methods which require support template dataset
     # for model initialization.
     if cfg.data.get('model_init', None) is not None:
+        cfg.data.model_init.pop('copy_from_train_dataset')
         model_init_samples_per_gpu = cfg.data.model_init.pop(
             'samples_per_gpu', 1)
         model_init_workers_per_gpu = cfg.data.model_init.pop(
@@ -191,13 +188,13 @@ def main():
 
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])
-        if cfg.task_type == 'mmdet':
-            show_kwargs = dict(show_score_thr=args.show_score_thr)
-        elif cfg.task_type == 'mmcls':
-            show_kwargs = {} if args.show_options is None \
-                else args.show_options
+        show_kwargs = dict(show_score_thr=args.show_score_thr)
         if cfg.data.get('model_init', None) is not None:
+            from mmfewshot.detection.apis import (single_gpu_model_init,
+                                                  single_gpu_test)
             single_gpu_model_init(model, model_init_dataloader)
+        else:
+            from mmdet.apis.test import single_gpu_test
         outputs = single_gpu_test(model, data_loader, args.show, args.show_dir,
                                   **show_kwargs)
     else:
@@ -206,7 +203,11 @@ def main():
             device_ids=[torch.cuda.current_device()],
             broadcast_buffers=False)
         if cfg.data.get('model_init', None) is not None:
+            from mmfewshot.detection.apis import (multi_gpu_model_init,
+                                                  multi_gpu_test)
             multi_gpu_model_init(model, model_init_dataloader)
+        else:
+            from mmdet.apis.test import multi_gpu_test
         outputs = multi_gpu_test(
             model,
             data_loader,
