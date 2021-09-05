@@ -92,3 +92,33 @@ class NwayKshotDataloader(object):
 
     def __len__(self):
         return len(self.query_data_loader)
+
+
+class TwoBranchDataloader(object):
+    """A dataloader wrapper.
+
+    It Create a iterator to iterate two different dataloader simultaneously.
+
+    Args:
+        main_data_loader (nn.DataLoader): DataLoader of main dataset.
+        auxiliary_data_loader (nn.DataLoader): DataLoader of auxiliary dataset.
+    """
+
+    def __init__(self, main_data_loader, auxiliary_data_loader):
+        self.dataset = main_data_loader.dataset
+        self.sampler = main_data_loader.sampler
+        self.main_data_loader = main_data_loader
+        self.auxiliary_data_loader = auxiliary_data_loader
+
+    def __iter__(self):
+        self.main_iter = iter(self.main_data_loader)
+        self.auxiliary_iter = iter(self.auxiliary_data_loader)
+        return self
+
+    def __next__(self):
+        main_data = self.main_iter.next()
+        auxiliary_data = self.auxiliary_iter.next()
+        return {'main_data': main_data, 'auxiliary_data': auxiliary_data}
+
+    def __len__(self):
+        return len(self.main_data_loader)

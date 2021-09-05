@@ -1,3 +1,4 @@
+import copy
 import random
 import warnings
 
@@ -14,7 +15,8 @@ from mmdet.utils import get_root_logger
 
 from mmfewshot.detection.core import (QuerySupportDistEvalHook,
                                       QuerySupportEvalHook)
-from mmfewshot.detection.datasets import build_dataloader, build_dataset
+from mmfewshot.detection.datasets import (build_dataloader, build_dataset,
+                                          get_copy_dataset_type)
 
 
 def set_random_seed(seed, deterministic=False):
@@ -69,7 +71,8 @@ def train_detector(model,
             # cfg.gpus will be ignored if distributed
             len(cfg.gpu_ids),
             dist=distributed,
-            seed=cfg.seed) for ds in dataset
+            seed=cfg.seed,
+            data_cfg=copy.deepcopy(cfg.data)) for ds in dataset
     ]
 
     # put model on gpus
@@ -159,13 +162,8 @@ def train_detector(model,
                         'dataset used for training and original '
                         'ann_cfg will be discarded', UserWarning)
                 # modify dataset type to support copying data_infos operation
-                if cfg.data.model_init.type == 'FewShotVOCDataset':
-                    cfg.data.model_init.type = 'FewShotVOCCopyDataset'
-                elif cfg.data.model_init.type == 'FewShotCocoDataset':
-                    cfg.data.model_init.type = 'FewShotCocoCopyDataset'
-                else:
-                    raise TypeError(f'{cfg.data.model_init.type} '
-                                    f'not support copy data_infos operation.')
+                cfg.data.model_init.type = \
+                    get_copy_dataset_type(cfg.data.model_init.type)
                 if not hasattr(dataset[0], 'get_support_data_infos'):
                     raise NotImplementedError(
                         f'`get_support_data_infos` is not implemented '
@@ -191,7 +189,8 @@ def train_detector(model,
                 eval_hook(model_init_dataloader, val_dataloader, **eval_cfg))
         else:
             eval_hook = DistEvalHook if distributed else EvalHook
-            runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
+            runner.register_hook(
+                eval_hook(val_dataloader, **eval_cfg), priority='LOW')
 
     # user-defined hooks
     if cfg.get('custom_hooks', None):

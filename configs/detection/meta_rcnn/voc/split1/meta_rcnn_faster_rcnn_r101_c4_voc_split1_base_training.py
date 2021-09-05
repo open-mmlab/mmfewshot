@@ -8,7 +8,9 @@ _base_ = [
 # mmfewshot.detection.datasets.few_shot_data_config
 data = dict(
     train=dict(
-        save_dataset=False, dataset=dict(classes='BASE_CLASSES_SPLIT1')),
+        save_dataset=False,
+        dataset=dict(classes='BASE_CLASSES_SPLIT1'),
+        support_dataset=dict(classes='BASE_CLASSES_SPLIT1')),
     val=dict(classes='BASE_CLASSES_SPLIT1'),
     test=dict(classes='BASE_CLASSES_SPLIT1'),
     model_init=dict(classes='BASE_CLASSES_SPLIT1'))

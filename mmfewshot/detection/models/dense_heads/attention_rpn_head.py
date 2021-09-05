@@ -99,8 +99,7 @@ class AttentionRPNHead(RPNHead):
                 - proposal_list (list[Tensor]): Proposals of each image.
         """
         query_feat = query_feats[0]
-        support_rois = bbox2roi(
-            [bboxes.unsqueeze(0) for bboxes in support_gt_bboxes])
+        support_rois = bbox2roi([bboxes for bboxes in support_gt_bboxes])
         support_roi_feats = self.extract_roi_feat(support_feats, support_rois)
         # Support features are placed in follow order:
         # [pos, neg, ..., pos, neg] * batch size

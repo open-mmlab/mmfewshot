@@ -9,7 +9,7 @@ from mmcv.parallel.data_container import DataContainer
 from torch.utils.data.dataloader import default_collate
 
 
-def query_support_collate_fn(batch, samples_per_gpu=1):
+def multi_pipeline_collate_fn(batch, samples_per_gpu=1):
     """Puts each data field into a tensor/DataContainer with outer dimension
     batch size.
 
@@ -94,13 +94,13 @@ def query_support_collate_fn(batch, samples_per_gpu=1):
     elif isinstance(batch[0], Sequence):
         transposed = zip(*batch)
         return [
-            query_support_collate_fn(samples, samples_per_gpu)
+            multi_pipeline_collate_fn(samples, samples_per_gpu)
             for samples in transposed
         ]
     elif isinstance(batch[0], Mapping):
         return {
-            key: query_support_collate_fn([d[key] for d in batch],
-                                          samples_per_gpu)
+            key: multi_pipeline_collate_fn([d[key] for d in batch],
+                                           samples_per_gpu)
             for key in batch[0]
         }
     else:
@@ -114,3 +114,16 @@ class NumpyEncoder(json.JSONEncoder):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
+
+
+def get_copy_dataset_type(dataset_type):
+    """Return corresponding copy dataset type."""
+    if dataset_type in ['FewShotVOCDataset', 'FewShotVOCDefaultDataset']:
+        copy_dataset_type = 'FewShotVOCCopyDataset'
+    elif dataset_type in ['FewShotCocoDataset', 'FewShotCocoDefaultDataset']:
+        copy_dataset_type = 'FewShotCocoCopyDataset'
+    else:
+        raise TypeError(f'{dataset_type} '
+                        f'not support copy data_infos operation.')
+
+    return copy_dataset_type

@@ -1,10 +1,10 @@
 from mmdet.models.builder import DETECTORS
 
-from .meta_rcnn import Meta_RCNN
+from .meta_rcnn import MetaRCNN
 
 
 @DETECTORS.register_module()
-class FSDetView(Meta_RCNN):
+class FSDetView(MetaRCNN):
     """Implementation of `FSDetView <https://arxiv.org/abs/1908.01998>`_.
 
     Args:

@@ -7,7 +7,9 @@ _base_ = [
 # classes splits are predefined in FewShotVOCDataset
 data = dict(
     train=dict(
-        save_dataset=False, dataset=dict(classes='BASE_CLASSES_SPLIT2')),
+        save_dataset=False,
+        dataset=dict(classes='BASE_CLASSES_SPLIT2'),
+        support_dataset=dict(classes='BASE_CLASSES_SPLIT2')),
     val=dict(classes='BASE_CLASSES_SPLIT2'),
     test=dict(classes='BASE_CLASSES_SPLIT2'),
     model_init=dict(classes='BASE_CLASSES_SPLIT2'))

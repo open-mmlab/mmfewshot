@@ -11,7 +11,9 @@ from mmdet.datasets.samplers import (DistributedGroupSampler,
                                      DistributedSampler, GroupSampler)
 from torch.utils.data import DataLoader
 
-from .dataset_wrappers import NwayKshotDataset, QueryAwareDataset
+from .dataset_wrappers import (NwayKshotDataset, QueryAwareDataset,
+                               TwoBranchDataset)
+from .utils import get_copy_dataset_type
 
 
 def build_dataset(cfg, default_args=None):
@@ -47,6 +49,27 @@ def build_dataset(cfg, default_args=None):
             shuffle_support=cfg.get('use_shuffle_support', False),
             repeat_times=cfg.get('repeat_times', 1),
         )
+    elif cfg['type'] == 'TwoBranchDataset':
+        main_dataset = build_dataset(cfg['dataset'], default_args)
+        # if `copy_from_main_dataset` is True, copy and update config
+        # from main_dataset and copy `data_infos` by using copy dataset
+        # to avoid reproducing random sampling.
+        if cfg['auxiliary_dataset'].pop('copy_from_main_dataset', False):
+            auxiliary_dataset_cfg = copy.deepcopy(cfg['dataset'])
+            auxiliary_dataset_cfg.update(cfg['auxiliary_dataset'])
+            auxiliary_dataset_cfg['type'] = get_copy_dataset_type(
+                cfg['dataset']['type'])
+            auxiliary_dataset_cfg.ann_cfg = [
+                dict(data_infos=main_dataset.data_infos)
+            ]
+            cfg['auxiliary_dataset'] = auxiliary_dataset_cfg
+        auxiliary_dataset = build_dataset(cfg['auxiliary_dataset'],
+                                          default_args)
+        dataset = TwoBranchDataset(
+            main_dataset=main_dataset,
+            auxiliary_dataset=auxiliary_dataset,
+            repeat_times=cfg.get('repeat_times', 1),
+        )
     else:
         dataset = build_from_cfg(cfg, DATASETS, default_args)
     return dataset
@@ -59,6 +82,7 @@ def build_dataloader(dataset,
                      dist=True,
                      shuffle=True,
                      seed=None,
+                     data_cfg=None,
                      **kwargs):
     """Build PyTorch DataLoader.
 
@@ -77,6 +101,7 @@ def build_dataloader(dataset,
         shuffle (bool): Whether to shuffle the data at every epoch.
             Default: True.
         seed (int): Random seed. Default:None.
+        data_cfg (dict | None): Dict of data configure. Default: None.
         kwargs: any keyword argument to be used to initialize DataLoader
 
     Returns:
@@ -96,29 +121,29 @@ def build_dataloader(dataset,
         worker_init_fn, num_workers=num_workers, rank=rank,
         seed=seed) if seed is not None else None
     if isinstance(dataset, QueryAwareDataset):
-        from .utils import query_support_collate_fn
+        from .utils import multi_pipeline_collate_fn
         data_loader = DataLoader(
             dataset,
             batch_size=batch_size,
             sampler=sampler,
             num_workers=num_workers,
             collate_fn=partial(
-                query_support_collate_fn, samples_per_gpu=samples_per_gpu),
+                multi_pipeline_collate_fn, samples_per_gpu=samples_per_gpu),
             pin_memory=False,
             worker_init_fn=init_fn,
             **kwargs)
     elif isinstance(dataset, NwayKshotDataset):
         from .dataloader_wrappers import NwayKshotDataloader
-        from .utils import query_support_collate_fn
+        from .utils import multi_pipeline_collate_fn
 
-        # init query dataloader
+        # initialize query dataloader
         query_data_loader = DataLoader(
             dataset,
             batch_size=batch_size,
             sampler=sampler,
             num_workers=num_workers,
             collate_fn=partial(
-                query_support_collate_fn, samples_per_gpu=samples_per_gpu),
+                multi_pipeline_collate_fn, samples_per_gpu=samples_per_gpu),
             pin_memory=False,
             worker_init_fn=init_fn,
             **kwargs)
@@ -138,15 +163,63 @@ def build_dataloader(dataset,
             seed=seed,
         )
 
+        # wrap two dataloaders with dataloader wrapper
         data_loader = NwayKshotDataloader(
             query_data_loader=query_data_loader,
             support_dataset=support_dataset,
             support_sampler=support_sampler,
             num_workers=num_workers,
             support_collate_fn=partial(
-                query_support_collate_fn, samples_per_gpu=1),
+                multi_pipeline_collate_fn, samples_per_gpu=1),
             pin_memory=False,
             worker_init_fn=init_fn,
+            **kwargs)
+    elif isinstance(dataset, TwoBranchDataset):
+        from .dataloader_wrappers import TwoBranchDataloader
+        from .utils import multi_pipeline_collate_fn
+        # initialize main dataloader
+        main_data_loader = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            sampler=sampler,
+            num_workers=num_workers,
+            collate_fn=partial(
+                multi_pipeline_collate_fn, samples_per_gpu=samples_per_gpu),
+            pin_memory=False,
+            worker_init_fn=init_fn,
+            **kwargs)
+        # convert main dataset to auxiliary dataset
+        auxiliary_dataset = copy.deepcopy(dataset)
+        auxiliary_dataset.convert_main_to_auxiliary()
+        # initialize auxiliary sampler and dataloader
+        auxiliary_samples_per_gpu = \
+            data_cfg.get('auxiliary_samples_per_gpu', samples_per_gpu)
+        auxiliary_workers_per_gpu = \
+            data_cfg.get('auxiliary_workers_per_gpu', workers_per_gpu)
+        (auxiliary_sampler, auxiliary_batch_size,
+         auxiliary_num_workers) = build_sampler(
+             dist=dist,
+             shuffle=shuffle,
+             dataset=auxiliary_dataset,
+             num_gpus=num_gpus,
+             samples_per_gpu=auxiliary_samples_per_gpu,
+             workers_per_gpu=auxiliary_workers_per_gpu,
+             seed=seed)
+        auxiliary_data_loader = DataLoader(
+            auxiliary_dataset,
+            batch_size=auxiliary_batch_size,
+            sampler=auxiliary_sampler,
+            num_workers=auxiliary_num_workers,
+            collate_fn=partial(
+                multi_pipeline_collate_fn,
+                samples_per_gpu=auxiliary_samples_per_gpu),
+            pin_memory=False,
+            worker_init_fn=init_fn,
+            **kwargs)
+        # wrap two dataloaders with dataloader wrapper
+        data_loader = TwoBranchDataloader(
+            main_data_loader=main_data_loader,
+            auxiliary_data_loader=auxiliary_data_loader,
             **kwargs)
     else:
         data_loader = DataLoader(

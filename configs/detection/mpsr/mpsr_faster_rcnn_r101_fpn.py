@@ -1,34 +1,29 @@
-_base_ = [
-    '../_base_/models/faster_rcnn_r50_caffe_c4.py',
-]
-# model settings
+_base_ = ['../_base_/models/faster_rcnn_r50_caffe_fpn.py']
 model = dict(
-    type='MetaRCNN',
-    backbone=dict(type='ResNetWithMetaConv', frozen_stages=2),
+    type='MPSR',
+    pretrained='open-mmlab://detectron2/resnet101_caffe',
+    backbone=dict(depth=101),
+    rpn_select_levels=[0, 1, 2, 3, 4, 4],
+    roi_select_levels=[0, 0, 0, 1, 2, 3],
     rpn_head=dict(
-        feat_channels=512, loss_cls=dict(use_sigmoid=False, loss_weight=1.0)),
+        type='TwoBranchRPNHead',
+        mid_channels=64,
+        loss_bbox=dict(type='SmoothL1Loss', beta=1.0 / 9.0, loss_weight=1.0)),
     roi_head=dict(
-        type='MetaRCNNRoIHead',
-        shared_head=dict(type='MetaRCNNResLayer'),
+        type='TwoBranchRoIHead',
+        bbox_roi_extractor=dict(
+            roi_layer=dict(output_size=8, sampling_ratio=2)),
         bbox_head=dict(
-            type='MetaBBoxHead',
-            with_avg_pool=False,
-            in_channels=2048,
-            roi_feat_size=1,
-            num_meta_classes=15,
-            meta_cls_in_channels=2048,
-            with_meta_cls_loss=True,
-            loss_meta=dict(
-                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
-            loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0)),
-        aggregation_layer=dict(
-            type='AggregationLayer',
-            aggregator_cfgs=[
-                dict(
-                    type='DotProductAggregator',
-                    in_channels=2048,
-                    with_fc=False)
-            ])),
+            type='TwoBranchBBoxHead',
+            reg_class_agnostic=True,
+            num_classes=20,
+            roi_feat_size=8,
+            num_cls_fcs=2,
+            num_reg_fcs=2,
+            fc_out_channels=1024,
+            auxiliary_loss_weight=0.1,
+            loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))),
+    # model training and testing settings
     train_cfg=dict(
         rpn=dict(
             assigner=dict(
@@ -62,7 +57,7 @@ model = dict(
                 ignore_iof_thr=-1),
             sampler=dict(
                 type='RandomSampler',
-                num=128,
+                num=512,
                 pos_fraction=0.25,
                 neg_pos_ub=-1,
                 add_gt_as_proposals=True),
@@ -71,10 +66,10 @@ model = dict(
     test_cfg=dict(
         rpn=dict(
             nms_pre=6000,
-            max_per_img=300,
+            max_per_img=1000,
             nms=dict(type='nms', iou_threshold=0.7),
             min_bbox_size=0),
         rcnn=dict(
             score_thr=0.05,
-            nms=dict(type='nms', iou_threshold=0.3),
+            nms=dict(type='nms', iou_threshold=0.5),
             max_per_img=100)))

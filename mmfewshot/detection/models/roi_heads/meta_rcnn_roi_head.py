@@ -46,13 +46,13 @@ class MetaRCNNRoIHead(StandardRoIHead):
                 also contain 'filename', 'ori_shape', 'pad_shape', and
                 'img_norm_cfg'. For details on the values of these keys see
                 `mmdet/datasets/pipelines/formatting.py:Collect`.
-            query_gt_bboxes (list[Tensor]): Ground truth bboxes for each query
-                image with shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y]
-                format.
+            query_gt_bboxes (list[Tensor]): Ground truth bboxes for each
+                query image, each item with shape (num_gts, 4)
+                in [tl_x, tl_y, br_x, br_y] format.
             query_gt_labels (list[Tensor]): Class indices corresponding to
-                each box of query images.
+                each box of query images, each item with shape (num_gts).
             support_gt_labels (list[Tensor]): Class indices corresponding to
-                each box of support images.
+                each box of support images, each item with shape (1).
             query_gt_bboxes_ignore (list[Tensor] | None): Specify which
                 bounding boxes can be ignored when computing the loss.
                 Default: None.
@@ -118,7 +118,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
             dict: Predicted results and losses.
         """
         query_rois = bbox2roi([res.bboxes for res in sampling_results])
-        query_roi_feat = self.extract_query_roi_feat(query_feats, query_rois)
+        query_roi_feats = self.extract_query_roi_feat(query_feats, query_rois)
         support_feat = self.extract_support_feats(support_feats)[0]
 
         bbox_targets = self.bbox_head.get_targets(sampling_results,
@@ -128,13 +128,14 @@ class MetaRCNNRoIHead(StandardRoIHead):
         (labels, label_weights, bbox_targets, bbox_weights) = bbox_targets
         loss_bbox = {'loss_cls': [], 'loss_bbox': [], 'acc': []}
         batch_size = len(query_img_metas)
-        num_sample_per_imge = query_roi_feat.size(0) // batch_size
+        num_sample_per_imge = query_roi_feats.size(0) // batch_size
         bbox_results = None
-        for b in range(batch_size):
-            start = b * num_sample_per_imge
-            end = (b + 1) * num_sample_per_imge
-            random_index = np.random.choice(range(query_gt_labels[b].size(0)))
-            random_query_label = query_gt_labels[b][random_index]
+        for img_id in range(batch_size):
+            start = img_id * num_sample_per_imge
+            end = (img_id + 1) * num_sample_per_imge
+            random_index = np.random.choice(
+                range(query_gt_labels[img_id].size(0)))
+            random_query_label = query_gt_labels[img_id][random_index]
             for i in range(support_feat.size(0)):
                 # following the official code each image only sample first
                 # class for training. The official code only use the first
@@ -142,7 +143,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
                 # random one from `query_gt_labels` instead.
                 if support_gt_labels[i] == random_query_label:
                     bbox_results = self._bbox_forward(
-                        query_roi_feat[start:end],
+                        query_roi_feats[start:end],
                         support_feat[i].unsqueeze(0))
                     single_loss_bbox = self.bbox_head.loss(
                         bbox_results['cls_score'], bbox_results['bbox_pred'],
@@ -182,12 +183,11 @@ class MetaRCNNRoIHead(StandardRoIHead):
         Returns:
             Tensor: RoI features with shape (N, C).
         """
-        roi_feat = self.bbox_roi_extractor(
+        roi_feats = self.bbox_roi_extractor(
             feats[:self.bbox_roi_extractor.num_inputs], rois)
         if self.with_shared_head:
-            roi_feat = self.shared_head(roi_feat)
-        roi_feat = roi_feat
-        return roi_feat
+            roi_feats = self.shared_head(roi_feats)
+        return roi_feats
 
     def extract_support_feats(self, feats):
         """Forward support features through shared layers.
@@ -208,21 +208,22 @@ class MetaRCNNRoIHead(StandardRoIHead):
             out = feats
         return out
 
-    def _bbox_forward(self, query_roi_feat, support_feat):
+    def _bbox_forward(self, query_roi_feats, support_roi_feats):
         """Box head forward function used in both training and testing.
 
         Args:
-            query_roi_feat (Tensor): Query roi features with shape (N, C).
-            support_feat (Tensor): Support features with shape (1, C).
+            query_roi_feats (Tensor): Query roi features with shape (N, C).
+            support_roi_feats (Tensor): Support features with shape (1, C).
 
         Returns:
              dict: A dictionary of predicted results.
         """
         # feature aggregation
-        rois_feat = self.aggregation_layer(
-            query_feat=query_roi_feat,
-            support_feat=support_feat.view(1, -1, 1, 1))[0]
-        cls_score, bbox_pred = self.bbox_head(rois_feat)
+        roi_feats = self.aggregation_layer(
+            query_feat=query_roi_feats.unsqueeze(-1).unsqueeze(-1),
+            support_feat=support_roi_feats.view(1, -1, 1, 1))[0]
+        cls_score, bbox_pred = self.bbox_head(
+            roi_feats.squeeze(-1).squeeze(-1))
         bbox_results = dict(cls_score=cls_score, bbox_pred=bbox_pred)
         return bbox_results
 
@@ -309,12 +310,12 @@ class MetaRCNNRoIHead(StandardRoIHead):
 
         rois = bbox2roi(proposals)
 
-        query_roi_feat = self.extract_query_roi_feat(query_feats, rois)
+        query_roi_feats = self.extract_query_roi_feat(query_feats, rois)
         cls_scores_dict, bbox_preds_dict = {}, {}
         num_classes = self.bbox_head.num_classes
         for class_id in support_feats_dict.keys():
             support_feat = support_feats_dict[class_id]
-            bbox_results = self._bbox_forward(query_roi_feat, support_feat)
+            bbox_results = self._bbox_forward(query_roi_feats, support_feat)
             cls_scores_dict[class_id] = \
                 bbox_results['cls_score'][:, class_id:class_id + 1]
             bbox_preds_dict[class_id] = \

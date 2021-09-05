@@ -61,9 +61,6 @@ class FewShotVOCDataset(FewShotCustomDataset):
             If set it as None, `ann_shot_filter` will be
             created according to `num_novel_shots` and `num_base_shots`.
             Default: None.
-        min_bbox_size (int | float, optional): The minimum size of bounding
-            boxes in the images. If the size of a bounding box is less than
-            ``min_bbox_size``, it would be add to ignored field. Default: None.
         use_difficult (bool): Whether use the difficult annotation or not.
             Default: False.
         min_bbox_area (int | float | None):  Filter images with bbox whose
@@ -80,7 +77,6 @@ class FewShotVOCDataset(FewShotCustomDataset):
                  num_novel_shots=None,
                  num_base_shots=None,
                  ann_shot_filter=None,
-                 min_bbox_size=None,
                  use_difficult=False,
                  min_bbox_area=None,
                  dataset_name=None,
@@ -112,7 +108,6 @@ class FewShotVOCDataset(FewShotCustomDataset):
                 f'{self.dataset_name}: can not config ann_shot_filter and ' \
                 f'num_novel_shots/num_base_shots at the same time.'
 
-        self.min_bbox_size = min_bbox_size
         self.use_difficult = use_difficult
         super(FewShotVOCDataset, self).__init__(
             classes=None,
@@ -126,9 +121,9 @@ class FewShotVOCDataset(FewShotCustomDataset):
 
         Args:
             classes (str | Sequence[str]): Classes for model training and
-            provide fixed label for each class. When classes is string,
-            it will load pre-defined classes in `FewShotVOCDataset`.
-            For example: 'NOVEL_CLASSES_SPLIT1'.
+                provide fixed label for each class. When classes is string,
+                it will load pre-defined classes in `FewShotVOCDataset`.
+                For example: 'NOVEL_CLASSES_SPLIT1'.
 
         Returns:
             list[str]: list of class names.
@@ -322,12 +317,6 @@ class FewShotVOCDataset(FewShotCustomDataset):
                     int(float(bnd_box.find('ymax').text))
                 ]
             ignore = False
-            if self.min_bbox_size:
-                assert not self.test_mode
-                w = bbox[2] - bbox[0]
-                h = bbox[3] - bbox[1]
-                if w < self.min_bbox_size or h < self.min_bbox_size:
-                    ignore = True
             if difficult or ignore:
                 bboxes_ignore.append(bbox)
                 labels_ignore.append(label)
@@ -586,7 +575,19 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
                 for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
             ]
             for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
-        })
+        },
+        MPSR={
+            f'SPLIT{split}_{shot}SHOT': [
+                dict(
+                    type='ann_file',
+                    ann_file=f'data/few_shot_voc_split/{shot}shot/'
+                    f'box_{shot}shot_{class_name}_train.txt',
+                    ann_classes=[class_name])
+                for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
+            ]
+            for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
+        },
+    )
 
     def __init__(self, ann_cfg, **kwargs):
         super(FewShotVOCDefaultDataset, self).__init__(

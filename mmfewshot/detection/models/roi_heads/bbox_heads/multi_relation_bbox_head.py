@@ -168,18 +168,17 @@ class MultiRelationBBoxHead(BBoxHead):
 
         Args:
             cls_scores (Tensor): Box scores with shape of
-                (N, num_anchors * num_classes)
+                (num_proposals, num_classes)
             bbox_preds (Tensor): Box energies / deltas with shape
-                of (N, num_anchors * 4)
+                of (num_proposals, num_classes * 4)
             rois (Tensor): shape (N, 4) or (N, 5)
-            labels (Tensor): Labels of each anchors with shape
-                (N, num_total_anchors).
-            label_weights (Tensor): Label weights of each anchor with shape
-                (N, num_total_anchors)
-            bbox_targets (Tensor): BBox regression targets of each anchor wight
-                shape (N, num_total_anchors, 4).
-            bbox_weights (Tensor): BBox regression loss weights of each anchor
-                with shape (N, num_total_anchors, 4).
+            labels (Tensor): Labels of proposals with shape (num_proposals).
+            label_weights (Tensor): Label weights of proposals with shape
+                (num_proposals).
+            bbox_targets (Tensor): BBox regression targets of each proposal
+                wight with shape (num_proposals, num_classes * 4).
+            bbox_weights (Tensor): BBox regression loss weights of each
+                proposal with shape (num_proposals, num_classes * 4).
             num_pos_pair_samples (int): Number of samples from positive pairs.
             reduction_override (str | None): The reduction method used to
                 override the original reduction method of the loss.

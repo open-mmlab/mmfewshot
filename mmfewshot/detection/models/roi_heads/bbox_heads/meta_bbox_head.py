@@ -14,9 +14,11 @@ class MetaBBoxHead(BBoxHead):
 
     Args:
         num_meta_classes (int): Number of classes for meta classification.
-        meta_cls_in_channels (int): Number of input feature channels.
+        meta_cls_in_channels (int): Number of support feature channels.
         with_meta_cls_loss (bool): Use meta classification loss.
             Default: True.
+        meta_cls_loss_weight (float | None): The loss weight of `loss_meta`.
+            Default: None.
         loss_meta (dict): Config for meta classification loss.
     """
 
@@ -24,6 +26,7 @@ class MetaBBoxHead(BBoxHead):
                  num_meta_classes,
                  meta_cls_in_channels=2048,
                  with_meta_cls_loss=True,
+                 meta_cls_loss_weight=None,
                  loss_meta=dict(
                      type='CrossEntropyLoss',
                      use_sigmoid=False,
@@ -34,6 +37,7 @@ class MetaBBoxHead(BBoxHead):
         self.with_meta_cls_loss = with_meta_cls_loss
         if with_meta_cls_loss:
             self.fc_meta = nn.Linear(meta_cls_in_channels, num_meta_classes)
+            self.meta_cls_loss_weight = meta_cls_loss_weight
             self.loss_meta_cls = build_loss(copy.deepcopy(loss_meta))
 
     def forward_meta_cls(self, support_feat):
@@ -71,17 +75,17 @@ class MetaBBoxHead(BBoxHead):
             Tensor: The calculated loss.
         """
         losses = dict()
-        avg_factor = max(
-            torch.sum(meta_cls_label_weights > 0).float().item(), 1.)
+        if self.meta_cls_loss_weight is None:
+            loss_weight = 1. / max(
+                torch.sum(meta_cls_label_weights > 0).float().item(), 1.)
+        else:
+            loss_weight = self.meta_cls_loss_weight
         if meta_cls_score.numel() > 0:
             loss_meta_cls_ = self.loss_meta_cls(
                 meta_cls_score,
                 meta_cls_labels,
                 meta_cls_label_weights,
                 reduction_override=reduction_override)
-            if isinstance(loss_meta_cls_, dict):
-                losses.update(loss_meta_cls_ / avg_factor)
-            else:
-                losses['loss_meta_cls'] = loss_meta_cls_ / avg_factor
+            losses['loss_meta_cls'] = loss_meta_cls_ * loss_weight
             losses['meta_acc'] = accuracy(meta_cls_score, meta_cls_labels)
         return losses

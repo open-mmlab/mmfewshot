@@ -116,7 +116,7 @@ class AttentionRPNDetector(QuerySupportDetector):
             'Support instance have more than two labels'
 
         feats = self.extract_support_feat(img)
-        rois = bbox2roi([bboxes.unsqueeze(0) for bboxes in gt_bboxes])
+        rois = bbox2roi([bboxes for bboxes in gt_bboxes])
         res4_roi_feat = self.rpn_head.extract_roi_feat(feats, rois)
         res5_roi_feat = self.roi_head.extract_roi_feat(feats, rois)
         self._forward_saved_support_dict['gt_labels'].extend(gt_labels)

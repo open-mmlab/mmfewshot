@@ -76,6 +76,10 @@ class FewShotCustomDataset(CustomDataset):
             boxes of the dataset's classes will be filtered out. This option
             only works when `test_mode=False`, i.e., we never filter images
             during tests. Default: Ture.
+        min_bbox_size (int | float, optional): The minimum size of bounding
+            boxes in the images. If the size of a bounding box is less than
+            ``min_bbox_size``, it would be added to ignored field.
+            Default: None.
         ann_shot_filter (dict | None): Used to specify the class and the
             corresponding maximum number of instances when loading
             the annotation file. For example: {'dog': 10, 'person': 5}.
@@ -103,6 +107,7 @@ class FewShotCustomDataset(CustomDataset):
                  proposal_file=None,
                  test_mode=False,
                  filter_empty_gt=True,
+                 min_bbox_size=None,
                  ann_shot_filter=None,
                  instance_wise=False,
                  dataset_name=None):
@@ -141,6 +146,8 @@ class FewShotCustomDataset(CustomDataset):
 
         # filter images too small and containing no annotations
         if not test_mode:
+            if min_bbox_size:
+                self.data_infos = self._filter_bboxs(min_bbox_size)
             valid_inds = self._filter_imgs()
             self.data_infos = [self.data_infos[i] for i in valid_inds]
             if self.proposals is not None:
@@ -385,6 +392,37 @@ class FewShotCustomDataset(CustomDataset):
                     width=data_info['width'],
                     height=data_info['height'],
                     ann=selected_ann))
+        return new_data_infos
+
+    def _filter_bboxs(self, min_bbox_size):
+        new_data_infos = []
+        for data_info in self.data_infos:
+            ann = data_info['ann']
+            keep_idx, ignore_idx = [], []
+            for i in range(ann['bboxes'].shape[0]):
+                bbox = ann['bboxes'][i]
+                w = bbox[2] - bbox[0]
+                h = bbox[3] - bbox[1]
+                if w < min_bbox_size or h < min_bbox_size:
+                    ignore_idx.append(i)
+                else:
+                    keep_idx.append(i)
+            if len(ignore_idx) > 0:
+                bboxes_ignore = ann.get('bboxes_ignore', np.zeros((0, 4)))
+                labels_ignore = ann.get('labels_ignore', np.zeros((0, )))
+                new_bboxes_ignore = ann['bboxes'][ignore_idx]
+                new_labels_ignore = ann['labels'][ignore_idx]
+                bboxes_ignore = np.concatenate(
+                    (bboxes_ignore, new_bboxes_ignore))
+                labels_ignore = np.concatenate(
+                    (labels_ignore, new_labels_ignore))
+                data_info.update(
+                    ann=dict(
+                        bboxes=ann['bboxes'][keep_idx],
+                        labels=ann['labels'][keep_idx],
+                        bboxes_ignore=bboxes_ignore,
+                        labels_ignore=labels_ignore))
+            new_data_infos.append(data_info)
         return new_data_infos
 
     def _set_group_flag(self):

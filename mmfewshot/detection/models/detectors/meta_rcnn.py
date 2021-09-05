@@ -7,7 +7,7 @@ from .query_support_detector import QuerySupportDetector
 
 
 @DETECTORS.register_module()
-class Meta_RCNN(QuerySupportDetector):
+class MetaRCNN(QuerySupportDetector):
     """Implementation of `MetaRCNN.  <https://arxiv.org/abs/1909.13032>`_.
 
     Args:
@@ -40,7 +40,7 @@ class Meta_RCNN(QuerySupportDetector):
                  test_cfg=None,
                  pretrained=None,
                  init_cfg=None):
-        super(Meta_RCNN, self).__init__(
+        super(MetaRCNN, self).__init__(
             backbone=backbone,
             neck=neck,
             support_backbone=support_backbone,

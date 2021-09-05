@@ -19,7 +19,8 @@ data = dict(
     val=dict(classes='NOVEL_CLASSES_SPLIT1'),
     test=dict(classes='NOVEL_CLASSES_SPLIT1'),
     model_init=dict(
-        ann_cfg=[('DEFAULT_ANN_FILE_VOC_TFA', 'split1_1shot')],
+        type='FewShotVOCDefaultDataset',
+        ann_cfg=[dict(method='TFA', setting='SPLIT1_1SHOT')],
         num_novel_shots=1,
         classes='NOVEL_CLASSES_SPLIT1'))
 evaluation = dict(interval=100, class_splits=['NOVEL_CLASSES_SPLIT1'])

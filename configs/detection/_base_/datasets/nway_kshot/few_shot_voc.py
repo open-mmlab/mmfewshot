@@ -35,8 +35,7 @@ test_pipeline = [
             dict(type='Collect', keys=['img'])
         ])
 ]
-# Predefined ann_cfg, classes and class_splits are defined in
-# mmfewshot.detection.datasets.few_shot_data_config
+# classes splits are predefined in FewShotVOCDataset
 data_root = 'data/VOCdevkit/'
 data = dict(
     samples_per_gpu=4,
@@ -65,7 +64,7 @@ data = dict(
             classes=None,
             use_difficult=False,
             instance_wise=False,
-            dataset_name='query_support_dataset_dataset')),
+            dataset_name='query_support_dataset')),
     val=dict(
         type='FewShotVOCDataset',
         ann_cfg=[

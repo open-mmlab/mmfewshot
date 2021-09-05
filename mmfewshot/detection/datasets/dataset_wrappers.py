@@ -457,3 +457,68 @@ class NwayKshotDataset(object):
         data_info['ann']['bboxes'] = \
             data_info['ann']['bboxes'][gt_idx:gt_idx + 1]
         return data_info
+
+
+@DATASETS.register_module()
+class TwoBranchDataset(object):
+    """A dataset wrapper of TwoBranchDataset.
+
+    Wrapping main_dataset and auxiliary_dataset to a single dataset and thus
+    building TwoBranchDataset requires two dataset. The behavior of
+    TwoBranchDataset is determined by `mode`. Dataset will return images
+    and annotations according to `mode`, e.g. fetching data from
+    main_dataset if `mode` is 'main'. The default `mode` is 'main' and
+    by using convert function `convert_main_to_auxiliary` the `mode`
+    will be converted into 'auxiliary'.
+
+    Args:
+        main_dataset (:obj:`FewShotCustomDataset`):
+            Main dataset to be wrapped.
+        auxiliary_dataset (:obj:`FewShotCustomDataset` | None):
+            Auxiliary dataset to be wrapped. If auxiliary dataset is None,
+            auxiliary dataset will copy from main dataset.
+        repeat_times (int): The length of repeated dataset will be `times`
+            larger than the original dataset. Default: 1.
+    """
+
+    def __init__(self,
+                 main_dataset=None,
+                 auxiliary_dataset=None,
+                 repeat_times=1):
+        assert main_dataset and auxiliary_dataset
+        self.main_dataset = main_dataset
+        self.auxiliary_dataset = auxiliary_dataset
+        self.CLASSES = self.main_dataset.CLASSES
+        self.mode = 'main'
+        self.repeat_times = repeat_times
+        self._main_len = len(self.main_dataset)
+        self._auxiliary_len = len(self.auxiliary_dataset)
+        self._len = self._main_len * repeat_times
+        if hasattr(main_dataset, 'flag'):
+            self.flag = np.zeros(
+                self._main_len * self.repeat_times, dtype=np.uint8)
+
+    def __getitem__(self, idx):
+        if self.mode == 'main':
+            idx %= self._main_len
+            return self.main_dataset.prepare_train_img(idx, 'main')
+        elif self.mode == 'auxiliary':
+            idx %= self._auxiliary_len
+            return self.auxiliary_dataset.prepare_train_img(idx, 'auxiliary')
+        else:
+            raise ValueError('not valid data type')
+
+    def __len__(self):
+        """Length of dataset."""
+        return self._len
+
+    def convert_main_to_auxiliary(self):
+        """Convert main dataset to auxiliary dataset."""
+        self.mode = 'auxiliary'
+
+    def save_data_infos(self, output_path):
+        """Save data infos of main and auxiliary data."""
+        self.main_dataset.save_data_infos(output_path)
+        paths = output_path.split('.')
+        self.auxiliary_dataset.save_data_infos(
+            '.'.join(paths[:-1] + ['auxiliary', paths[-1]]))

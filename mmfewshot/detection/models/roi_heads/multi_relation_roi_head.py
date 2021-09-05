@@ -132,26 +132,26 @@ class MultiRelationRoIHead(StandardRoIHead):
         Returns:
             Tensor: Roi features with shape (num_proposals, C).
         """
-        roi_feat = self.bbox_roi_extractor(
+        roi_feats = self.bbox_roi_extractor(
             feats[:self.bbox_roi_extractor.num_inputs], rois)
         if self.with_shared_head:
-            roi_feat = self.shared_head(roi_feat)
-        return roi_feat
+            roi_feats = self.shared_head(roi_feats)
+        return roi_feats
 
-    def _bbox_forward(self, query_rois_feats, support_rois_feats):
+    def _bbox_forward(self, query_roi_feats, support_roi_feats):
         """Box head forward function used in both training and testing.
 
         Args:
-            query_rois_feats (Tensor): Roi features with shape (N*K, C).
-            support_rois_feats (Tensor): Roi features with shape (N, C).
+            query_roi_feats (Tensor): Roi features with shape (N*K, C).
+            support_roi_feats (Tensor): Roi features with shape (N, C).
 
         Returns:
              dict: A dictionary of predicted results.
         """
         cls_score, bbox_pred = [], []
-        batch_size = len(support_rois_feats)
+        batch_size = len(support_roi_feats)
         for query_rois_feat, support_rois_feat in zip(
-                torch.chunk(query_rois_feats, batch_size), support_rois_feats):
+                torch.chunk(query_roi_feats, batch_size), support_roi_feats):
             cls_score_single, bbox_pred_single = self.bbox_head(
                 query_rois_feat, support_rois_feat)
             cls_score.append(cls_score_single)
@@ -186,31 +186,30 @@ class MultiRelationRoIHead(StandardRoIHead):
             dict: Predicted results and losses.
         """
         query_rois = bbox2roi([res.bboxes for res in sampling_results])
-        query_rois_feats = self.extract_roi_feat(query_feats, query_rois)
-        support_rois = bbox2roi(
-            [bboxes.unsqueeze(0) for bboxes in support_gt_bboxes])
-        support_rois_feats = self.extract_roi_feat(support_feats, support_rois)
-        avg_support_rois_feats = [
-            support_rois_feats[i * self.num_support_shots:(i + 1) *
-                               self.num_support_shots].mean(0, True)
+        query_roi_feats = self.extract_roi_feat(query_feats, query_rois)
+        support_rois = bbox2roi([bboxes for bboxes in support_gt_bboxes])
+        support_roi_feats = self.extract_roi_feat(support_feats, support_rois)
+        avg_support_roi_feats = [
+            support_roi_feats[i * self.num_support_shots:(i + 1) *
+                              self.num_support_shots].mean(0, True)
             for i in range(
-                support_rois_feats.size(0) // self.num_support_shots)
+                support_roi_feats.size(0) // self.num_support_shots)
         ]
         if batch_size > 1:
-            pos_avg_support_rois_feats = []
-            neg_avg_support_rois_feats = []
+            pos_avg_support_roi_feats = []
+            neg_avg_support_roi_feats = []
             for b in range(batch_size):
                 start = b * self.num_support_ways
                 end = (b + 1) * self.num_support_ways
-                pos_avg_support_rois_feats.extend(
-                    avg_support_rois_feats[start:start + 1])
-                neg_avg_support_rois_feats.extend(
-                    avg_support_rois_feats[start + 1:end])
-            avg_support_rois_feats = \
-                pos_avg_support_rois_feats + neg_avg_support_rois_feats
+                pos_avg_support_roi_feats.extend(
+                    avg_support_roi_feats[start:start + 1])
+                neg_avg_support_roi_feats.extend(avg_support_roi_feats[start +
+                                                                       1:end])
+            avg_support_roi_feats = \
+                pos_avg_support_roi_feats + neg_avg_support_roi_feats
 
-        bbox_results = self._bbox_forward(query_rois_feats,
-                                          avg_support_rois_feats)
+        bbox_results = self._bbox_forward(query_roi_feats,
+                                          avg_support_roi_feats)
 
         bbox_targets = self.bbox_head.get_targets(sampling_results,
                                                   query_gt_bboxes,
@@ -310,8 +309,8 @@ class MultiRelationRoIHead(StandardRoIHead):
                 and class labels of shape [N, num_bboxes].
         """
         rois = bbox2roi(proposals)
-        query_rois_feats = self.extract_roi_feat(query_feats, rois)
-        bbox_results = self._bbox_forward(query_rois_feats, [support_feat])
+        query_roi_feats = self.extract_roi_feat(query_feats, rois)
+        bbox_results = self._bbox_forward(query_roi_feats, [support_feat])
         img_shapes = tuple(meta['img_shape'] for meta in query_img_metas)
         scale_factors = tuple(meta['scale_factor'] for meta in query_img_metas)
 
