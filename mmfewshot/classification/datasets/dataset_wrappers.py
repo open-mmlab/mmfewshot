@@ -2,8 +2,8 @@ import os.path as osp
 
 import numpy as np
 
+from mmfewshot.utils import local_numpy_seed
 from .builder import DATASETS
-from .utils import local_numpy_seed
 
 
 @DATASETS.register_module()

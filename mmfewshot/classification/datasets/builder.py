@@ -7,8 +7,9 @@ from mmcv.runner import get_dist_info
 from mmcv.utils import build_from_cfg
 from torch.utils.data import DataLoader
 
+from mmfewshot.utils import DistributedInfiniteSampler, InfiniteSampler
+from mmfewshot.utils import multi_pipeline_collate_fn as collate
 from .dataset_wrappers import EpisodicDataset, MetaTestDataset
-from .utils import multi_pipeline_collate_fn as collate
 
 
 def build_dataset(cfg, default_args=None):
@@ -50,6 +51,7 @@ def build_dataloader(dataset,
                      round_up=True,
                      seed=None,
                      pin_memory=False,
+                     infinite_sampler=False,
                      **kwargs):
     """Build PyTorch DataLoader.
 
@@ -71,6 +73,10 @@ def build_dataloader(dataset,
         seed (int | None): Random seed. Default:None.
         pin_memory (bool): Whether to use pin_memory for dataloader.
             Default: False.
+        infinite_sampler (bool): Whether to use infinite sampler. Noted that
+            infinite sampler will keep iterator of dataloader running
+            forever, which can avoid the overhead of worker initialization
+            between epochs. Default: False.
         kwargs: any keyword argument to be used to initialize DataLoader
 
     Returns:
@@ -78,44 +84,34 @@ def build_dataloader(dataset,
     """
     rank, world_size = get_dist_info()
     if dist:
-        sampler = DistributedSampler(
-            dataset, world_size, rank, shuffle=shuffle, round_up=round_up)
+        if infinite_sampler:
+            sampler = DistributedInfiniteSampler(
+                dataset, world_size, rank, shuffle=shuffle)
+        else:
+            sampler = DistributedSampler(
+                dataset, world_size, rank, shuffle=shuffle, round_up=round_up)
         shuffle = False
         batch_size = samples_per_gpu
         num_workers = workers_per_gpu
     else:
-        sampler = None
+        sampler = InfiniteSampler(dataset, seed=seed, shuffle=shuffle) \
+            if infinite_sampler else None
         batch_size = num_gpus * samples_per_gpu
         num_workers = num_gpus * workers_per_gpu
 
     init_fn = partial(
         worker_init_fn, num_workers=num_workers, rank=rank,
         seed=seed) if seed is not None else None
-    try:
-        data_loader = DataLoader(
-            dataset,
-            batch_size=batch_size,
-            sampler=sampler,
-            num_workers=num_workers,
-            collate_fn=partial(collate, samples_per_gpu=samples_per_gpu),
-            pin_memory=pin_memory,
-            shuffle=shuffle,
-            worker_init_fn=init_fn,
-            persistent_workers=num_workers > 0,
-            **kwargs)
-    except ():
-        from .data_loader import DataLoader as DataLoader_
-        data_loader = DataLoader_(
-            dataset,
-            batch_size=batch_size,
-            sampler=sampler,
-            num_workers=num_workers,
-            collate_fn=partial(collate, samples_per_gpu=samples_per_gpu),
-            pin_memory=pin_memory,
-            shuffle=shuffle,
-            worker_init_fn=init_fn,
-            persistent_workers=num_workers > 0,
-            **kwargs)
+    data_loader = DataLoader(
+        dataset,
+        batch_size=batch_size,
+        sampler=sampler,
+        num_workers=num_workers,
+        collate_fn=partial(collate, samples_per_gpu=samples_per_gpu),
+        pin_memory=pin_memory,
+        shuffle=shuffle if sampler is None else None,
+        worker_init_fn=init_fn,
+        **kwargs)
 
     return data_loader
 

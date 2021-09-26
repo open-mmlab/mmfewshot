@@ -1,6 +1,7 @@
 matplotlib
-mmcls
-mmdet
+mmcls==0.15.0
+mmcv==1.3.12
+mmdet==2.16.0
 numpy
 pycocotools; platform_system == "Linux"
 pycocotools-windows; platform_system == "Windows"

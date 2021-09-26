@@ -95,7 +95,7 @@ class TwoBranchRPNHead(RPNHead):
             for cls_score in cls_scores
         ]
         label_weights_list = [
-            torch.ones_like(cls_score, dtype=torch.long).to(device)
+            torch.ones_like(cls_score, dtype=torch.float).to(device)
             for cls_score in cls_scores
         ]
         num_total_samples = sum(label_weights.sum()

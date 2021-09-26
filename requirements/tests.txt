@@ -5,8 +5,9 @@ interrogate
 isort==4.3.21
 # Note: used for kwarray.group_items, this may be ported to mmcv in the future.
 kwarray
-mmcls
-mmdet
+mmcls==0.15.0
+mmcv==1.3.12
+mmdet==2.16.0
 pytest
 ubelt
 xdoctest>=0.10.0

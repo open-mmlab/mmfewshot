@@ -58,7 +58,8 @@ def train_model(model,
             dist=distributed,
             round_up=True,
             seed=cfg.seed,
-            pin_memory=cfg.get('pin_memory', False)) for ds in dataset
+            pin_memory=cfg.get('pin_memory', False),
+            infinite_sampler=cfg.infinite_sampler) for ds in dataset
     ]
 
     # put model on gpus
@@ -94,7 +95,8 @@ def train_model(model,
     else:
         if 'total_epochs' in cfg:
             assert cfg.total_epochs == cfg.runner.max_epochs
-
+    if cfg.infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
+        cfg.runner['type'] = 'InfiniteEpochBasedRunner'
     runner = build_runner(
         cfg.runner,
         default_args=dict(

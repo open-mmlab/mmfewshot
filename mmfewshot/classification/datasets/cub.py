@@ -5,8 +5,8 @@ import mmcv
 import numpy as np
 from mmcls.datasets.builder import DATASETS
 
+from mmfewshot.utils import local_numpy_seed
 from .few_shot_custom import FewShotCustomDataset
-from .utils import local_numpy_seed
 
 ALL_CLASSES = [
     '001.Black_footed_Albatross',

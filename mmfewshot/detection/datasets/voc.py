@@ -587,7 +587,17 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
             ]
             for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
         },
-    )
+        FSDetView={
+            f'SPLIT{split}_{shot}SHOT': [
+                dict(
+                    type='ann_file',
+                    ann_file=f'data/few_shot_voc_split/{shot}shot/'
+                    f'box_{shot}shot_{class_name}_train.txt',
+                    ann_classes=[class_name])
+                for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
+            ]
+            for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
+        })
 
     def __init__(self, ann_cfg, **kwargs):
         super(FewShotVOCDefaultDataset, self).__init__(

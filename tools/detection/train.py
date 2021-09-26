@@ -119,13 +119,13 @@ def main():
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         distributed = False
+        rank, world_size = get_dist_info()
     else:
         distributed = True
         init_dist(args.launcher, **cfg.dist_params)
-        # re-set gpu_ids with distributed training mode
         rank, world_size = get_dist_info()
+        # re-set gpu_ids with distributed training mode
         cfg.gpu_ids = range(world_size)
-
     # create work_dir
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
     # dump config
@@ -156,7 +156,7 @@ def main():
     elif cfg.seed is not None:
         seed = cfg.seed
     elif distributed:
-        seed = 1234567
+        seed = 42
         Warning(f'When using DistributedDataParallel, each rank will '
                 f'initialize different random seed. It will cause different'
                 f'random action for each rank. In few shot setting, novel '
@@ -178,23 +178,26 @@ def main():
 
     model = build_detector(cfg.model)
     model.init_weights()
-    # fix parameters by prefix
+    # freeze parameters by prefix
     if frozen_parameters is not None:
+        logger.info(f'Frozen parameters: {frozen_parameters}')
         for name, param in model.named_parameters():
             for frozen_prefix in frozen_parameters:
                 if frozen_prefix in name:
                     param.requires_grad = False
+            if param.requires_grad:
+                logger.info(f'Training parameters: {name}')
     # If save_dataset is set to True, dataset will be saved into json.
     save_dataset = cfg.data.train.pop('save_dataset', False)
     datasets = [build_dataset(cfg.data.train)]
-    if save_dataset:
+    if save_dataset and rank == 0:
         save_dataset_path = osp.join(cfg.work_dir,
                                      f'{timestamp}_saved_data.json')
-        if cfg.data.train.type == 'RepeatDataset':
-            datasets[0].dataset.save_data_infos(save_dataset_path)
-        else:
+        if hasattr(datasets[0], 'save_data_infos'):
             datasets[0].save_data_infos(save_dataset_path)
-
+        else:
+            raise AttributeError(f'`save_data_infos` is not implemented'
+                                 f'in {type(datasets[0])}.')
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
         val_dataset.pipeline = cfg.data.train.pipeline

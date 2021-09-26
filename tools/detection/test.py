@@ -8,10 +8,9 @@ from mmcv import Config, DictAction
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
                          wrap_fp16_model)
-from mmdet.datasets import replace_ImageToTensor
 
-import mmfewshot  # noqa: F401, F403
-from mmfewshot.detection.datasets import build_dataloader, build_dataset
+from mmfewshot.detection.datasets import (build_dataloader, build_dataset,
+                                          get_copy_dataset_type)
 from mmfewshot.detection.models import build_detector
 
 
@@ -83,6 +82,7 @@ def parse_args():
     if args.options:
         warnings.warn('--options is deprecated in favor of --eval-options')
         args.eval_options = args.options
+        args.cfg_options = args.options
     return args
 
 
@@ -112,23 +112,9 @@ def main():
         torch.backends.cudnn.benchmark = True
     cfg.model.pretrained = None
 
-    # in case the test dataset is concatenated
-    samples_per_gpu = 1
-    if isinstance(cfg.data.test, dict):
-        cfg.data.test.test_mode = True
-        samples_per_gpu = cfg.data.test.pop('samples_per_gpu', 1)
-        if samples_per_gpu > 1:
-            # Replace 'ImageToTensor' to 'DefaultFormatBundle'
-            cfg.data.test.pipeline = replace_ImageToTensor(
-                cfg.data.test.pipeline)
-    elif isinstance(cfg.data.test, list):
-        for ds_cfg in cfg.data.test:
-            ds_cfg.test_mode = True
-        samples_per_gpu = max(
-            [ds_cfg.pop('samples_per_gpu', 1) for ds_cfg in cfg.data.test])
-        if samples_per_gpu > 1:
-            for ds_cfg in cfg.data.test:
-                ds_cfg.pipeline = replace_ImageToTensor(ds_cfg.pipeline)
+    # currently only support single images testing
+    samples_per_gpu = cfg.data.test.pop('samples_per_gpu', 1)
+    assert samples_per_gpu == 1, 'currently only support single images testing'
 
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
@@ -136,10 +122,6 @@ def main():
     else:
         distributed = True
         init_dist(args.launcher, **cfg.dist_params)
-
-    # currently only support single images testing
-    samples_per_gpu = cfg.data.test.pop('samples_per_gpu', 1)
-    assert samples_per_gpu == 1, 'currently only support single images testing'
 
     # build the dataloader
     dataset = build_dataset(cfg.data.test)
@@ -150,24 +132,6 @@ def main():
         dist=distributed,
         shuffle=False)
 
-    # for meta-learning methods which require support template dataset
-    # for model initialization.
-    if cfg.data.get('model_init', None) is not None:
-        cfg.data.model_init.pop('copy_from_train_dataset')
-        model_init_samples_per_gpu = cfg.data.model_init.pop(
-            'samples_per_gpu', 1)
-        model_init_workers_per_gpu = cfg.data.model_init.pop(
-            'workers_per_gpu', 1)
-        assert cfg.data.model_init.get('ann_cfg', None) is not None, \
-            'during testing ann_cfg of support template can not be None'
-        model_init_dataset = build_dataset(cfg.data.model_init)
-        # disable dist to make all rank get same data
-        model_init_dataloader = build_dataloader(
-            model_init_dataset,
-            samples_per_gpu=model_init_samples_per_gpu,
-            workers_per_gpu=model_init_workers_per_gpu,
-            dist=False,
-            shuffle=False)
     # pop frozen_parameters
     cfg.model.pop('frozen_parameters', None)
 
@@ -185,6 +149,30 @@ def main():
         model.CLASSES = checkpoint['meta']['CLASSES']
     else:
         model.CLASSES = dataset.CLASSES
+
+    # for meta-learning methods which require support template dataset
+    # for model initialization.
+    if cfg.data.get('model_init', None) is not None:
+        cfg.data.model_init.pop('copy_from_train_dataset')
+        model_init_samples_per_gpu = cfg.data.model_init.pop(
+            'samples_per_gpu', 1)
+        model_init_workers_per_gpu = cfg.data.model_init.pop(
+            'workers_per_gpu', 1)
+        if cfg.data.model_init.get('ann_cfg', None) is None:
+            assert checkpoint['meta'].get('model_init_ann_cfg',
+                                          None) is not None
+            cfg.data.model_init.type = \
+                get_copy_dataset_type(cfg.data.model_init.type)
+            cfg.data.model_init.ann_cfg = \
+                checkpoint['meta']['model_init_ann_cfg']
+        model_init_dataset = build_dataset(cfg.data.model_init)
+        # disable dist to make all rank get same data
+        model_init_dataloader = build_dataloader(
+            model_init_dataset,
+            samples_per_gpu=model_init_samples_per_gpu,
+            workers_per_gpu=model_init_workers_per_gpu,
+            dist=False,
+            shuffle=False)
 
     if not distributed:
         model = MMDataParallel(model, device_ids=[0])

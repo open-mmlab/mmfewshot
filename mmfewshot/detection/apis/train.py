@@ -10,7 +10,6 @@ from mmcv.runner import (HOOKS, DistSamplerSeedHook, EpochBasedRunner,
                          build_runner)
 from mmcv.utils import build_from_cfg
 from mmdet.core import DistEvalHook, EvalHook
-from mmdet.datasets import replace_ImageToTensor
 from mmdet.utils import get_root_logger
 
 from mmfewshot.detection.core import (QuerySupportDistEvalHook,
@@ -72,7 +71,8 @@ def train_detector(model,
             len(cfg.gpu_ids),
             dist=distributed,
             seed=cfg.seed,
-            data_cfg=copy.deepcopy(cfg.data)) for ds in dataset
+            data_cfg=copy.deepcopy(cfg.data),
+            infinite_sampler=cfg.infinite_sampler) for ds in dataset
     ]
 
     # put model on gpus
@@ -103,6 +103,8 @@ def train_detector(model,
         if 'total_epochs' in cfg:
             assert cfg.total_epochs == cfg.runner.max_epochs
 
+    if cfg.infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
+        cfg.runner['type'] = 'InfiniteEpochBasedRunner'
     runner = build_runner(
         cfg.runner,
         default_args=dict(
@@ -135,16 +137,15 @@ def train_detector(model,
 
     # register eval hooks
     if validate:
-        # Support batch_size > 1 in validation
-        val_samples_per_gpu = cfg.data.val.pop('samples_per_gpu', 1)
-        if val_samples_per_gpu > 1:
-            # Replace 'ImageToTensor' to 'DefaultFormatBundle'
-            cfg.data.val.pipeline = replace_ImageToTensor(
-                cfg.data.val.pipeline)
+        # currently only support single images testing
+        samples_per_gpu = cfg.data.val.pop('samples_per_gpu', 1)
+        assert samples_per_gpu == 1, \
+            'currently only support single images testing'
+
         val_dataset = build_dataset(cfg.data.val, dict(test_mode=True))
         val_dataloader = build_dataloader(
             val_dataset,
-            samples_per_gpu=val_samples_per_gpu,
+            samples_per_gpu=samples_per_gpu,
             workers_per_gpu=cfg.data.workers_per_gpu,
             dist=distributed,
             shuffle=False)
@@ -154,7 +155,6 @@ def train_detector(model,
         # Prepare dataset for model initialization. In most cases,
         # the dataset would be used to generate the support templates.
         if cfg.data.get('model_init', None) is not None:
-
             if cfg.data.model_init.pop('copy_from_train_dataset', False):
                 if cfg.data.model_init.ann_cfg is not None:
                     warnings.warn(
@@ -171,6 +171,11 @@ def train_detector(model,
                 cfg.data.model_init.ann_cfg = [
                     dict(data_infos=dataset[0].get_support_data_infos())
                 ]
+            # the support data used in training phase will be saved into
+            # checkpoint, which allows model initialize with these data
+            # in testing.
+            cfg.checkpoint_config.meta['model_init_ann_cfg'] = \
+                cfg.data.model_init.ann_cfg
             samples_per_gpu = cfg.data.model_init.pop('samples_per_gpu', 1)
             workers_per_gpu = cfg.data.model_init.pop('workers_per_gpu', 1)
             model_init_dataset = build_dataset(cfg.data.model_init)
@@ -186,7 +191,8 @@ def train_detector(model,
             eval_hook = QuerySupportDistEvalHook \
                 if distributed else QuerySupportEvalHook
             runner.register_hook(
-                eval_hook(model_init_dataloader, val_dataloader, **eval_cfg))
+                eval_hook(model_init_dataloader, val_dataloader, **eval_cfg),
+                priority='LOW')
         else:
             eval_hook = DistEvalHook if distributed else EvalHook
             runner.register_hook(

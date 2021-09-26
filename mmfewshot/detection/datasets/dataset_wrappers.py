@@ -273,7 +273,7 @@ class NwayKshotDataset(object):
             mini-batch.
         num_support_shots (int): Number of support shot for each
             class in mini-batch.
-        mutual_support_shot (bool): If True only one annotation will be
+        one_support_shot_per_image (bool): If True only one annotation will be
             sampled from each image. Default: False.
         num_used_support_shots (int): The total number of support shots
             sampled and used for each class during training. If set to -1,
@@ -289,7 +289,7 @@ class NwayKshotDataset(object):
                  support_dataset,
                  num_support_ways,
                  num_support_shots,
-                 mutual_support_shot=False,
+                 one_support_shot_per_image=False,
                  num_used_support_shots=None,
                  shuffle_support=False,
                  repeat_times=1):
@@ -305,7 +305,7 @@ class NwayKshotDataset(object):
         # convert_query_to_support().
         self.mode = 'query'
         self.num_support_ways = num_support_ways
-        self.mutual_support_shot = mutual_support_shot
+        self.one_support_shot_per_image = one_support_shot_per_image
         self.num_used_support_shots = num_used_support_shots
         self.shuffle_support = shuffle_support
         assert num_support_ways <= len(
@@ -353,7 +353,7 @@ class NwayKshotDataset(object):
     def prepare_support_shots(self):
         # create lookup table for annotations in same class
         # Support shots are simply loaded in order of data infos
-        # until the number met the setting. When `mutual_support_shot`
+        # until the number met the setting. When `one_support_shot_per_image`
         # is true, only one annotation will be sampled for each image.
         # TODO: more way to random select support shots
         for idx in range(len(self.support_dataset)):
@@ -363,7 +363,7 @@ class NwayKshotDataset(object):
                         len(self.data_infos_by_class[gt]) <
                         self.num_used_support_shots):
                     self.data_infos_by_class[gt].append((idx, gt_idx))
-                    if self.mutual_support_shot:
+                    if self.one_support_shot_per_image:
                         break
         # make sure all class index lists have enough
         # instances (length > num_support_shots)

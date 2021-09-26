@@ -106,7 +106,6 @@ class TwoBranchDataloader(object):
 
     def __init__(self, main_data_loader, auxiliary_data_loader):
         self.dataset = main_data_loader.dataset
-        self.sampler = main_data_loader.sampler
         self.main_data_loader = main_data_loader
         self.auxiliary_data_loader = auxiliary_data_loader
 

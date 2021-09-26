@@ -6,7 +6,7 @@ import torch
 import torch.distributed as dist
 from mmcls.models.builder import (CLASSIFIERS, build_backbone, build_head,
                                   build_neck)
-from mmcls.models.utils import BatchCutMixLayer, BatchMixupLayer
+from mmcls.models.utils import Augments
 from mmcv.runner import BaseModule
 
 
@@ -39,16 +39,10 @@ class FewShotBaseClassifier(BaseModule):
         if head is not None:
             self.head = build_head(copy.deepcopy(head))
 
-        self.mixup, self.cutmix = None, None
+        self.augments = None
         if train_cfg is not None:
-            mixup_cfg = train_cfg.get('mixup', None)
-            cutmix_cfg = train_cfg.get('cutmix', None)
-            assert mixup_cfg is None or cutmix_cfg is None, \
-                'Mixup and CutMix can not be set simultaneously.'
-            if mixup_cfg is not None:
-                self.mixup = BatchMixupLayer(**mixup_cfg)
-            if cutmix_cfg is not None:
-                self.cutmix = BatchCutMixLayer(**cutmix_cfg)
+            augments_cfg = train_cfg.get('augments', None)
+            self.augments = Augments(augments_cfg)
 
         self.meta_test_cfg = None
         # device_indicator is used to record runtime device
