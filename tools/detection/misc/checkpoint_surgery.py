@@ -254,15 +254,17 @@ def main():
         for idx, (param_name,
                   tar_size) in enumerate(zip(args.param_name, tar_sizes)):
             combine_checkpoints(param_name, True, tar_size, checkpoint,
-                                checkpoint2)
+                                checkpoint2, args)
             combine_checkpoints(param_name, False, tar_size, checkpoint,
-                                checkpoint2)
+                                checkpoint2, args)
     elif args.method == 'randinit':
         tar_sizes = [TAR_SIZE + 1, TAR_SIZE * 4]
         for idx, (param_name,
                   tar_size) in enumerate(zip(args.param_name, tar_sizes)):
-            random_init_checkpoint(param_name, True, tar_size, checkpoint)
-            random_init_checkpoint(param_name, False, tar_size, checkpoint)
+            random_init_checkpoint(param_name, True, tar_size, checkpoint,
+                                   args)
+            random_init_checkpoint(param_name, False, tar_size, checkpoint,
+                                   args)
     else:
         raise ValueError(f'not support method: {args.method}')
 
