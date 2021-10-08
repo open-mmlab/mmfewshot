@@ -8,7 +8,7 @@ from mmcv.utils import print_log
 from mmdet.core import eval_recalls
 from mmdet.datasets.builder import DATASETS
 
-from mmfewshot.detection.core import eval_map, voc_tpfp_fn
+from mmfewshot.detection.core import eval_map
 from .few_shot_custom import FewShotCustomDataset
 
 # pre-defined classes split for few shot setting
@@ -70,6 +70,12 @@ class FewShotVOCDataset(FewShotCustomDataset):
             'train dataset' or 'query dataset'. Default: None.
         test_mode (bool): If set True, annotation will not be loaded.
             Default: False.
+        coordinate_offset (list[int]): The bbox annotation will add the
+            coordinate offsets which corresponds to [x_min, y_min, x_max,
+            y_max] during training. For testing, the gt annotation will
+            not be changed while the predict results will minus the
+            coordinate offsets to inverse data loading logic in training.
+            Default: [-1, -1, 0, 0].
     """
 
     def __init__(self,
@@ -81,6 +87,7 @@ class FewShotVOCDataset(FewShotCustomDataset):
                  min_bbox_area=None,
                  dataset_name=None,
                  test_mode=False,
+                 coordinate_offset=[-1, -1, 0, 0],
                  **kwargs):
         if dataset_name is None:
             self.dataset_name = 'Test dataset' \
@@ -107,7 +114,7 @@ class FewShotVOCDataset(FewShotCustomDataset):
             assert num_novel_shots is not None or num_base_shots is not None, \
                 f'{self.dataset_name}: can not config ann_shot_filter and ' \
                 f'num_novel_shots/num_base_shots at the same time.'
-
+        self.coordinate_offset = coordinate_offset
         self.use_difficult = use_difficult
         super(FewShotVOCDataset, self).__init__(
             classes=None,
@@ -302,19 +309,16 @@ class FewShotVOCDataset(FewShotCustomDataset):
             # evaluation or testing keep consisent with original xml
             # annotation file and the xmin and ymin of prediction results
             # will add 1 for inverse of data loading logic.
-            if self.test_mode:
+            bbox = [
+                int(float(bnd_box.find('xmin').text)),
+                int(float(bnd_box.find('ymin').text)),
+                int(float(bnd_box.find('xmax').text)),
+                int(float(bnd_box.find('ymax').text))
+            ]
+            if not self.test_mode:
                 bbox = [
-                    int(float(bnd_box.find('xmin').text)),
-                    int(float(bnd_box.find('ymin').text)),
-                    int(float(bnd_box.find('xmax').text)),
-                    int(float(bnd_box.find('ymax').text))
-                ]
-            else:
-                bbox = [
-                    int(float(bnd_box.find('xmin').text)) - 1,
-                    int(float(bnd_box.find('ymin').text)) - 1,
-                    int(float(bnd_box.find('xmax').text)),
-                    int(float(bnd_box.find('ymax').text))
+                    i + offset
+                    for i, offset in zip(bbox, self.coordinate_offset)
                 ]
             ignore = False
             if difficult or ignore:
@@ -413,8 +417,8 @@ class FewShotVOCDataset(FewShotCustomDataset):
         # will add 1 for inverse of data loading logic.
         for i in range(len(results)):
             for j in range(len(results[i])):
-                results[i][j][:, 0] += 1
-                results[i][j][:, 1] += 1
+                for k in range(4):
+                    results[i][j][:, k] -= self.coordinate_offset[k]
 
         if not isinstance(metric, str):
             assert len(metric) == 1
@@ -444,7 +448,7 @@ class FewShotVOCDataset(FewShotCustomDataset):
                     iou_thr=iou_thr,
                     dataset='voc07',
                     logger=logger,
-                    tpfp_fn=voc_tpfp_fn)
+                    use_legacy_coordinate=True)
                 mean_aps.append(mean_ap)
                 eval_results[f'AP{int(iou_thr * 100):02d}'] = round(mean_ap, 3)
 
@@ -577,6 +581,17 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
             for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
         },
         MPSR={
+            f'SPLIT{split}_{shot}SHOT': [
+                dict(
+                    type='ann_file',
+                    ann_file=f'data/few_shot_voc_split/{shot}shot/'
+                    f'box_{shot}shot_{class_name}_train.txt',
+                    ann_classes=[class_name])
+                for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
+            ]
+            for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
+        },
+        MetaRCNN={
             f'SPLIT{split}_{shot}SHOT': [
                 dict(
                     type='ann_file',

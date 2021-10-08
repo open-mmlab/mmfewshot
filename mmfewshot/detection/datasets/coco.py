@@ -810,13 +810,50 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
                     ann_file='data/few_shot_coco_split/fsod_10shot/'
                     'final_split_voc_10_shot_instances_train2017.json')
             ],
-            '30SHOT': [
+            '10SHOT14': [
+                dict(
+                    type='ann_file',
+                    ann_file=f'data/few_shot_coco_split/10shot/'
+                    f'full_box_10shot_{class_name}_trainval.json')
+                for class_name in COCO_SPLIT['ALL_CLASSES']
+            ],
+            '30SHOT14': [
                 dict(
                     type='ann_file',
                     ann_file=f'data/few_shot_coco_split/'
                     f'30shot/full_box_30shot_{class_name}_trainval.json')
                 for class_name in COCO_SPLIT['ALL_CLASSES']
             ]
+        },
+        MPSR={
+            f'{shot}SHOT': [
+                dict(
+                    type='ann_file',
+                    ann_file=f'data/few_shot_coco_split/{shot}shot/'
+                    f'full_box_{shot}shot_{class_name}_trainval.json')
+                for class_name in COCO_SPLIT['ALL_CLASSES']
+            ]
+            for shot in [10, 30]
+        },
+        MetaRCNN={
+            f'{shot}SHOT': [
+                dict(
+                    type='ann_file',
+                    ann_file=f'data/few_shot_coco_split/{shot}shot/'
+                    f'full_box_{shot}shot_{class_name}_trainval.json')
+                for class_name in COCO_SPLIT['ALL_CLASSES']
+            ]
+            for shot in [10, 30]
+        },
+        FSDetView={
+            f'{shot}SHOT': [
+                dict(
+                    type='ann_file',
+                    ann_file=f'data/few_shot_coco_split/{shot}shot/'
+                    f'full_box_{shot}shot_{class_name}_trainval.json')
+                for class_name in COCO_SPLIT['ALL_CLASSES']
+            ]
+            for shot in [10, 30]
         })
 
     def __init__(self, ann_cfg, **kwargs):

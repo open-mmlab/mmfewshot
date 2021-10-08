@@ -72,7 +72,7 @@ def train_detector(model,
             dist=distributed,
             seed=cfg.seed,
             data_cfg=copy.deepcopy(cfg.data),
-            infinite_sampler=cfg.infinite_sampler) for ds in dataset
+            use_infinite_sampler=cfg.use_infinite_sampler) for ds in dataset
     ]
 
     # put model on gpus
@@ -103,7 +103,7 @@ def train_detector(model,
         if 'total_epochs' in cfg:
             assert cfg.total_epochs == cfg.runner.max_epochs
 
-    if cfg.infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
+    if cfg.use_infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
         cfg.runner['type'] = 'InfiniteEpochBasedRunner'
     runner = build_runner(
         cfg.runner,

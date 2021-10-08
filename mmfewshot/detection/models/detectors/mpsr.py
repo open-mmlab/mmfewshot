@@ -82,20 +82,34 @@ class MPSR(TwoStageDetector):
             dict[str, Tensor]: a dictionary of loss components
         """
         # train model with regular pipeline
-        main_losses = super(MPSR, self).forward_train(**main_data, **kwargs)
-
+        x = self.extract_feat(main_data['img'])
         # train model with refine pipeline
         auxiliary_rpn_feats, auxiliary_roi_feats = \
             self.extract_auxiliary_feat(auxiliary_data_list)
-        auxiliary_rpn_losses = self.rpn_head.forward_auxiliary_train(
-            auxiliary_rpn_feats)
+
+        # RPN forward and loss
+        proposal_cfg = self.train_cfg.get('rpn_proposal', self.test_cfg.rpn)
+        rpn_losses, proposal_list = self.rpn_head.forward_train(
+            x,
+            auxiliary_rpn_feats,
+            main_data['img_metas'],
+            main_data['gt_bboxes'],
+            gt_labels=None,
+            gt_bboxes_ignore=main_data.get('gt_bboxes_ignore', None),
+            proposal_cfg=proposal_cfg)
+
+        roi_losses = self.roi_head.forward_train(
+            x, main_data['img_metas'], proposal_list,
+            main_data['gt_bboxes'], main_data['gt_labels'],
+            main_data.get('gt_bboxes_ignore', None), **kwargs)
+
         auxiliary_roi_losses = self.roi_head.forward_auxiliary_train(
             auxiliary_roi_feats,
             [torch.cat(data['gt_labels']) for data in auxiliary_data_list])
 
         losses = dict()
-        losses.update(main_losses)
-        losses.update(auxiliary_rpn_losses)
+        losses.update(rpn_losses)
+        losses.update(roi_losses)
         losses.update(auxiliary_roi_losses)
 
         return losses

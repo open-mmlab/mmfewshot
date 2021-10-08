@@ -11,9 +11,9 @@ from mmdet.datasets.samplers import (DistributedGroupSampler,
                                      DistributedSampler, GroupSampler)
 from torch.utils.data import DataLoader
 
-from mmfewshot.utils.use_infinite_sampler import (
-    DistributedInfiniteGroupSampler, DistributedInfiniteSampler,
-    InfiniteGroupSampler)
+from mmfewshot.utils.infinite_sampler import (DistributedInfiniteGroupSampler,
+                                              DistributedInfiniteSampler,
+                                              InfiniteGroupSampler)
 from .dataset_wrappers import (NwayKshotDataset, QueryAwareDataset,
                                TwoBranchDataset)
 from .utils import get_copy_dataset_type
@@ -102,8 +102,7 @@ def build_dataset(cfg, default_args=None):
         dataset = TwoBranchDataset(
             main_dataset=main_dataset,
             auxiliary_dataset=auxiliary_dataset,
-            repeat_times=cfg.get('repeat_times', 1),
-        )
+            reweight_dataset=cfg.get('reweight_dataset', False))
     else:
         dataset = build_from_cfg(cfg, DATASETS, default_args)
     return dataset

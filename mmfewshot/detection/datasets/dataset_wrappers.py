@@ -275,9 +275,10 @@ class NwayKshotDataset(object):
             class in mini-batch.
         one_support_shot_per_image (bool): If True only one annotation will be
             sampled from each image. Default: False.
-        num_used_support_shots (int): The total number of support shots
-            sampled and used for each class during training. If set to -1,
-            all shots in dataset will be used as support shot. Default:-1.
+        num_used_support_shots (int | None): The total number of support
+            shots sampled and used for each class during training. If set to
+            None, all shots in dataset will be used as support shot.
+            Default: 200.
         shuffle_support (bool): If allow generate new batch index for
             each epoch. Default: False.
         repeat_times (int): The length of repeated dataset will be `times`
@@ -290,7 +291,7 @@ class NwayKshotDataset(object):
                  num_support_ways,
                  num_support_shots,
                  one_support_shot_per_image=False,
-                 num_used_support_shots=None,
+                 num_used_support_shots=200,
                  shuffle_support=False,
                  repeat_times=1):
         self.query_dataset = query_dataset
@@ -303,7 +304,7 @@ class NwayKshotDataset(object):
         # the default mode is 'query'. To convert the dataset
         # into 'support' dataset, simply call the function
         # convert_query_to_support().
-        self.mode = 'query'
+        self._mode = 'query'
         self.num_support_ways = num_support_ways
         self.one_support_shot_per_image = one_support_shot_per_image
         self.num_used_support_shots = num_used_support_shots
@@ -325,11 +326,11 @@ class NwayKshotDataset(object):
         self._ori_len = len(self.query_dataset)
 
     def __getitem__(self, idx):
-        if self.mode == 'query':
+        if self._mode == 'query':
             idx %= self._ori_len
             # loads one data in query pipeline
             return self.query_dataset.prepare_train_img(idx, 'query')
-        elif self.mode == 'support':
+        elif self._mode == 'support':
             # loads one batch of data in support pipeline
             b_idx = self.batch_index[idx]
             batch_data = [
@@ -343,12 +344,12 @@ class NwayKshotDataset(object):
 
     def __len__(self):
         """Length of dataset."""
-        if self.mode == 'query':
+        if self._mode == 'query':
             return len(self.query_dataset) * self.repeat_times
-        elif self.mode == 'support':
+        elif self._mode == 'support':
             return len(self.batch_index)
         else:
-            raise ValueError(f'{self.mode}not a valid mode')
+            raise ValueError(f'{self._mode}not a valid mode')
 
     def prepare_support_shots(self):
         # create lookup table for annotations in same class
@@ -359,9 +360,8 @@ class NwayKshotDataset(object):
         for idx in range(len(self.support_dataset)):
             labels = self.support_dataset.get_ann_info(idx)['labels']
             for gt_idx, gt in enumerate(labels):
-                if self.num_used_support_shots is None or (
-                        len(self.data_infos_by_class[gt]) <
-                        self.num_used_support_shots):
+                if len(self.data_infos_by_class[gt]) < \
+                        self.num_used_support_shots:
                     self.data_infos_by_class[gt].append((idx, gt_idx))
                     if self.one_support_shot_per_image:
                         break
@@ -377,7 +377,7 @@ class NwayKshotDataset(object):
         """Generate new batch indexes."""
         if not self.shuffle_support:
             return
-        if self.mode == 'query':
+        if self._mode == 'query':
             raise ValueError('not support data type')
         self.batch_index = self.generate_index(len(self.batch_index))
 
@@ -388,7 +388,7 @@ class NwayKshotDataset(object):
             support_dataset_len (int): Length of pre sample batch indexes.
         """
         self.batch_index = self.generate_index(support_dataset_len)
-        self.mode = 'support'
+        self._mode = 'support'
         if hasattr(self, 'flag'):
             self.flag = np.zeros(support_dataset_len, dtype=np.uint8)
 
@@ -477,44 +477,60 @@ class TwoBranchDataset(object):
         auxiliary_dataset (:obj:`FewShotCustomDataset` | None):
             Auxiliary dataset to be wrapped. If auxiliary dataset is None,
             auxiliary dataset will copy from main dataset.
-        repeat_times (int): The length of repeated dataset will be `times`
-            larger than the original dataset. Default: 1.
+        reweight_dataset (bool): Whether to change the sampling weights
+            of VOC07 and VOC12 . Default: False.
     """
 
     def __init__(self,
                  main_dataset=None,
                  auxiliary_dataset=None,
-                 repeat_times=1):
+                 reweight_dataset=False):
         assert main_dataset and auxiliary_dataset
+        self._mode = 'main'
         self.main_dataset = main_dataset
         self.auxiliary_dataset = auxiliary_dataset
         self.CLASSES = self.main_dataset.CLASSES
-        self.mode = 'main'
-        self.repeat_times = repeat_times
-        self._main_len = len(self.main_dataset)
-        self._auxiliary_len = len(self.auxiliary_dataset)
-        self._len = self._main_len * repeat_times
-        if hasattr(main_dataset, 'flag'):
-            self.flag = np.zeros(
-                self._main_len * self.repeat_times, dtype=np.uint8)
+        if reweight_dataset:
+            # reweight the dataset to be consistent with the original
+            # implementation of MPSR
+            self.main_idx_map = self.reweight_dataset(
+                self.main_dataset,
+                ['VOC2007', 'VOC2012'],
+            )
+            self.auxiliary_idx_map = self.reweight_dataset(
+                self.auxiliary_dataset, ['VOC'])
+        else:
+            self.main_idx_map = list(range(len(self.main_dataset)))
+            self.auxiliary_idx_map = list(range(len(self.main_dataset)))
+        self._main_len = len(self.main_idx_map)
+        self._auxiliary_len = len(self.auxiliary_idx_map)
+        self._set_group_flag()
 
     def __getitem__(self, idx):
-        if self.mode == 'main':
+        if self._mode == 'main':
             idx %= self._main_len
+            idx = self.main_idx_map[idx]
             return self.main_dataset.prepare_train_img(idx, 'main')
-        elif self.mode == 'auxiliary':
+        elif self._mode == 'auxiliary':
             idx %= self._auxiliary_len
+            idx = self.auxiliary_idx_map[idx]
             return self.auxiliary_dataset.prepare_train_img(idx, 'auxiliary')
         else:
             raise ValueError('not valid data type')
 
     def __len__(self):
         """Length of dataset."""
-        return self._len
+        if self._mode == 'main':
+            return self._main_len
+        elif self._mode == 'auxiliary':
+            return self._auxiliary_len
+        else:
+            raise ValueError('not valid data type')
 
     def convert_main_to_auxiliary(self):
         """Convert main dataset to auxiliary dataset."""
-        self.mode = 'auxiliary'
+        self._mode = 'auxiliary'
+        self._set_group_flag()
 
     def save_data_infos(self, output_path):
         """Save data infos of main and auxiliary data."""
@@ -522,3 +538,25 @@ class TwoBranchDataset(object):
         paths = output_path.split('.')
         self.auxiliary_dataset.save_data_infos(
             '.'.join(paths[:-1] + ['auxiliary', paths[-1]]))
+
+    def _set_group_flag(self):
+        # disable the group sampler, because in few shot setting,
+        # one group may only has two or three images.
+        self.flag = np.zeros(len(self), dtype=np.uint8)
+
+    @staticmethod
+    def reweight_dataset(dataset, group_prefix, repeat_length=100):
+        groups = [[] for _ in range(len(group_prefix))]
+        for i in range(len(dataset)):
+            filename = dataset.data_infos[i]['filename']
+            for j, prefix in enumerate(group_prefix):
+                if prefix in filename:
+                    groups[j].append(i)
+                    break
+                assert j < len(group_prefix) - 1
+
+        reweight_idx_map = []
+        for g in groups:
+            if len(g) < 50:
+                reweight_idx_map += g * (int(repeat_length / len(g)) + 1)
+        return reweight_idx_map

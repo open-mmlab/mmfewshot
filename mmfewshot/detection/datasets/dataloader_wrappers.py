@@ -98,6 +98,8 @@ class TwoBranchDataloader(object):
     """A dataloader wrapper.
 
     It Create a iterator to iterate two different dataloader simultaneously.
+    Note that `TwoBranchDataloader` dose not support epoch based training and
+    the length of dataloader is decided by main dataset.
 
     Args:
         main_data_loader (nn.DataLoader): DataLoader of main dataset.
@@ -115,8 +117,18 @@ class TwoBranchDataloader(object):
         return self
 
     def __next__(self):
-        main_data = self.main_iter.next()
-        auxiliary_data = self.auxiliary_iter.next()
+        # The iterator actually has infinite length, which can't
+        # be used in epoch based training.
+        try:
+            main_data = next(self.main_iter)
+        except StopIteration:
+            self.main_iter = iter(self.main_data_loader)
+            main_data = next(self.main_iter)
+        try:
+            auxiliary_data = next(self.auxiliary_iter)
+        except StopIteration:
+            self.auxiliary_iter = iter(self.auxiliary_data_loader)
+            auxiliary_data = next(self.auxiliary_iter)
         return {'main_data': main_data, 'auxiliary_data': auxiliary_data}
 
     def __len__(self):

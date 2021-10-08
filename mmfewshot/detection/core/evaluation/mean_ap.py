@@ -5,96 +5,6 @@ from mmdet.core import average_precision, print_map_summary
 from mmdet.core.evaluation.mean_ap import (get_cls_results, tpfp_default,
                                            tpfp_imagenet)
 
-from .voc_bbox_overlaps import voc_bbox_overlaps
-
-
-# TODO: after mmdet merge #5627, this function should be removed
-def voc_tpfp_fn(det_bboxes,
-                gt_bboxes,
-                gt_bboxes_ignore=None,
-                iou_thr=0.5,
-                area_ranges=None):
-    """Check if detected bboxes are true positive or false positive. The bbox
-    overlaps calculation follows the official evaluation code.
-
-    Args:
-        det_bboxes (np.ndarray): Detected bboxes of
-            this image, of shape (m, 5).
-        gt_bboxes (np.ndarray): GT bboxes of this image, of shape (n, 4).
-        gt_bboxes_ignore (np.ndarray): Ignored gt bboxes of this image,
-            of shape (k, 4). Default: None
-        iou_thr (float): IoU threshold to be considered as matched.
-            Default: 0.5.
-        area_ranges (list[tuple] | None): Range of bbox areas to be evaluated,
-            in the format [(min1, max1), (min2, max2), ...]. Default: None.
-    Returns:
-        tuple[np.ndarray]: (tp, fp) whose elements are 0 and 1. The shape of
-            each array is (num_scales, m).
-    """
-    # an indicator of ignored gts
-    gt_ignore_inds = np.concatenate(
-        (np.zeros(gt_bboxes.shape[0], dtype=np.bool),
-         np.ones(gt_bboxes_ignore.shape[0], dtype=np.bool)))
-    # stack gt_bboxes and gt_bboxes_ignore for convenience
-    gt_bboxes = np.vstack((gt_bboxes, gt_bboxes_ignore))
-    num_dets = det_bboxes.shape[0]
-    num_gts = gt_bboxes.shape[0]
-    if area_ranges is None:
-        area_ranges = [(None, None)]
-    num_scales = len(area_ranges)
-    # tp and fp are of shape (num_scales, num_gts), each row is tp or fp of
-    # a certain scale
-    tp = np.zeros((num_scales, num_dets), dtype=np.float32)
-    fp = np.zeros((num_scales, num_dets), dtype=np.float32)
-
-    # if there is no gt bboxes in this image, then all det bboxes
-    # within area range are false positives
-    if gt_bboxes.shape[0] == 0:
-        if area_ranges == [(None, None)]:
-            fp[...] = 1
-        else:
-            det_areas = (det_bboxes[:, 2] - det_bboxes[:, 0]) * (
-                det_bboxes[:, 3] - det_bboxes[:, 1])
-            for i, (min_area, max_area) in enumerate(area_ranges):
-                fp[i, (det_areas >= min_area) & (det_areas < max_area)] = 1
-        return tp, fp
-
-    ious = voc_bbox_overlaps(det_bboxes, gt_bboxes)
-    # for each det, the max iou with all gts
-    ious_max = ious.max(axis=1)
-    # for each det, which gt overlaps most with it
-    ious_argmax = ious.argmax(axis=1)
-    # sort all dets in descending order by scores
-    sort_inds = np.argsort(-det_bboxes[:, -1])
-    for k, (min_area, max_area) in enumerate(area_ranges):
-        gt_covered = np.zeros(num_gts, dtype=bool)
-        # if no area range is specified, gt_area_ignore is all False
-        if min_area is None:
-            gt_area_ignore = np.zeros_like(gt_ignore_inds, dtype=bool)
-        else:
-            gt_areas = (gt_bboxes[:, 2] - gt_bboxes[:, 0]) * (
-                gt_bboxes[:, 3] - gt_bboxes[:, 1])
-            gt_area_ignore = (gt_areas < min_area) | (gt_areas >= max_area)
-        for i in sort_inds:
-            if ious_max[i] >= iou_thr:
-                matched_gt = ious_argmax[i]
-                if not (gt_ignore_inds[matched_gt]
-                        or gt_area_ignore[matched_gt]):
-                    if not gt_covered[matched_gt]:
-                        gt_covered[matched_gt] = True
-                        tp[k, i] = 1
-                    else:
-                        fp[k, i] = 1
-                # otherwise ignore this detected bbox, tp = 0, fp = 0
-            elif min_area is None:
-                fp[k, i] = 1
-            else:
-                bbox = det_bboxes[i, :4]
-                area = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
-                if min_area <= area < max_area:
-                    fp[k, i] = 1
-    return tp, fp
-
 
 def eval_map(det_results,
              annotations,
@@ -104,7 +14,8 @@ def eval_map(det_results,
              dataset=None,
              logger=None,
              tpfp_fn=None,
-             nproc=4):
+             nproc=4,
+             use_legacy_coordinate=False):
     """Evaluate mAP of a dataset. :func:`eval_map` in mmdetection predefine the
     names of classes and thus not support arbitrary class splits.
 
@@ -138,6 +49,10 @@ def eval_map(det_results,
             to evaluate tp & fp. Default None.
         nproc (int): Processes used for computing TP and FP.
             Default: 4.
+        use_legacy_coordinate (bool): Whether to use coordinate system in
+            mmdet v1.x. which means width, height should be
+            calculated as 'x2 - x1 + 1` and 'y2 - y1 + 1' respectively.
+            Default: False.
 
     Returns:
         tuple: (mAP, [dict, dict, ...])
@@ -166,12 +81,12 @@ def eval_map(det_results,
             raise ValueError(
                 f'tpfp_fn has to be a function or None, but got {tpfp_fn}')
 
-        # compute tp and fp for each image with multiple processes
         tpfp = pool.starmap(
             tpfp_fn,
             zip(cls_dets, cls_gts, cls_gts_ignore,
                 [iou_thr for _ in range(num_imgs)],
-                [area_ranges for _ in range(num_imgs)]))
+                [area_ranges for _ in range(num_imgs)],
+                [use_legacy_coordinate for _ in range(num_imgs)]))
         tp, fp = tuple(zip(*tpfp))
         # calculate gt number of each scale
         # ignored gts or gts beyond the specific scale are not counted
