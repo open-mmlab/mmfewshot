@@ -48,7 +48,7 @@ mmcls_version = digit_version(mmcls.__version__)
 
 assert (mmcls_version >= digit_version(mmcls_minimum_version)
         and mmcls_version <= digit_version(mmcls_maximum_version)), \
-    f'MMDET=={mmcls.__version__} is used but incompatible. ' \
+    f'MMCLS=={mmcls.__version__} is used but incompatible. ' \
     f'Please install mmcls>={mmcls_minimum_version},\
      <={mmcls_maximum_version}.'
 

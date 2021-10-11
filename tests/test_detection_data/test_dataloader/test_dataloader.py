@@ -1,6 +1,6 @@
 import torch
 
-from mmfewshot.apis.train import set_random_seed
+from mmfewshot.detection.apis.train import set_random_seed
 from mmfewshot.detection.datasets.builder import (build_dataloader,
                                                   build_dataset)
 
@@ -9,7 +9,7 @@ def test_dataloader():
     set_random_seed(2021)
 
     # test regular and few shot annotations
-    dataconfigs = [{
+    data_configs = [{
         'type': 'NwayKshotDataset',
         'support_way': 5,
         'support_shot': 1,
@@ -106,9 +106,9 @@ def test_dataloader():
         }
     }]
 
-    for dataconfig in dataconfigs:
+    for data_config in data_configs:
 
-        nway_kshot_dataset = build_dataset(cfg=dataconfig)
+        nway_kshot_dataset = build_dataset(cfg=data_config)
         nway_kshot_dataloader = build_dataloader(
             nway_kshot_dataset,
             samples_per_gpu=2,
@@ -124,11 +124,11 @@ def test_dataloader():
                    len(nway_kshot_dataloader.support_data_loader)
             support_labels = data_batch['support_data']['gt_labels'].data[0]
             assert len(set(torch.cat(
-                support_labels).tolist())) == dataconfig['support_way']
+                support_labels).tolist())) == data_config['support_way']
             assert len(torch.cat(support_labels).tolist()) == \
-                   dataconfig['support_way'] * dataconfig['support_shot']
+                   data_config['support_way'] * data_config['support_shot']
 
-    dataconfigs = [{
+    data_configs = [{
         'type': 'QueryAwareDataset',
         'support_way': 3,
         'support_shot': 5,
@@ -225,8 +225,8 @@ def test_dataloader():
         }
     }]
 
-    for dataconfig in dataconfigs:
-        query_aware_dataset = build_dataset(cfg=dataconfig)
+    for data_config in data_configs:
+        query_aware_dataset = build_dataset(cfg=data_config)
         query_aware_dataloader = build_dataloader(
             query_aware_dataset,
             samples_per_gpu=2,
@@ -242,6 +242,6 @@ def test_dataloader():
             support_labels = data_batch['support_data']['gt_labels'].data[0]
             half_batch = len(support_labels) // 2
             assert len(set(torch.cat(support_labels[:half_batch]).tolist())) \
-                   == dataconfig['support_way']
+                   == data_config['support_way']
             assert len(set(torch.cat(support_labels[half_batch:]).tolist())) \
-                   == dataconfig['support_way']
+                   == data_config['support_way']

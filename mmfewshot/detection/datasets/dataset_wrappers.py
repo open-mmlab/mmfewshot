@@ -559,4 +559,6 @@ class TwoBranchDataset(object):
         for g in groups:
             if len(g) < 50:
                 reweight_idx_map += g * (int(repeat_length / len(g)) + 1)
+            else:
+                reweight_idx_map += g
         return reweight_idx_map

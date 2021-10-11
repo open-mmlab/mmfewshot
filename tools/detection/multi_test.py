@@ -141,15 +141,14 @@ def main():
     rank, _ = get_dist_info()
     eval_result_list = []
     # build the dataloader
-    dataset = build_dataset(base_cfg.data.test, task_type=base_cfg.task_type)
+    dataset = build_dataset(base_cfg.data.test)
     # currently only support single images testing
     data_loader = build_dataloader(
         dataset,
         samples_per_gpu=samples_per_gpu,
         workers_per_gpu=base_cfg.data.workers_per_gpu,
         dist=distributed,
-        shuffle=False,
-        round_up=False)
+        shuffle=False)
 
     for i in range(args.start, args.times):
         cfg = copy.deepcopy(base_cfg)
@@ -253,7 +252,7 @@ def main():
                 else:
                     avg_results = dict()
                     for k in eval_result_list[0].keys():
-                        avg_results[f'avg_{k}'] = sum([
+                        avg_results[f'Avg {k}'] = sum([
                             eval_result_list[i][k] for i in range(num_results)
                         ]) / num_results
                     mmcv.dump(avg_results,

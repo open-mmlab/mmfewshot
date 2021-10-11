@@ -159,8 +159,8 @@ def main():
                 f'It will cause UNFAIR data usage. Therefore, seed is set '
                 f'to {seed} for default.')
 
-    np.random.seed(seed)
-    all_seeds = np.random.randint(0, 1000000, args.times)
+    np.random.seed(int(seed))
+    all_seeds = np.random.randint(0, 1000000, args.times).tolist()
     print(f'using seeds for {args.times} times training: ', all_seeds)
 
     # train with saved dataset
@@ -190,7 +190,7 @@ def main():
         meta = dict()
         # log env info
         env_info_dict = collect_env()
-        env_info = '\n'.join([(f'{k}: {v}') for k, v in env_info_dict.items()])
+        env_info = '\n'.join([f'{k}: {v}' for k, v in env_info_dict.items()])
         dash_line = '-' * 60 + '\n'
         logger.info('Environment info:\n' + dash_line + env_info + '\n' +
                     dash_line)
@@ -270,7 +270,8 @@ def main():
                     'mode', 'epoch', 'iter', 'lr', 'memory', 'time',
                     'data_time'
             ]:
-                eval_result.pop(k)
+                if k in eval_result.keys():
+                    eval_result.pop(k)
             logger.info(' '.join(
                 [f'experiment {i} last eval result:'] +
                 [f'{k}: {eval_result[k]}' for k in eval_result.keys()]))
@@ -284,7 +285,7 @@ def main():
             [eval_result_list[i][k] for i in range(num_result)]) / num_result
     logger.info(f'{num_result} times avg eval result:')
     logger.info(' '.join([f'average {num_result} eval results:'] + [
-        f'avg_{k}: {eval_result_list[0][k]}'
+        f'Avg {k}: {eval_result_list[0][k]}'
         for k in eval_result_list[0].keys()
     ]))
 

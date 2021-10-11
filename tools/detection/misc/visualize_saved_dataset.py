@@ -1,18 +1,22 @@
 """Visualized instances of saved dataset.
 
 Example:
-    python3 -m tools.models.visualize_dataset \
-        --src1 ./work_dirs/xx_saved_data.json
+    python tools/detection/misc/visualize_saved_dataset.py \
+        --src ./work_dirs/xx_saved_data.json
         --dir ./vis_images
 """
 import argparse
 import json
 import os
 
-import cv2
 import mmcv
 import numpy as np
 from terminaltables import AsciiTable
+
+try:
+    import cv2
+except ():
+    raise ImportError('please install cv2 mutually')
 
 
 class Visualizer(object):
