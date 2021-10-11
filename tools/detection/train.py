@@ -59,11 +59,11 @@ def parse_args():
         nargs='+',
         action=DictAction,
         help='override some settings in the used config, the key-value pair '
-        'in xxx=yyy format will be merged into config file. If the value to '
-        'be overwritten is a list, it should be like key="[a,b]" or key=a,b '
-        'It also allows nested list/tuple values, e.g. key="[(a,b),(c,d)]" '
-        'Note that the quotation marks are necessary and that no white space '
-        'is allowed.')
+        'in xxx=yyy format will be merged into config file. If the value '
+        'to be overwritten is a list, it should be like key="[a,b]" or '
+        'key=a,b It also allows nested list/tuple values, e.g. '
+        'key="[(a,b),(c,d)]" Note that the quotation marks are necessary '
+        'and that no white space is allowed.')
     parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
@@ -173,31 +173,14 @@ def main():
         set_random_seed(seed, deterministic=args.deterministic)
     meta['seed'] = seed
     meta['exp_name'] = osp.basename(args.config)
-    # get fixed parameters
-    frozen_parameters = cfg.model.pop('frozen_parameters', None)
 
-    model = build_detector(cfg.model)
-    model.init_weights()
-    # freeze parameters by prefix
-    if frozen_parameters is not None:
-        logger.info(f'Frozen parameters: {frozen_parameters}')
-        for name, param in model.named_parameters():
-            for frozen_prefix in frozen_parameters:
-                if frozen_prefix in name:
-                    param.requires_grad = False
-            if param.requires_grad:
-                logger.info(f'Training parameters: {name}')
-    # If save_dataset is set to True, dataset will be saved into json.
-    save_dataset = cfg.data.train.pop('save_dataset', False)
-    datasets = [build_dataset(cfg.data.train)]
-    if save_dataset and rank == 0:
-        save_dataset_path = osp.join(cfg.work_dir,
-                                     f'{timestamp}_saved_data.json')
-        if hasattr(datasets[0], 'save_data_infos'):
-            datasets[0].save_data_infos(save_dataset_path)
-        else:
-            raise AttributeError(f'`save_data_infos` is not implemented'
-                                 f'in {type(datasets[0])}.')
+    # build_detector will do three things, including building model,
+    # initializing weights and freezing parameters (optional).
+    model = build_detector(cfg.model, logger=logger)
+    # build_dataset will do two things, including building dataset
+    # and saving dataset into json file (optional).
+    datasets = [build_dataset(cfg.data.train, rank=rank, timestamp=timestamp)]
+
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
         val_dataset.pipeline = cfg.data.train.pipeline

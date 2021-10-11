@@ -208,20 +208,10 @@ def main():
         meta['seed'] = all_seeds[i]
         meta['exp_name'] = osp.basename(args.config + f'_times_{i}')
 
-        # get fixed parameters
-        frozen_parameters = cfg.model.pop('frozen_parameters', None)
+        # build_detector will do three things, including building model,
+        # initializing weights and freezing parameters (optional).
+        model = build_detector(cfg.model, logger=logger)
 
-        model = build_detector(cfg.model)
-        model.init_weights()
-        # freeze parameters by prefix
-        if frozen_parameters is not None:
-            logger.info(f'Frozen parameters: {frozen_parameters}')
-            for name, param in model.named_parameters():
-                for frozen_prefix in frozen_parameters:
-                    if frozen_prefix in name:
-                        param.requires_grad = False
-                if param.requires_grad:
-                    logger.info(f'Training parameters: {name}')
         # if dataset is wrapped by more than one wrapper, please
         # modify follow code mutually.
         if resume_ann_cfg is not None:
@@ -229,17 +219,11 @@ def main():
                 cfg.data.train.dataset.ann_cfg = resume_ann_cfg[i]
             else:
                 cfg.data.train.ann_cfg = resume_ann_cfg[i]
-        # if save_dataset is True, training set will be saved into json
-        save_dataset = cfg.data.train.pop('save_dataset', False)
-        datasets = [build_dataset(cfg.data.train)]
-        if rank == 0 and save_dataset:
-            save_dataset_path = osp.join(cfg.work_dir,
-                                         f'{timestamp}_saved_data.json')
-            if hasattr(datasets[0], 'save_data_infos'):
-                datasets[0].save_data_infos(save_dataset_path)
-            else:
-                raise AttributeError(f'{type(datasets[0])} requires implement'
-                                     f' save_data_infos for saving dataset.')
+        # build_dataset will do two things, including building dataset
+        # and saving dataset into json file (optional).
+        datasets = [
+            build_dataset(cfg.data.train, rank=rank, timestamp=timestamp)
+        ]
 
         if len(cfg.workflow) == 2:
             val_dataset = copy.deepcopy(cfg.data.val)

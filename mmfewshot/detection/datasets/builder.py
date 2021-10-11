@@ -1,4 +1,5 @@
 import copy
+import os.path as osp
 from functools import partial
 
 from mmcv.parallel import collate
@@ -19,7 +20,10 @@ from .dataset_wrappers import (NwayKshotDataset, QueryAwareDataset,
 from .utils import get_copy_dataset_type
 
 
-def build_dataset(cfg, default_args=None):
+def build_dataset(cfg, default_args=None, rank=None, timestamp=None):
+    # If save_dataset is set to True, dataset will be saved into json.
+    save_dataset = cfg.pop('save_dataset', False)
+
     if isinstance(cfg, (list, tuple)):
         dataset = ConcatDataset([build_dataset(c, default_args) for c in cfg])
     elif cfg['type'] == 'ConcatDataset':
@@ -105,6 +109,16 @@ def build_dataset(cfg, default_args=None):
             reweight_dataset=cfg.get('reweight_dataset', False))
     else:
         dataset = build_from_cfg(cfg, DATASETS, default_args)
+
+    if rank == 0 and save_dataset:
+        save_dataset_path = osp.join(cfg.work_dir,
+                                     f'{timestamp}_saved_data.json')
+        if hasattr(dataset, 'save_data_infos'):
+            dataset.save_data_infos(save_dataset_path)
+        else:
+            raise AttributeError(
+                f'`save_data_infos` is not implemented in {type(dataset)}.')
+
     return dataset
 
 
