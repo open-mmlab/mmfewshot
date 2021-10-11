@@ -7,12 +7,11 @@ _base_ = [
 # FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
 data = dict(
     train=dict(
-        dataset=dict(
-            type='FewShotVOCDefaultDataset',
-            ann_cfg=[dict(method='TFA', setting='SPLIT1_10SHOT')],
-            num_novel_shots=10,
-            num_base_shots=10,
-            classes='ALL_CLASSES_SPLIT1')),
+        type='FewShotVOCDefaultDataset',
+        ann_cfg=[dict(method='TFA', setting='SPLIT1_10SHOT')],
+        num_novel_shots=10,
+        num_base_shots=10,
+        classes='ALL_CLASSES_SPLIT1'),
     val=dict(classes='ALL_CLASSES_SPLIT1'),
     test=dict(classes='ALL_CLASSES_SPLIT1'))
 evaluation = dict(
@@ -29,4 +28,4 @@ runner = dict(max_iters=40000)
 load_from = \
     'work_dirs/' \
     'tfa_faster_rcnn_r101_fpn_voc_split1_base_training/' \
-    'model_reset_surgery.pth'
+    'model_reset_randinit.pth'

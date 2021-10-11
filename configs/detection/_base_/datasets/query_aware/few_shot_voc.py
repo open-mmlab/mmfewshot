@@ -51,7 +51,6 @@ data = dict(
         type='QueryAwareDataset',
         num_support_ways=None,
         num_support_shots=None,
-        repeat_times=50,
         save_dataset=True,
         dataset=dict(
             type='FewShotVOCDataset',

@@ -1,6 +1,6 @@
 # dataset settings
 img_norm_cfg = dict(
-    mean=[102.9801, 115.9465, 122.7717], std=[1.0, 1.0, 1.0], to_rgb=False)
+    mean=[103.530, 116.280, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
 train_multi_pipelines = dict(
     query=[
         dict(type='LoadImageFromFile'),
@@ -43,10 +43,9 @@ data = dict(
         type='NwayKshotDataset',
         num_support_ways=15,
         num_support_shots=1,
-        mutual_support_shot=True,
+        one_support_shot_per_image=True,
         num_used_support_shots=200,
         save_dataset=False,
-        repeat_times=10,
         dataset=dict(
             type='FewShotVOCDataset',
             ann_cfg=[

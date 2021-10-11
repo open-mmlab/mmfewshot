@@ -6,7 +6,7 @@ _base_ = [
 ]
 # classes splits are predefined in FewShotVOCDataset
 data = dict(
-    train=dict(dataset=dict(classes='BASE_CLASSES_SPLIT1')),
+    train=dict(classes='BASE_CLASSES_SPLIT1'),
     val=dict(classes='BASE_CLASSES_SPLIT1'),
     test=dict(classes='BASE_CLASSES_SPLIT1'))
 lr_config = dict(warmup_iters=100, step=[12000, 16000])
@@ -16,3 +16,6 @@ model = dict(
     pretrained='open-mmlab://detectron2/resnet101_caffe',
     backbone=dict(depth=101),
     roi_head=dict(bbox_head=dict(num_classes=15)))
+# base training use normal sampler get better performance in fine-tuning
+use_infinite_sampler = False
+seed = 2021

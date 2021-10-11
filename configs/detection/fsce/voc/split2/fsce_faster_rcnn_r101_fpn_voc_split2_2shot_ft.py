@@ -7,28 +7,28 @@ _base_ = [
 # FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
 data = dict(
     train=dict(
-        dataset=dict(
-            type='FewShotVOCDefaultDataset',
-            ann_cfg=[dict(method='FSCE', setting='SPLIT2_2SHOT')],
-            num_novel_shots=2,
-            num_base_shots=2,
-            classes='ALL_CLASSES_SPLIT2')),
+        type='FewShotVOCDefaultDataset',
+        ann_cfg=[dict(method='FSCE', setting='SPLIT2_2SHOT')],
+        num_novel_shots=2,
+        num_base_shots=2,
+        classes='ALL_CLASSES_SPLIT2'),
     val=dict(classes='ALL_CLASSES_SPLIT2'),
     test=dict(classes='ALL_CLASSES_SPLIT2'))
 evaluation = dict(
-    interval=700, class_splits=['BASE_CLASSES_SPLIT2', 'NOVEL_CLASSES_SPLIT2'])
-checkpoint_config = dict(interval=5000)
+    interval=2500,
+    class_splits=['BASE_CLASSES_SPLIT2', 'NOVEL_CLASSES_SPLIT2'])
+checkpoint_config = dict(interval=2500)
 optimizer = dict(lr=0.001)
 lr_config = dict(
     warmup_iters=20, step=[
-        5000,
+        3000,
     ])
-runner = dict(max_iters=7000)
+runner = dict(max_iters=5000)
 # load_from = 'path of base training model'
 load_from = \
     'work_dirs/' \
     'fsce_faster_rcnn_r101_fpn_voc_split2_base_training/' \
-    'model_reset_surgery.pth'
+    'model_reset_randinit.pth'
 model = dict(frozen_parameters=[
     'backbone', 'neck', 'rpn_head', 'roi_head.bbox_head.shared_fcs.0'
 ])

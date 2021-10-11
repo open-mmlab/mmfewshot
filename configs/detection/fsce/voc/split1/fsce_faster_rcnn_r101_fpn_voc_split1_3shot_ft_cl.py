@@ -8,17 +8,17 @@ _base_ = [
 # FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
 data = dict(
     train=dict(
-        dataset=dict(
-            type='FewShotVOCDefaultDataset',
-            ann_cfg=[dict(method='FSCE', setting='SPLIT1_3SHOT')],
-            num_novel_shots=3,
-            num_base_shots=3,
-            classes='ALL_CLASSES_SPLIT1')),
+        type='FewShotVOCDefaultDataset',
+        ann_cfg=[dict(method='FSCE', setting='SPLIT1_3SHOT')],
+        num_novel_shots=3,
+        num_base_shots=3,
+        classes='ALL_CLASSES_SPLIT1'),
     val=dict(classes='ALL_CLASSES_SPLIT1'),
     test=dict(classes='ALL_CLASSES_SPLIT1'))
 evaluation = dict(
-    interval=700, class_splits=['BASE_CLASSES_SPLIT1', 'NOVEL_CLASSES_SPLIT1'])
-checkpoint_config = dict(interval=5000)
+    interval=4000,
+    class_splits=['BASE_CLASSES_SPLIT1', 'NOVEL_CLASSES_SPLIT1'])
+checkpoint_config = dict(interval=4000)
 optimizer = dict(lr=0.001)
 lr_config = dict(warmup_iters=200, gamma=0.5, step=[4000, 6000])
 runner = dict(max_iters=8000)
@@ -32,7 +32,7 @@ custom_hooks = [
 load_from = \
     'work_dirs/' \
     'fsce_faster_rcnn_r101_fpn_voc_split1_base_training/' \
-    'model_reset_surgery.pth'
+    'model_reset_randinit.pth'
 model = dict(
     roi_head=dict(
         bbox_head=dict(

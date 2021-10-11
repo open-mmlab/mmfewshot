@@ -14,4 +14,4 @@ load_from = None
 resume_from = None
 workflow = [('train', 1)]
 pin_memory = True
-seed = 1234567
+use_infinite_sampler = True

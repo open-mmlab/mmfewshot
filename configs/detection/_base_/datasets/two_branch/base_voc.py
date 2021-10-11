@@ -6,7 +6,11 @@ train_multi_pipelines = dict(
     main=[
         dict(type='LoadImageFromFile'),
         dict(type='LoadAnnotations', with_bbox=True),
-        dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),
+        dict(
+            type='Resize',
+            img_scale=[(1333, 800)],
+            keep_ratio=True,
+            multiscale_mode='value'),
         dict(type='RandomFlip', flip_ratio=0.5),
         dict(type='Normalize', **img_norm_cfg),
         dict(type='Pad', size_divisor=32),
@@ -48,9 +52,12 @@ data_root = 'data/VOCdevkit/'
 data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
+    auxiliary_samples_per_gpu=2,
+    auxiliary_workers_per_gpu=2,
     train=dict(
         type='TwoBranchDataset',
         save_dataset=False,
+        reweight_dataset=False,
         dataset=dict(
             type='FewShotVOCDataset',
             ann_cfg=[
@@ -67,11 +74,11 @@ data = dict(
             classes=None,
             use_difficult=False,
             instance_wise=False,
+            # coordinate_offset=[-1, -1, -1, -1],
             dataset_name='main_dataset'),
         auxiliary_dataset=dict(
             copy_from_main_dataset=True,
             instance_wise=True,
-            min_bbox_size=8,
             dataset_name='auxiliary_dataset')),
     val=dict(
         type='FewShotVOCDataset',
@@ -82,6 +89,7 @@ data = dict(
         ],
         img_prefix=data_root,
         pipeline=test_pipeline,
+        # coordinate_offset=[-1, -1, -1, -1],
         classes=None),
     test=dict(
         type='FewShotVOCDataset',
@@ -93,5 +101,6 @@ data = dict(
         img_prefix=data_root,
         pipeline=test_pipeline,
         test_mode=True,
+        # coordinate_offset=[-1, -1, -1, -1],
         classes=None))
 evaluation = dict(interval=5000, metric='mAP')

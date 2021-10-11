@@ -37,23 +37,20 @@ data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
-        type='RepeatDataset',
-        times=150,
         save_dataset=False,
-        dataset=dict(
-            type='FewShotCocoDataset',
-            ann_cfg=[
-                dict(
-                    type='ann_file',
-                    ann_file='data/few_shot_coco_split/'
-                    'annotations/trainvalno5k.json')
-            ],
-            img_prefix=data_root,
-            num_novel_shots=None,
-            num_base_shots=None,
-            pipeline=train_pipeline,
-            classes='ALL_CLASSES',
-            instance_wise=False)),
+        type='FewShotCocoDataset',
+        ann_cfg=[
+            dict(
+                type='ann_file',
+                ann_file='data/few_shot_coco_split/'
+                'annotations/trainvalno5k.json')
+        ],
+        img_prefix=data_root,
+        num_novel_shots=None,
+        num_base_shots=None,
+        pipeline=train_pipeline,
+        classes='ALL_CLASSES',
+        instance_wise=False),
     val=dict(
         type='FewShotCocoDataset',
         ann_cfg=[
@@ -76,7 +73,7 @@ data = dict(
         test_mode=True,
         classes='ALL_CLASSES'))
 evaluation = dict(
-    interval=5000,
+    interval=4000,
     metric='bbox',
     classwise=True,
     class_splits=['BASE_CLASSES', 'NOVEL_CLASSES'])

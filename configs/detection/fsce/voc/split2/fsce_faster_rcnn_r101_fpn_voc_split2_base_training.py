@@ -6,7 +6,7 @@ _base_ = [
 ]
 # classes splits are predefined in FewShotVOCDataset
 data = dict(
-    train=dict(dataset=dict(classes='BASE_CLASSES_SPLIT2')),
+    train=dict(classes='BASE_CLASSES_SPLIT2'),
     val=dict(classes='BASE_CLASSES_SPLIT2'),
     test=dict(classes='BASE_CLASSES_SPLIT2'))
 lr_config = dict(warmup_iters=100, step=[12000, 16000])

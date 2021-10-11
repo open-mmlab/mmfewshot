@@ -4,6 +4,15 @@ data = dict(samples_per_gpu=32, workers_per_gpu=2)
 model = dict(
     type='BaselineClassifier',
     backbone=dict(type='WRN28x10'),
-    head=dict(type='LinearHead', num_classes=100, in_channels=640),
+    head=dict(type='LinearHead', num_classes=351, in_channels=640),
     meta_test_head=dict(type='LinearHead', num_classes=5, in_channels=640))
+runner = dict(type='EpochBasedRunner', max_epochs=50)
 optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001)
+optimizer_config = dict(grad_clip=None)
+# learning policy
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=5000,
+    warmup_ratio=0.25,
+    step=[25])

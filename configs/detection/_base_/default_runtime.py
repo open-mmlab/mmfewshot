@@ -14,4 +14,5 @@ log_level = 'INFO'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]
-seed = 1234567
+seed = 42
+use_infinite_sampler = True

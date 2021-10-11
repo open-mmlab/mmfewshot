@@ -51,7 +51,6 @@ data = dict(
         type='QueryAwareDataset',
         num_support_ways=2,
         num_support_shots=10,
-        repeat_times=1,
         save_dataset=False,
         dataset=dict(
             type='FewShotCocoDataset',

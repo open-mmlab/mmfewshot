@@ -17,14 +17,23 @@ data = dict(
     val=dict(classes='ALL_CLASSES_SPLIT1'),
     test=dict(classes='ALL_CLASSES_SPLIT1'))
 evaluation = dict(
-    interval=2000,
-    class_splits=['BASE_CLASSES_SPLIT1', 'NOVEL_CLASSES_SPLIT1'])
-checkpoint_config = dict(interval=2000)
-optimizer = dict(lr=0.005)
-lr_config = dict(warmup_iters=500, warmup_ratio=1. / 3, step=[1300, 1700])
+    interval=500, class_splits=['BASE_CLASSES_SPLIT1', 'NOVEL_CLASSES_SPLIT1'])
+checkpoint_config = dict(interval=1000)
+optimizer = dict(
+    lr=0.004,
+    paramwise_cfg=dict(
+        custom_keys={'.bias': dict(lr_mult=2.0, decay_mult=0.0)}))
+lr_config = dict(warmup_iters=500, step=[2000])
 runner = dict(max_iters=2000)
 # load_from = 'path of base training model'
 load_from = \
     'work_dirs/' \
     'mpsr_faster_rcnn_r101_fpn_voc_split1_base_training/' \
     'latest.pth'
+model = dict(
+    roi_head=dict(
+        bbox_head=dict(init_cfg=[
+            dict(
+                type='Normal',
+                override=dict(type='Normal', name='fc_cls', std=0.001))
+        ])))

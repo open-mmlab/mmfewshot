@@ -10,4 +10,4 @@ runner = dict(max_iters=110000)
 model = dict(
     pretrained='open-mmlab://detectron2/resnet101_caffe',
     backbone=dict(depth=101),
-    roi_head=dict(bbox_head=dict(num_classes=60), ))
+    roi_head=dict(bbox_head=dict(num_classes=60)))

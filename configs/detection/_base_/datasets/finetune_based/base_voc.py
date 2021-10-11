@@ -38,25 +38,21 @@ data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
-        type='RepeatDataset',
-        times=1,
+        type='FewShotVOCDataset',
         save_dataset=False,
-        dataset=dict(
-            type='FewShotVOCDataset',
-            ann_cfg=[
-                dict(
-                    type='ann_file',
-                    ann_file=data_root +
-                    'VOC2007/ImageSets/Main/trainval.txt'),
-                dict(
-                    type='ann_file',
-                    ann_file=data_root + 'VOC2012/ImageSets/Main/trainval.txt')
-            ],
-            img_prefix=data_root,
-            pipeline=train_pipeline,
-            classes=None,
-            use_difficult=True,
-            instance_wise=False)),
+        ann_cfg=[
+            dict(
+                type='ann_file',
+                ann_file=data_root + 'VOC2007/ImageSets/Main/trainval.txt'),
+            dict(
+                type='ann_file',
+                ann_file=data_root + 'VOC2012/ImageSets/Main/trainval.txt')
+        ],
+        img_prefix=data_root,
+        pipeline=train_pipeline,
+        classes=None,
+        use_difficult=True,
+        instance_wise=False),
     val=dict(
         type='FewShotVOCDataset',
         ann_cfg=[
@@ -80,4 +76,4 @@ data = dict(
         test_mode=True,
         classes=None,
     ))
-evaluation = dict(interval=2000, metric='mAP')
+evaluation = dict(interval=3000, metric='mAP')

@@ -39,7 +39,8 @@ lr_config = dict(
 log_config = dict(interval=10)
 runner = dict(max_iters=3000)
 # load_from = 'path of base training model'
-load_from = 'work_dirs/arpn_faster_rcnn_r50_c4_coco_base_training/latest.pth'
+load_from = \
+    'work_dirs/attention_rpn_faster_rcnn_r50_c4_coco_base_training/latest.pth'
 
 model = dict(
     frozen_parameters=['backbone'],
