@@ -51,7 +51,7 @@ def build_dataloader(dataset,
                      round_up=True,
                      seed=None,
                      pin_memory=False,
-                     infinite_sampler=False,
+                     use_infinite_sampler=False,
                      **kwargs):
     """Build PyTorch DataLoader.
 
@@ -73,10 +73,10 @@ def build_dataloader(dataset,
         seed (int | None): Random seed. Default:None.
         pin_memory (bool): Whether to use pin_memory for dataloader.
             Default: False.
-        infinite_sampler (bool): Whether to use infinite sampler. Noted that
-            infinite sampler will keep iterator of dataloader running
-            forever, which can avoid the overhead of worker initialization
-            between epochs. Default: False.
+        use_infinite_sampler (bool): Whether to use infinite sampler.
+            Noted that infinite sampler will keep iterator of dataloader
+            running forever, which can avoid the overhead of worker
+            initialization between epochs. Default: False.
         kwargs: any keyword argument to be used to initialize DataLoader
 
     Returns:
@@ -84,7 +84,7 @@ def build_dataloader(dataset,
     """
     rank, world_size = get_dist_info()
     if dist:
-        if infinite_sampler:
+        if use_infinite_sampler:
             sampler = DistributedInfiniteSampler(
                 dataset, world_size, rank, shuffle=shuffle)
         else:
@@ -95,7 +95,7 @@ def build_dataloader(dataset,
         num_workers = workers_per_gpu
     else:
         sampler = InfiniteSampler(dataset, seed=seed, shuffle=shuffle) \
-            if infinite_sampler else None
+            if use_infinite_sampler else None
         batch_size = num_gpus * samples_per_gpu
         num_workers = num_gpus * workers_per_gpu
 

@@ -263,12 +263,9 @@ def test_single_task(model, support_dataloader, query_dataloader,
             outputs['loss'].backward()
             optimizer.step()
     else:  # methods without fine-tune stage
-        model.eval()
-        with torch.no_grad():
-            for i, data in enumerate(support_dataloader):
-                data['gt_label'] = label_wrapper(data['gt_label'],
-                                                 task_class_ids)
-                model.forward(**data, mode='support')
+        for i, data in enumerate(support_dataloader):
+            data['gt_label'] = label_wrapper(data['gt_label'], task_class_ids)
+            model.forward(**data, mode='support')
 
     model.before_forward_query()
     results_list, gt_label_list = [], []

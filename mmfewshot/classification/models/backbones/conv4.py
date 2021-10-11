@@ -8,11 +8,11 @@ class ConvBlock(nn.Module):
         super(ConvBlock, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.conv = nn.Conv2d(in_channels, out_channels, 3, padding=padding)
-        self.bn = nn.BatchNorm2d(out_channels)
-        self.relu = nn.ReLU(inplace=True)
-
-        layers = [self.conv, self.bn, self.relu]
+        layers = [
+            nn.Conv2d(in_channels, out_channels, 3, padding=padding),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True)
+        ]
         if is_pooling:
             layers.append(nn.MaxPool2d(2))
         self.layers = nn.Sequential(*layers)

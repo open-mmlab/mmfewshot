@@ -1,8 +1,9 @@
+import numpy as np
 import torch
 from mmcls.models.builder import CLASSIFIERS
 
 from mmfewshot.classification.datasets import label_wrapper
-from mmfewshot.classification.models.utils import clone_module, update_module
+from mmfewshot.classification.models.utils import convert_maml_module
 from .base import FewShotBaseClassifier
 
 
@@ -26,6 +27,7 @@ class MAMLClassifier(FewShotBaseClassifier):
         self.num_inner_steps = num_inner_steps
         self.inner_lr = inner_lr
         self.first_order = first_order
+        convert_maml_module(self)
 
     def forward(self,
                 img=None,
@@ -77,8 +79,8 @@ class MAMLClassifier(FewShotBaseClassifier):
         This method defines an iteration step during training, except for the
         back propagation and optimizer updating, which are done in an optimizer
         hook. Note that in some complicated cases or models, the whole process
-        including back propagation and optimizer updating are also defined in
-        this method, such as GAN.
+        including back propagation and optimizer updating are also defined
+        in this method, such as GAN.
 
         Args:
             data (dict): The output of dataloader.
@@ -138,33 +140,17 @@ class MAMLClassifier(FewShotBaseClassifier):
         Returns:
             dict[str, Tensor]: a dictionary of loss components
         """
-
-        support_img = support_data['img']
+        support_img, query_img = support_data['img'], query_data['img']
         class_ids = torch.unique(support_data['gt_label']).cpu().tolist()
+        np.random.shuffle(class_ids)
         support_label = label_wrapper(support_data['gt_label'], class_ids)
-        clone_backbone = clone_module(self.backbone)
-        clone_head = clone_module(self.head)
-        second_order = not self.first_order
-        for step in range(self.num_inner_steps):
-            feats = clone_backbone(support_img)
-            inner_loss = clone_head.forward_train(feats, support_label)['loss']
-            parameters = list(clone_backbone.parameters()) + list(
-                clone_head.parameters())
-            grads = torch.autograd.grad(
-                inner_loss,
-                parameters,
-                retain_graph=second_order,
-                create_graph=second_order)
-            for parameter, grad in zip(parameters, grads):
-                if grad is not None:
-                    parameter.update = -self.inner_lr * grad
-            update_module(clone_backbone)
-            update_module(clone_head)
-
-        query_img = query_data['img']
         query_label = label_wrapper(query_data['gt_label'], class_ids)
-        feats = clone_backbone(query_img)
-        loss = clone_head.forward_train(feats, query_label)
+
+        self.fast_adapt(self.num_inner_steps, support_img, support_label)
+        query_feats = self.extract_feat(query_img)
+        loss = self.head.forward_train(query_feats, query_label)
+        for weight in self.parameters():
+            weight.fast = None
         return loss
 
     def forward_support(self, img, gt_label, **kwargs):
@@ -178,8 +164,8 @@ class MAMLClassifier(FewShotBaseClassifier):
         Returns:
             dict[str, Tensor]: A dictionary of loss components
         """
-        x = self.extract_feat(img)
-        return self.head.forward_support(x, gt_label)
+        self.fast_adapt(self.meta_test_cfg['support']['num_inner_steps'], img,
+                        gt_label)
 
     def forward_query(self, img, **kwargs):
         """Forward query data in meta testing.
@@ -194,12 +180,39 @@ class MAMLClassifier(FewShotBaseClassifier):
         x = self.extract_feat(img)
         return self.head.forward_query(x)
 
+    def fast_adapt(self, num_steps, img, labels):
+        """Forward and update fast weight with input images and labels.
+
+        Args:
+            num_steps (int): The number of fast forward and update steps.
+            img (Tensor): With shape (N, C, H, W).
+            labels (Tensor): With shape (N).
+        """
+        fast_parameters = list(self.parameters())
+        for weight in self.parameters():
+            weight.fast = None
+        for step in range(num_steps):
+            feats = self.extract_feat(img)
+            inner_loss = self.head.forward_train(feats, labels)['loss']
+            grads = torch.autograd.grad(
+                inner_loss, fast_parameters, create_graph=True)
+            fast_parameters = []
+            if self.first_order:
+                grads = [g.detach() for g in grads]
+            for k, weight in enumerate(list(self.parameters())):
+                if weight.fast is None:
+                    weight.fast = weight - self.inner_lr * grads[k]
+                else:
+                    weight.fast = weight.fast - self.inner_lr * grads[k]
+                fast_parameters.append(weight.fast)
+
     def before_meta_test(self, meta_test_cfg, **kwargs):
         """Used in meta testing.
 
         This function will be called before the meta testing.
         """
         self.meta_test_cfg = meta_test_cfg
+        self.zero_grad()
 
     def before_forward_support(self, **kwargs):
         """Used in meta testing.
@@ -207,6 +220,8 @@ class MAMLClassifier(FewShotBaseClassifier):
         This function will be called before model forward support data during
         meta testing.
         """
+        for weight in self.parameters():
+            weight.fast = None
         self.backbone.train()
         self.head.train()
 
