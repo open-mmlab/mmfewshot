@@ -1,7 +1,10 @@
+from typing import Dict, List
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcls.models.builder import HEADS
+from torch import Tensor
 
 from mmfewshot.classification.datasets import label_wrapper
 from .base_head import FewShotBaseHead
@@ -19,11 +22,11 @@ class MetaBaselineHead(FewShotBaseHead):
     """
 
     def __init__(self,
-                 temperature=10.0,
-                 learnable_temperature=True,
+                 temperature: float = 10.0,
+                 learnable_temperature: bool = True,
                  *args,
-                 **kwargs):
-        super(MetaBaselineHead, self).__init__(*args, **kwargs)
+                 **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         if learnable_temperature:
             self.temperature = nn.Parameter(torch.tensor(temperature))
         else:
@@ -33,8 +36,9 @@ class MetaBaselineHead(FewShotBaseHead):
         self.mean_support_feats = None
         self.class_ids = None
 
-    def forward_train(self, support_feats, support_labels, query_feats,
-                      query_labels, **kwargs):
+    def forward_train(self, support_feats: Tensor, support_labels: Tensor,
+                      query_feats: Tensor, query_labels: Tensor,
+                      **kwargs) -> Dict:
         """Forward training data.
 
         Args:
@@ -60,12 +64,12 @@ class MetaBaselineHead(FewShotBaseHead):
         losses = self.loss(scores, query_labels)
         return losses
 
-    def forward_support(self, x, gt_label, **kwargs):
+    def forward_support(self, x: Tensor, gt_label: Tensor, **kwargs) -> None:
         """Forward support data in meta testing."""
         self.support_feats.append(x)
         self.support_labels.append(gt_label)
 
-    def forward_query(self, x, **kwargs):
+    def forward_query(self, x: Tensor, **kwargs) -> List:
         """Forward query data in meta testing."""
         cosine_distance = torch.mm(
             F.normalize(x),
@@ -75,7 +79,7 @@ class MetaBaselineHead(FewShotBaseHead):
         pred = list(pred.detach().cpu().numpy())
         return pred
 
-    def before_forward_support(self):
+    def before_forward_support(self) -> None:
         """Used in meta testing.
 
         This function will be called before model forward support data during
@@ -87,7 +91,7 @@ class MetaBaselineHead(FewShotBaseHead):
         self.class_ids = None
         self.mean_support_feats = None
 
-    def before_forward_query(self):
+    def before_forward_query(self) -> None:
         """Used in meta testing.
 
         This function will be called before model forward query data during

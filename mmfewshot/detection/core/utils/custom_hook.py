@@ -1,5 +1,7 @@
+from typing import Sequence
+
 from mmcv.parallel import is_module_wrapper
-from mmcv.runner import HOOKS, Hook
+from mmcv.runner import HOOKS, Hook, Runner
 
 
 @HOOKS.register_module()
@@ -12,14 +14,16 @@ class ContrastiveLossDecayHook(Hook):
         decay_rate (float): Decay rate. Default: 0.5.
     """
 
-    def __init__(self, decay_steps, decay_rate=0.5):
+    def __init__(self,
+                 decay_steps: Sequence[int],
+                 decay_rate: float = 0.5) -> None:
         assert isinstance(
             decay_steps,
             (list, tuple)), '`decay_steps` should be list or tuple.'
         self.decay_steps = decay_steps
         self.decay_rate = decay_rate
 
-    def before_iter(self, runner):
+    def before_iter(self, runner: Runner) -> None:
         runner_iter = runner.iter + 1
         decay_rate = 1.0
         for step in self.decay_steps:

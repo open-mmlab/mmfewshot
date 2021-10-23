@@ -12,9 +12,24 @@ data = dict(
         dataset=dict(ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='data/few_shot_coco_split/'
-                'annotations/trainvalno5k.json')
-        ])))
+                ann_file='data/coco/annotations/instances_train2017.json')
+        ])),
+    val=dict(ann_cfg=[
+        dict(
+            type='ann_file',
+            ann_file='data/coco/annotations/instances_val2017.json')
+    ]),
+    test=dict(ann_cfg=[
+        dict(
+            type='ann_file',
+            ann_file='data/coco/annotations/instances_val2017.json')
+    ]),
+    model_init=dict(ann_cfg=[
+        dict(
+            type='ann_file',
+            ann_file='data/coco/annotations/instances_train2017.json')
+    ]))
+
 optimizer = dict(
     lr=0.004,
     momentum=0.9,

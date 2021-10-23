@@ -1,3 +1,5 @@
+from typing import Dict
+
 from mmcls.models.builder import CLASSIFIERS
 
 from .meta_metric_base import MetaMetricBaseClassifier
@@ -13,6 +15,8 @@ class MetaBaselineClassifier(MetaMetricBaseClassifier):
             the `meta_test_head` only will be built and run in meta testing.
     """
 
-    def __init__(self, head=dict(type='MetaBaselineHead'), *args, **kwargs):
-        super(MetaBaselineClassifier, self).__init__(
-            head=head, *args, **kwargs)
+    def __init__(self,
+                 head: Dict = dict(type='MetaBaselineHead'),
+                 *args,
+                 **kwargs) -> None:
+        super().__init__(head=head, *args, **kwargs)

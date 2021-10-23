@@ -1,6 +1,9 @@
 import copy
+from typing import Dict, List, Optional, Union
 
 from mmcls.models.builder import CLASSIFIERS, build_head
+from torch import Tensor
+from typing_extensions import Literal
 
 from .base import FewShotBaseClassifier
 
@@ -16,15 +19,23 @@ class FinetuneBaseClassifier(FewShotBaseClassifier):
             Default: None.
     """
 
-    def __init__(self, head, meta_test_head=None, *args, **kwargs):
+    def __init__(self,
+                 head: Dict,
+                 meta_test_head: Optional[Dict] = None,
+                 *args,
+                 **kwargs) -> None:
         assert meta_test_head is not None
-        super(FinetuneBaseClassifier, self).__init__(
-            head=head, *args, **kwargs)
+        super().__init__(head=head, *args, **kwargs)
         # meta_test_head only will be built and used in meta testing
         self.meta_test_head_cfg = meta_test_head
         self.meta_test_head = None
 
-    def forward(self, img=None, feats=None, mode='train', **kwargs):
+    def forward(self,
+                img: Tensor = None,
+                feats: Tensor = None,
+                mode: Literal['train', 'support', 'query',
+                              'extract_feat'] = 'train',
+                **kwargs) -> Union[Tensor, Dict, List]:
         """Calls one of (:func:`forward_train`, :func:`forward_query`,
         :func:`forward_support` and :func:`extract_feat`) according to
         the `mode`. The inputs of forward function would change with the
@@ -58,7 +69,11 @@ class FinetuneBaseClassifier(FewShotBaseClassifier):
         else:
             raise ValueError()
 
-    def forward_train(self, gt_label, img=None, feats=None, **kwargs):
+    def forward_train(self,
+                      gt_label: Tensor,
+                      img: Optional[Tensor] = None,
+                      feats: Optional[Tensor] = None,
+                      **kwargs) -> Dict:
         """Forward computation during training.
 
         Input can be either images or extracted features.
@@ -83,16 +98,20 @@ class FinetuneBaseClassifier(FewShotBaseClassifier):
 
         return losses
 
-    def forward_support(self, gt_label, img=None, feats=None, **kwargs):
+    def forward_support(self,
+                        gt_label: Tensor,
+                        img: Optional[Tensor] = None,
+                        feats: Optional[Tensor] = None,
+                        **kwargs) -> Dict:
         """Forward support data in meta testing.
 
         Input can be either images or extracted features.
 
         Args:
-            img (Tensor | None): With shape (N, C, H, W). Default: None.
-            feats (Tensor | None): With shape (N, C).
             gt_label (Tensor): It should be of shape (N, 1) encoding the
                 ground-truth label of input images.
+            img (Tensor | None): With shape (N, C, H, W). Default: None.
+            feats (Tensor | None): With shape (N, C).
 
         Returns:
             dict[str, Tensor]: A dictionary of loss components
@@ -109,7 +128,10 @@ class FinetuneBaseClassifier(FewShotBaseClassifier):
 
         return losses
 
-    def forward_query(self, img=None, feats=None, **kwargs):
+    def forward_query(self,
+                      img: Optional[Tensor] = None,
+                      feats: Optional[Tensor] = None,
+                      **kwargs) -> List:
         """Forward query data in meta testing.
 
         Input can be either images or extracted features.
@@ -128,7 +150,7 @@ class FinetuneBaseClassifier(FewShotBaseClassifier):
             x = feats
         return self.meta_test_head.forward_query(x, **kwargs)
 
-    def before_meta_test(self, meta_test_cfg, **kwargs):
+    def before_meta_test(self, meta_test_cfg: Dict, **kwargs) -> None:
         """Used in meta testing.
 
         This function will be called before the meta testing.
@@ -149,7 +171,7 @@ class FinetuneBaseClassifier(FewShotBaseClassifier):
         self.meta_test_head = build_head(meta_test_head)
         self.meta_test_cfg = meta_test_cfg
 
-    def before_forward_support(self, **kwargs):
+    def before_forward_support(self, **kwargs) -> None:
         """Used in meta testing.
 
         This function will be called before model forward support data during
@@ -159,7 +181,7 @@ class FinetuneBaseClassifier(FewShotBaseClassifier):
         self.meta_test_head.before_forward_support()
         self.meta_test_head.to(self.device)
 
-    def before_forward_query(self, **kwargs):
+    def before_forward_query(self, **kwargs) -> None:
         """Used in meta testing.
 
         This function will be called before model forward query data during

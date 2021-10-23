@@ -1,7 +1,11 @@
+from typing import Optional
+
 import torch
 import torch.nn as nn
 from mmdet.models import LOSSES
 from mmdet.models.losses.utils import weight_reduce_loss
+from torch import Tensor
+from typing_extensions import Literal
 
 
 @LOSSES.register_module()
@@ -17,17 +21,17 @@ class SupervisedContrastiveLoss(nn.Module):
             to increase consistency. Default: 0.5.
         reweight_type (str): Reweight function for contrastive loss.
             Options are ('none', 'exp', 'linear'). Default: 'none'.
-        reduction (str, optional): The method used to reduce the loss into
+        reduction (str): The method used to reduce the loss into
             a scalar. Default: 'mean'. Options are "none", "mean" and "sum".
-        loss_weight (float, optional): Weight of loss. Default: 1.0.
+        loss_weight (float): Weight of loss. Default: 1.0.
     """
 
     def __init__(self,
-                 temperature=0.2,
-                 iou_threshold=0.5,
-                 reweight_type='none',
-                 reduction='mean',
-                 loss_weight=1.0):
+                 temperature: float = 0.2,
+                 iou_threshold: float = 0.5,
+                 reweight_type: Literal['none', 'exp', 'linear'] = 'none',
+                 reduction: Literal['none', 'mean', 'sum'] = 'mean',
+                 loss_weight: float = 1.0) -> None:
         super().__init__()
         assert temperature > 0, 'temperature should be a positive number.'
         self.temperature = temperature
@@ -37,13 +41,13 @@ class SupervisedContrastiveLoss(nn.Module):
         self.loss_weight = loss_weight
 
     def forward(self,
-                features,
-                labels,
-                ious,
-                decay_rate=None,
-                weight=None,
-                avg_factor=None,
-                reduction_override=None):
+                features: Tensor,
+                labels: Tensor,
+                ious: Tensor,
+                decay_rate: Optional[float] = None,
+                weight: Optional[Tensor] = None,
+                avg_factor: Optional[int] = None,
+                reduction_override: Optional[str] = None) -> Tensor:
         """Forward function.
 
         Args:
@@ -51,13 +55,13 @@ class SupervisedContrastiveLoss(nn.Module):
                 of features to be compared and K is the channels.
             labels (tensor): Shape of (N).
             ious (tensor): Shape of (N).
-            decay_rate (float, optional): The decay rate for total loss.
+            decay_rate (float | None): The decay rate for total loss.
                 Default: None.
-            weight (Tensor, optional): The weight of loss for each
+            weight (Tensor | None): The weight of loss for each
                 prediction with shape of (N). Default: None.
-            avg_factor (int, optional): Average factor that is used to average
+            avg_factor (int | None): Average factor that is used to average
                 the loss. Default: None.
-            reduction_override (str, optional): The reduction method used to
+            reduction_override (str | None): The reduction method used to
                 override the original reduction method of the loss.
                 Options are "none", "mean" and "sum". Default: None.
 
@@ -112,7 +116,9 @@ class SupervisedContrastiveLoss(nn.Module):
         return loss_weight * loss
 
     @staticmethod
-    def _get_reweight_func(reweight_type):
+    def _get_reweight_func(
+            reweight_type: Literal['none', 'exp',
+                                   'linear'] = 'none') -> callable:
         """Return corresponding reweight function according to `reweight_type`.
 
         Args:

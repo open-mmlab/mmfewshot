@@ -1,30 +1,32 @@
 import os.path as osp
 import time
+from typing import List, Optional
 
 import mmcv
 import torch
+import torch.nn as nn
 from mmcv.image import tensor2imgs
 from mmcv.parallel import is_module_wrapper
 from mmcv.runner import get_dist_info
 from mmdet.apis.test import collect_results_cpu, collect_results_gpu
 from mmdet.core import encode_mask_results
 from mmdet.utils import get_root_logger
+from torch.utils.data import DataLoader
 
 
-def single_gpu_test(model,
-                    data_loader,
-                    show=False,
-                    out_dir=None,
-                    show_score_thr=0.3):
+def single_gpu_test(model: nn.Module,
+                    data_loader: DataLoader,
+                    show: bool = False,
+                    out_dir: Optional[str] = None,
+                    show_score_thr: float = 0.3) -> List:
     """Test model with single gpu for meta-learning based detector.
 
     Args:
         model (nn.Module): Model to be tested.
-        data_loader (nn.Dataloader): Pytorch data loader.
-        show (bool): Whether to show the image.
-            Default: False.
-        out_dir (str or None): The directory to write the image. Default: None.
-        show_score_thr (float, optional): Minimum score of bboxes to be shown.
+        data_loader (DataLoader): Pytorch data loader.
+        show (bool): Whether to show the image. Default: False.
+        out_dir (str | None): The directory to write the image. Default: None.
+        show_score_thr (float): Minimum score of bboxes to be shown.
             Default: 0.3.
 
     Returns:
@@ -49,7 +51,7 @@ def single_gpu_test(model,
             imgs = tensor2imgs(img_tensor, **img_metas[0]['img_norm_cfg'])
             assert len(imgs) == len(img_metas)
 
-            for i, (img, img_meta) in enumerate(zip(imgs, img_metas)):
+            for j, (img, img_meta) in enumerate(zip(imgs, img_metas)):
                 h, w, _ = img_meta['img_shape']
                 img_show = img[:h, :w, :]
 
@@ -81,12 +83,14 @@ def single_gpu_test(model,
                       for bbox_results, mask_results in result]
         results.extend(result)
 
-        for _ in range(batch_size):
-            prog_bar.update()
+        prog_bar.update(batch_size)
     return results
 
 
-def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
+def multi_gpu_test(model: nn.Module,
+                   data_loader: DataLoader,
+                   tmpdir: str = None,
+                   gpu_collect: bool = False) -> List:
     """Test model with multiple gpus for meta-learning based detector.
 
     This method tests model with multiple gpus and collects the results
@@ -97,7 +101,7 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
 
     Args:
         model (nn.Module): Model to be tested.
-        data_loader (nn.Dataloader): Pytorch data loader.
+        data_loader (Dataloader): Pytorch data loader.
         tmpdir (str): Path of directory to save the temporary results from
             different gpus under cpu mode. Default: None.
         gpu_collect (bool): Option to use either gpu or cpu to collect results.
@@ -124,8 +128,7 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
 
         if rank == 0:
             batch_size = len(result)
-            for _ in range(batch_size * world_size):
-                prog_bar.update()
+            prog_bar.update(batch_size * world_size)
 
     # collect results from all ranks
     if gpu_collect:
@@ -135,7 +138,7 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
     return results
 
 
-def single_gpu_model_init(model, data_loader):
+def single_gpu_model_init(model: nn.Module, data_loader: DataLoader) -> List:
     """Extracting support template features for meta-learning methods in query-
     support fashion with single gpu.
 
@@ -166,7 +169,7 @@ def single_gpu_model_init(model, data_loader):
     return results
 
 
-def multi_gpu_model_init(model, data_loader):
+def multi_gpu_model_init(model: nn.Module, data_loader: DataLoader) -> List:
     """Extracting support template features for meta-learning methods in query-
     support fashion with multi gpus.
 
@@ -180,7 +183,7 @@ def multi_gpu_model_init(model, data_loader):
     model.eval()
     results = []
     dataset = data_loader.dataset
-    rank, world_size = get_dist_info()
+    rank, _ = get_dist_info()
     if rank == 0:
         logger = get_root_logger()
         logger.info('starting model initialization...')

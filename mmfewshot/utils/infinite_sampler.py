@@ -1,4 +1,5 @@
 import itertools
+from typing import Iterable, Iterator, Optional
 
 import numpy as np
 import torch
@@ -13,19 +14,22 @@ class InfiniteSampler(Sampler):
     https://github.com/facebookresearch/detectron2/blob/main/detectron2/data/samplers/grouped_batch_sampler.py
 
     Args:
-        dataset (object): The dataset.
+        dataset (Iterable): The dataset.
         seed (int): Random seed. Default: 0.
         shuffle (bool): Whether shuffle the dataset or not. Default: True.
     """  # noqa: W605
 
-    def __init__(self, dataset, seed=0, shuffle=True):
+    def __init__(self,
+                 dataset: Iterable,
+                 seed: int = 0,
+                 shuffle: bool = True) -> None:
         self.dataset = dataset
         self.seed = seed if seed is not None else 0
         self.shuffle = shuffle
         self.size = len(dataset)
         self.indices = self._indices()
 
-    def _infinite_indices(self):
+    def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
         g = torch.Generator()
         g.manual_seed(self.seed)
@@ -35,15 +39,15 @@ class InfiniteSampler(Sampler):
             else:
                 yield from torch.arange(self.size).tolist()
 
-    def _indices(self):
+    def _indices(self) -> Iterator:
         """Slice the infinite indices by rank."""
         yield from itertools.islice(self._infinite_indices(), 0, None)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         for idx in self.indices:
             yield idx
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Length of base dataset."""
         return self.size
 
@@ -60,7 +64,7 @@ class InfiniteGroupSampler(Sampler):
     https://github.com/facebookresearch/detectron2/blob/main/detectron2/data/samplers/grouped_batch_sampler.py
 
     Args:
-        dataset (object): The dataset.
+        dataset (Iterable): The dataset.
         samples_per_gpu (int): Number of training samples on each GPU, i.e.,
             batch size of each GPU. Default: 1.
         seed (int): Random seed. Default: 0.
@@ -70,7 +74,11 @@ class InfiniteGroupSampler(Sampler):
             that all indices in a batch is in a group. Default: True.
     """  # noqa: W605
 
-    def __init__(self, dataset, samples_per_gpu=1, seed=0, shuffle=True):
+    def __init__(self,
+                 dataset: Iterable,
+                 samples_per_gpu: int = 1,
+                 seed: int = 0,
+                 shuffle: bool = True) -> None:
         self.dataset = dataset
         self.samples_per_gpu = samples_per_gpu
         self.seed = seed if seed is not None else 0
@@ -85,7 +93,7 @@ class InfiniteGroupSampler(Sampler):
         self.size = len(dataset)
         self.indices = self._indices_of_rank()
 
-    def _infinite_indices(self):
+    def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
         g = torch.Generator()
         g.manual_seed(self.seed)
@@ -95,11 +103,11 @@ class InfiniteGroupSampler(Sampler):
             else:
                 yield from torch.arange(self.size).tolist()
 
-    def _indices_of_rank(self):
+    def _indices_of_rank(self) -> Iterator:
         """Slice the infinite indices by rank."""
         yield from itertools.islice(self._infinite_indices(), 0, None)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         # once batch size is reached, yield the indices
         for idx in self.indices:
             flag = self.flag[idx]
@@ -110,7 +118,7 @@ class InfiniteGroupSampler(Sampler):
                     yield group_buffer[i]
                 del group_buffer[:]
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Length of base dataset."""
         return self.size
 
@@ -127,20 +135,20 @@ class DistributedInfiniteSampler(Sampler):
     https://github.com/facebookresearch/detectron2/blob/main/detectron2/data/samplers/grouped_batch_sampler.py
 
     Args:
-        dataset (object): The dataset.
-        num_replicas (int, optional): Number of processes participating in
+        dataset (Iterable): The dataset.
+        num_replicas (int | None): Number of processes participating in
             distributed training. Default: None.
-        rank (int, optional): Rank of current process. Default: None.
+        rank (int | None): Rank of current process. Default: None.
         seed (int): Random seed. Default: 0.
         shuffle (bool): Whether shuffle the dataset or not. Default: True.
     """  # noqa: W605
 
     def __init__(self,
-                 dataset,
-                 num_replicas=None,
-                 rank=None,
-                 seed=0,
-                 shuffle=True):
+                 dataset: Iterable,
+                 num_replicas: Optional[int] = None,
+                 rank: Optional[int] = None,
+                 seed: int = 0,
+                 shuffle: bool = True) -> None:
         _rank, _num_replicas = get_dist_info()
         if num_replicas is None:
             num_replicas = _num_replicas
@@ -154,7 +162,7 @@ class DistributedInfiniteSampler(Sampler):
         self.size = len(dataset)
         self.indices = self._indices_of_rank()
 
-    def _infinite_indices(self):
+    def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
         g = torch.Generator()
         g.manual_seed(self.seed)
@@ -167,12 +175,12 @@ class DistributedInfiniteSampler(Sampler):
             else:
                 yield from torch.arange(self.size).tolist()
 
-    def _indices_of_rank(self):
+    def _indices_of_rank(self) -> Iterator:
         """Slice the infinite indices by rank."""
         yield from itertools.islice(self._infinite_indices(), self.rank, None,
                                     self.num_replicas)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         for idx in self.indices:
             yield idx
 
@@ -192,12 +200,12 @@ class DistributedInfiniteGroupSampler(Sampler):
     https://github.com/facebookresearch/detectron2/blob/main/detectron2/data/samplers/grouped_batch_sampler.py
 
     Args:
-        dataset (object): The dataset.
+        dataset (Iterable): The dataset.
         samples_per_gpu (int): Number of training samples on each GPU, i.e.,
             batch size of each GPU. Default: 1.
-        num_replicas (int, optional): Number of processes participating in
+        num_replicas (int | None): Number of processes participating in
             distributed training. Default: None.
-        rank (int, optional): Rank of current process. Default: None.
+        rank (int | None): Rank of current process. Default: None.
         seed (int): Random seed. Default: 0.
         shuffle (bool): Whether shuffle the indices of a dummy `epoch`, it
             should be noted that `shuffle` can not guarantee that you can
@@ -206,12 +214,12 @@ class DistributedInfiniteGroupSampler(Sampler):
     """  # noqa: W605
 
     def __init__(self,
-                 dataset,
-                 samples_per_gpu=1,
-                 num_replicas=None,
-                 rank=None,
-                 seed=0,
-                 shuffle=True):
+                 dataset: Iterable,
+                 samples_per_gpu: int = 1,
+                 num_replicas: Optional[int] = None,
+                 rank: Optional[int] = None,
+                 seed: int = 0,
+                 shuffle: bool = True) -> None:
         _rank, _num_replicas = get_dist_info()
         if num_replicas is None:
             num_replicas = _num_replicas
@@ -233,7 +241,7 @@ class DistributedInfiniteGroupSampler(Sampler):
         self.size = len(dataset)
         self.indices = self._indices_of_rank()
 
-    def _infinite_indices(self):
+    def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
         g = torch.Generator()
         g.manual_seed(self.seed)
@@ -246,12 +254,12 @@ class DistributedInfiniteGroupSampler(Sampler):
             else:
                 yield from torch.arange(self.size).tolist()
 
-    def _indices_of_rank(self):
+    def _indices_of_rank(self) -> Iterator:
         """Slice the infinite indices by rank."""
         yield from itertools.islice(self._infinite_indices(), self.rank, None,
                                     self.num_replicas)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         # once batch size is reached, yield the indices
         for idx in self.indices:
             flag = self.flag[idx]
@@ -262,7 +270,7 @@ class DistributedInfiniteGroupSampler(Sampler):
                     yield group_buffer[i]
                 del group_buffer[:]
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Length of base dataset."""
         return self.size
 

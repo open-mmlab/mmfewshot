@@ -1,9 +1,11 @@
 import math
+from typing import Dict, List, Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcls.models.builder import HEADS
+from torch import Tensor
 
 from mmfewshot.classification.datasets.utils import label_wrapper
 from .base_head import FewShotBaseHead
@@ -25,13 +27,13 @@ class RelationHead(FewShotBaseHead):
     """
 
     def __init__(self,
-                 in_channels,
-                 feature_size=(7, 7),
-                 hidden_channels=8,
-                 loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
+                 in_channels: int,
+                 feature_size: Tuple[int] = (7, 7),
+                 hidden_channels: int = 8,
+                 loss: Dict = dict(type='CrossEntropyLoss', loss_weight=1.0),
                  *args,
-                 **kwargs):
-        super(RelationHead, self).__init__(loss=loss, *args, **kwargs)
+                 **kwargs) -> None:
+        super().__init__(loss=loss, *args, **kwargs)
 
         self.in_channels = in_channels
         self.feature_size = feature_size
@@ -46,7 +48,7 @@ class RelationHead(FewShotBaseHead):
         self.support_labels = []
         self.prototype_feats = None
 
-    def init_layer(self):
+    def init_layer(self) -> None:
         self.layer1 = nn.Sequential(
             nn.Conv2d(
                 self.in_channels * 2,
@@ -71,7 +73,7 @@ class RelationHead(FewShotBaseHead):
         self.fc2 = nn.Linear(self.hidden_channels, 1)
         self.relu = nn.ReLU(inplace=True)
 
-    def init_weights(self):
+    def init_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
@@ -83,7 +85,7 @@ class RelationHead(FewShotBaseHead):
                 m.weight.data.normal_(0, 0.01)
                 m.bias.data.fill_(1)
 
-    def forward_relation_module(self, x):
+    def forward_relation_module(self, x: Tensor) -> Tensor:
         """Forward function for relation module."""
         out = self.layer1(x)
         out = self.layer2(out)
@@ -92,8 +94,9 @@ class RelationHead(FewShotBaseHead):
         out = self.fc2(out)
         return out
 
-    def forward_train(self, support_feats, support_labels, query_feats,
-                      query_labels, **kwargs):
+    def forward_train(self, support_feats: Tensor, support_labels: Tensor,
+                      query_feats: Tensor, query_labels: Tensor,
+                      **kwargs) -> Dict:
         """Forward training data.
 
         Args:
@@ -144,12 +147,12 @@ class RelationHead(FewShotBaseHead):
 
         return losses
 
-    def forward_support(self, x, gt_label, **kwargs):
+    def forward_support(self, x: Tensor, gt_label: Tensor, **kwargs) -> None:
         """Forward support data in meta testing."""
         self.support_feats.append(x)
         self.support_labels.append(gt_label)
 
-    def forward_query(self, x, **kwargs):
+    def forward_query(self, x: Tensor, **kwargs) -> List:
         """Forward query data in meta testing."""
         assert self.prototype_feats is not None
         num_way, c, h, w = self.prototype_feats.size()
@@ -169,7 +172,7 @@ class RelationHead(FewShotBaseHead):
         pred = list(pred.detach().cpu().numpy())
         return pred
 
-    def before_forward_support(self):
+    def before_forward_support(self) -> None:
         """Used in meta testing.
 
         This function will be called before model forward support data during
@@ -180,7 +183,7 @@ class RelationHead(FewShotBaseHead):
         self.support_labels.clear()
         self.prototype_feats = None
 
-    def before_forward_query(self):
+    def before_forward_query(self) -> None:
         """Used in meta testing.
 
         This function will be called before model forward query data during

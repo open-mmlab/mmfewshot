@@ -2,6 +2,7 @@ import time
 
 from mmcv.runner import EpochBasedRunner
 from mmcv.runner.builder import RUNNERS
+from torch.utils.data import DataLoader
 
 
 @RUNNERS.register_module()
@@ -11,7 +12,7 @@ class InfiniteEpochBasedRunner(EpochBasedRunner):
     This runner train models epoch by epoch.
     """
 
-    def train(self, data_loader, **kwargs):
+    def train(self, data_loader: DataLoader, **kwargs) -> None:
         self.model.train()
         self.mode = 'train'
         self.data_loader = data_loader

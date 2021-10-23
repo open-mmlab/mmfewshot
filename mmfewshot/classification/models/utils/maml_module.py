@@ -4,24 +4,30 @@ https://github.com/RL-VIG/LibFewShot.
 This file is only used in method maml for fast adaptation.
 """
 
+from typing import Tuple, Union
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import Tensor
 
 
 class LinearWithFastWeight(nn.Linear):
 
-    def __init__(self, in_features, out_features, bias=True):
-        super(LinearWithFastWeight, self).__init__(in_features, out_features)
+    def __init__(self,
+                 in_features: int,
+                 out_features: int,
+                 bias: bool = True) -> None:
+        super().__init__(in_features, out_features)
         # Lazy hack to add fast weight link
         self.weight.fast = None
         self.bias.fast = None
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         if self.weight.fast is not None and self.bias.fast is not None:
             out = F.linear(x, self.weight.fast, self.bias.fast)
         else:
-            out = super(LinearWithFastWeight, self).forward(x)
+            out = super().forward(x)
         return out
 
 
@@ -29,14 +35,14 @@ class Conv2dWithFastWeight(nn.Conv2d):
 
     def __init__(
         self,
-        in_channels,
-        out_channels,
-        kernel_size,
-        stride=1,
-        padding=0,
-        bias=True,
-    ):
-        super(Conv2dWithFastWeight, self).__init__(
+        in_channels: int,
+        out_channels: int,
+        kernel_size: Union[int, Tuple],
+        stride: Union[int, Tuple] = 1,
+        padding: Union[int, Tuple, str] = 0,
+        bias: bool = True,
+    ) -> None:
+        super().__init__(
             in_channels,
             out_channels,
             kernel_size,
@@ -49,7 +55,7 @@ class Conv2dWithFastWeight(nn.Conv2d):
         if self.bias is not None:
             self.bias.fast = None
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         if self.bias is None:
             if self.weight.fast is not None:
                 out = F.conv2d(
@@ -60,7 +66,7 @@ class Conv2dWithFastWeight(nn.Conv2d):
                     padding=self.padding,
                 )
             else:
-                out = super(Conv2dWithFastWeight, self).forward(x)
+                out = super().forward(x)
         else:
             if self.weight.fast is not None and self.bias.fast is not None:
                 out = F.conv2d(
@@ -71,20 +77,20 @@ class Conv2dWithFastWeight(nn.Conv2d):
                     padding=self.padding,
                 )
             else:
-                out = super(Conv2dWithFastWeight, self).forward(x)
+                out = super().forward(x)
 
         return out
 
 
 class BatchNorm2dWithFastWeight(nn.BatchNorm2d):
 
-    def __init__(self, num_features):
-        super(BatchNorm2dWithFastWeight, self).__init__(num_features)
+    def __init__(self, num_features: int) -> None:
+        super().__init__(num_features)
         # Lazy hack to add fast weight link
         self.weight.fast = None
         self.bias.fast = None
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         # batch_norm momentum hack: follow hack of Kate
         # Rakelly in pytorch-maml/src/layers.py
         running_mean = torch.zeros(x.data.size()[1]).cuda()
@@ -112,7 +118,7 @@ class BatchNorm2dWithFastWeight(nn.BatchNorm2d):
         return out
 
 
-def convert_maml_module(module):
+def convert_maml_module(module: nn.Module) -> nn.Module:
     """Convert a normal model to MAML model.
 
     Replace nn.Linear with LinearWithFastWeight, nn.Conv2d with

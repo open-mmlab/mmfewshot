@@ -1,7 +1,10 @@
 import numpy as np
 
 
-def voc_bbox_overlaps(bboxes1, bboxes2, mode='iou', eps=1e-6):
+def voc_bbox_overlaps(bboxes1: np.ndarray,
+                      bboxes2: np.ndarray,
+                      mode: str = 'iou',
+                      eps: float = 1e-6) -> np.ndarray:
     """Calculate the ious between each bbox of bboxes1 and bboxes2. The
     calculation follows the official evaluation code of Pascal VOC dataset.
 
@@ -12,7 +15,7 @@ def voc_bbox_overlaps(bboxes1, bboxes2, mode='iou', eps=1e-6):
             over foreground).
         eps (float): Constant variable to avoid division by zero.
     Returns:
-        ious (ndarray): With Shape (n, k).
+        ious (np.ndarray): With Shape (n, k).
     """
 
     assert mode in ['iou', 'iof']

@@ -1,6 +1,8 @@
 import copy
+from typing import Optional
 
 import torch
+from mmcv.utils import ConfigDict
 from mmdet.models.builder import DETECTORS
 
 from .query_support_detector import QuerySupportDetector
@@ -24,23 +26,23 @@ class MetaRCNN(QuerySupportDetector):
         train_cfg (dict | None): Training config. Useless in CenterNet,
             but we keep this variable for SingleStageDetector. Default: None.
         test_cfg (dict | None): Testing config of CenterNet. Default: None.
-        pretrained (str, optional): model pretrained path. Default: None.
-        init_cfg (dict or list[dict], optional): Initialization config dict.
+        pretrained (str | None): model pretrained path. Default: None.
+        init_cfg (dict | list[dict] | None): Initialization config dict.
             Default: None
     """
 
     def __init__(self,
-                 backbone,
-                 neck=None,
-                 support_backbone=None,
-                 support_neck=None,
-                 rpn_head=None,
-                 roi_head=None,
-                 train_cfg=None,
-                 test_cfg=None,
-                 pretrained=None,
-                 init_cfg=None):
-        super(MetaRCNN, self).__init__(
+                 backbone: ConfigDict,
+                 neck: Optional[ConfigDict] = None,
+                 support_backbone: Optional[ConfigDict] = None,
+                 support_neck: Optional[ConfigDict] = None,
+                 rpn_head: Optional[ConfigDict] = None,
+                 roi_head: Optional[ConfigDict] = None,
+                 train_cfg: Optional[ConfigDict] = None,
+                 test_cfg: Optional[ConfigDict] = None,
+                 pretrained: Optional[ConfigDict] = None,
+                 init_cfg: Optional[ConfigDict] = None) -> None:
+        super().__init__(
             backbone=backbone,
             neck=neck,
             support_backbone=support_backbone,
@@ -143,8 +145,8 @@ class MetaRCNN(QuerySupportDetector):
                 `filename`, `ori_shape`, `pad_shape`, and `img_norm_cfg`.
                 For details on the values of these keys see
                 :class:`mmdet.datasets.pipelines.Collect`.
-            proposals (list[Tensor], optional): override rpn proposals with
-                custom proposals. Use when `with_rpn` is False.
+            proposals (list[Tensor] | None): override rpn proposals with
+                custom proposals. Use when `with_rpn` is False. Default: None.
             rescale (bool): If True, return boxes in original image space.
 
         Returns:

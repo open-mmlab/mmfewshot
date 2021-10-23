@@ -1,6 +1,7 @@
 import os.path as osp
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
+from typing import Dict, List, Optional, Sequence, Union
 
 import mmcv
 import numpy as np
@@ -9,7 +10,7 @@ from mmdet.core import eval_recalls
 from mmdet.datasets.builder import DATASETS
 
 from mmfewshot.detection.core import eval_map
-from .few_shot_custom import FewShotCustomDataset
+from .few_shot_base import FewShotBaseDataset
 
 # pre-defined classes split for few shot setting
 VOC_SPLIT = dict(
@@ -41,7 +42,7 @@ VOC_SPLIT = dict(
 
 
 @DATASETS.register_module()
-class FewShotVOCDataset(FewShotCustomDataset):
+class FewShotVOCDataset(FewShotBaseDataset):
     """VOC dataset for few shot detection.
 
     Args:
@@ -79,16 +80,16 @@ class FewShotVOCDataset(FewShotCustomDataset):
     """
 
     def __init__(self,
-                 classes=None,
-                 num_novel_shots=None,
-                 num_base_shots=None,
-                 ann_shot_filter=None,
-                 use_difficult=False,
-                 min_bbox_area=None,
-                 dataset_name=None,
-                 test_mode=False,
-                 coordinate_offset=[-1, -1, 0, 0],
-                 **kwargs):
+                 classes: Optional[Union[str, Sequence[str]]] = None,
+                 num_novel_shots: Optional[int] = None,
+                 num_base_shots: Optional[int] = None,
+                 ann_shot_filter: Optional[Dict] = None,
+                 use_difficult: bool = False,
+                 min_bbox_area: Optional[Union[int, float]] = None,
+                 dataset_name: Optional[str] = None,
+                 test_mode: bool = False,
+                 coordinate_offset: List[int] = [-1, -1, 0, 0],
+                 **kwargs) -> None:
         if dataset_name is None:
             self.dataset_name = 'Test dataset' \
                 if test_mode else 'Train dataset'
@@ -116,14 +117,14 @@ class FewShotVOCDataset(FewShotCustomDataset):
                 f'num_novel_shots/num_base_shots at the same time.'
         self.coordinate_offset = coordinate_offset
         self.use_difficult = use_difficult
-        super(FewShotVOCDataset, self).__init__(
+        super().__init__(
             classes=None,
             ann_shot_filter=ann_shot_filter,
             dataset_name=dataset_name,
             test_mode=test_mode,
             **kwargs)
 
-    def get_classes(self, classes):
+    def get_classes(self, classes: Union[str, Sequence[str]]) -> List[str]:
         """Get class names.
 
         Args:
@@ -156,7 +157,7 @@ class FewShotVOCDataset(FewShotCustomDataset):
             raise ValueError(f'Unsupported type {type(classes)} of classes.')
         return class_names
 
-    def _create_ann_shot_filter(self):
+    def _create_ann_shot_filter(self) -> Dict:
         """generate `ann_shot_filter` with `num_novel_shots` and
         `num_base_shots`."""
         ann_shot_filter = {}
@@ -169,7 +170,7 @@ class FewShotVOCDataset(FewShotCustomDataset):
                 ann_shot_filter[class_name] = self.num_base_shots
         return ann_shot_filter
 
-    def load_annotations(self, ann_cfg):
+    def load_annotations(self, ann_cfg: List[Dict]) -> List[Dict]:
         """support to load annotation from two type of ann_cfg.
 
         Args:
@@ -208,11 +209,17 @@ class FewShotVOCDataset(FewShotCustomDataset):
 
         return data_infos
 
-    def load_annotations_xml(self, ann_file, classes=None):
+    def load_annotations_xml(
+            self,
+            ann_file: str,
+            classes: Optional[List[str]] = None) -> List[Dict]:
         """Load annotation from XML style ann_file.
 
         Args:
             ann_file (str): Path of XML file.
+            classes (list[str] | None): Specific classes to load form xml file.
+                If set to None, it will use classes of whole dataset.
+                Default: None.
 
         Returns:
             list[dict]: Annotation info from XML file.
@@ -266,16 +273,20 @@ class FewShotVOCDataset(FewShotCustomDataset):
                     ann=ann_info))
         return data_infos
 
-    def _get_xml_ann_info(self, dataset_year, img_id, classes=None):
+    def _get_xml_ann_info(self,
+                          dataset_year: str,
+                          img_id: str,
+                          classes: Optional[List[str]] = None) -> Dict:
         """Get annotation from XML file by img_id.
 
         Args:
             dataset_year (str): Year of voc dataset. Options are
                 'VOC2007', 'VOC2012'
             img_id (str): Id of image.
-            classes (list): Specific classes to load form xml file.
-                If set to None, it will use classes of whole dataset.
-                Default: None.
+            classes (list[str] | None): Specific classes to load form
+                xml file. If set to None, it will use classes of whole
+                dataset. Default: None.
+
         Returns:
             dict: Annotation info of specified id with specified class.
         """
@@ -346,7 +357,9 @@ class FewShotVOCDataset(FewShotCustomDataset):
             labels_ignore=labels_ignore.astype(np.int64))
         return ann_info
 
-    def _filter_imgs(self, min_size=32, min_bbox_area=None):
+    def _filter_imgs(self,
+                     min_size: int = 32,
+                     min_bbox_area: Optional[int] = None) -> List[int]:
         """Filter images not meet the demand.
 
         Args:
@@ -381,12 +394,12 @@ class FewShotVOCDataset(FewShotCustomDataset):
         return valid_inds
 
     def evaluate(self,
-                 results,
-                 metric='mAP',
-                 logger=None,
-                 proposal_nums=(100, 300, 1000),
-                 iou_thr=0.5,
-                 class_splits=None):
+                 results: List[Sequence],
+                 metric: Union[str, List[str]] = 'mAP',
+                 logger: Optional[object] = None,
+                 proposal_nums: Sequence[int] = (100, 300, 1000),
+                 iou_thr: Optional[Union[float, Sequence[float]]] = 0.5,
+                 class_splits: Optional[List[str]] = None) -> Dict:
         """Evaluate the predictions results in VOC protocol, and support to
         return evaluate results of specific categories.
 
@@ -394,7 +407,7 @@ class FewShotVOCDataset(FewShotCustomDataset):
             results (list[list | tuple]): Predictions of the model.
             metric (str | list[str]): Metrics to be evaluated. Options are
                 'mAP', 'recall'. Default: mAP.
-            logger (logging.Logger | str, optional): Logger used for printing
+            logger (logging.Logger | None): Logger used for printing
                 related information during evaluation. Default: None.
             proposal_nums (Sequence[int]): Proposal number used for evaluating
                 recalls, such as recall@100, recall@1000.
@@ -499,10 +512,10 @@ class FewShotVOCCopyDataset(FewShotVOCDataset):
             dataset. Example: [dict(data_infos=FewShotVOCDataset.data_infos)]
     """
 
-    def __init__(self, ann_cfg, **kwargs):
-        super(FewShotVOCCopyDataset, self).__init__(ann_cfg=ann_cfg, **kwargs)
+    def __init__(self, ann_cfg: Union[List[Dict], Dict], **kwargs) -> None:
+        super().__init__(ann_cfg=ann_cfg, **kwargs)
 
-    def ann_cfg_parser(self, ann_cfg):
+    def ann_cfg_parser(self, ann_cfg: Union[List[Dict], Dict]) -> List[Dict]:
         """Parse annotation config from a copy of other dataset's `data_infos`.
 
         Args:
@@ -545,80 +558,31 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
             For example: [dict(method='TFA', setting='SPILT1_1shot')].
     """
 
+    voc_benchmark = {
+        f'SPLIT{split}_{shot}SHOT': [
+            dict(
+                type='ann_file',
+                ann_file=f'data/few_shot_voc_split/{shot}shot/'
+                f'box_{shot}shot_{class_name}_train.txt',
+                ann_classes=[class_name])
+            for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
+        ]
+        for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
+    }
+
     # pre-defined annotation config for model reproducibility
     DEFAULT_ANN_CONFIG = dict(
-        TFA={
-            f'SPLIT{split}_{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_voc_split/{shot}shot/'
-                    f'box_{shot}shot_{class_name}_train.txt',
-                    ann_classes=[class_name])
-                for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
-            ]
-            for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
-        },
-        FSCE={
-            f'SPLIT{split}_{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_voc_split/{shot}shot/'
-                    f'box_{shot}shot_{class_name}_train.txt',
-                    ann_classes=[class_name])
-                for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
-            ]
-            for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
-        },
-        Attention_RPN={
-            f'SPLIT{split}_{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_voc_split/{shot}shot/'
-                    f'box_{shot}shot_{class_name}_train.txt',
-                    ann_classes=[class_name])
-                for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
-            ]
-            for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
-        },
-        MPSR={
-            f'SPLIT{split}_{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_voc_split/{shot}shot/'
-                    f'box_{shot}shot_{class_name}_train.txt',
-                    ann_classes=[class_name])
-                for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
-            ]
-            for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
-        },
-        MetaRCNN={
-            f'SPLIT{split}_{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_voc_split/{shot}shot/'
-                    f'box_{shot}shot_{class_name}_train.txt',
-                    ann_classes=[class_name])
-                for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
-            ]
-            for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
-        },
-        FSDetView={
-            f'SPLIT{split}_{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_voc_split/{shot}shot/'
-                    f'box_{shot}shot_{class_name}_train.txt',
-                    ann_classes=[class_name])
-                for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']
-            ]
-            for shot in [1, 2, 3, 5, 10] for split in [1, 2, 3]
-        })
+        TFA=voc_benchmark,
+        FSCE=voc_benchmark,
+        Attention_RPN=voc_benchmark,
+        MPSR=voc_benchmark,
+        MetaRCNN=voc_benchmark,
+        FSDetView=voc_benchmark)
 
-    def __init__(self, ann_cfg, **kwargs):
-        super(FewShotVOCDefaultDataset, self).__init__(
-            ann_cfg=ann_cfg, **kwargs)
+    def __init__(self, ann_cfg: List[Dict], **kwargs) -> None:
+        super().__init__(ann_cfg=ann_cfg, **kwargs)
 
-    def ann_cfg_parser(self, ann_cfg):
+    def ann_cfg_parser(self, ann_cfg: List[Dict]) -> List[Dict]:
         """Parse pre-defined annotation config to annotation information.
 
         Args:

@@ -2,6 +2,7 @@ import copy
 import json
 import os.path as osp
 import warnings
+from typing import Dict, List, Optional, Sequence, Union
 
 import numpy as np
 from mmdet.datasets.builder import DATASETS
@@ -14,8 +15,8 @@ from .utils import NumpyEncoder
 
 
 @DATASETS.register_module()
-class FewShotCustomDataset(CustomDataset):
-    """Custom dataset for few shot detection.
+class FewShotBaseDataset(CustomDataset):
+    """Base dataset for few shot detection.
 
     The main differences with normal detection dataset fall in two aspects.
 
@@ -54,9 +55,9 @@ class FewShotCustomDataset(CustomDataset):
               ann_classes=['dog', 'cat'])
             - loading annotation from a json file saved by dataset.
               example:dict(type='saved_dataset', ann_file='path/to/ann_file')
-        classes (str | Sequence[str]): Classes for model training and
+        classes (str | Sequence[str] | None): Classes for model training and
             provide fixed label for each class.
-        pipeline (list[dict]): Config to specify processing pipeline.
+        pipeline (list[dict] | None): Config to specify processing pipeline.
             Used in normal dataset. Default: None.
         multi_pipelines (dict[list[dict]]): Config to specify
             data pipelines for corresponding data flow.
@@ -68,15 +69,15 @@ class FewShotCustomDataset(CustomDataset):
                   process pipeline.
                 - support (list[dict]): Config for support-data
                   process pipeline.
-        data_root (str | None): Data root for ``ann_cfg``,
-            ``img_prefix``, ``seg_prefix``, ``proposal_file`` if specified.
+        data_root (str | None): Data root for ``ann_cfg``, `img_prefix``,
+            ``seg_prefix``, ``proposal_file`` if specified. Default: None.
         test_mode (bool): If set True, annotation will not be loaded.
             Default: False.
         filter_empty_gt (bool): If set true, images without bounding
             boxes of the dataset's classes will be filtered out. This option
             only works when `test_mode=False`, i.e., we never filter images
             during tests. Default: Ture.
-        min_bbox_size (int | float, optional): The minimum size of bounding
+        min_bbox_size (int | float | None): The minimum size of bounding
             boxes in the images. If the size of a bounding box is less than
             ``min_bbox_size``, it would be added to ignored field.
             Default: None.
@@ -97,20 +98,20 @@ class FewShotCustomDataset(CustomDataset):
     CLASSES = None
 
     def __init__(self,
-                 ann_cfg,
-                 classes,
-                 pipeline=None,
-                 multi_pipelines=None,
-                 data_root=None,
-                 img_prefix='',
-                 seg_prefix=None,
-                 proposal_file=None,
-                 test_mode=False,
-                 filter_empty_gt=True,
-                 min_bbox_size=None,
-                 ann_shot_filter=None,
-                 instance_wise=False,
-                 dataset_name=None):
+                 ann_cfg: List[Dict],
+                 classes: Union[str, Sequence[str], None],
+                 pipeline: Optional[List[Dict]] = None,
+                 multi_pipelines: Optional[Dict[str, List[Dict]]] = None,
+                 data_root: Optional[str] = None,
+                 img_prefix: str = '',
+                 seg_prefix: Optional[str] = None,
+                 proposal_file: Optional[str] = None,
+                 test_mode: bool = False,
+                 filter_empty_gt: bool = True,
+                 min_bbox_size: Optional[Union[int, float]] = None,
+                 ann_shot_filter: Optional[Dict] = None,
+                 instance_wise: bool = False,
+                 dataset_name: Optional[str] = None) -> None:
         self.data_root = data_root
         self.img_prefix = img_prefix
         self.seg_prefix = seg_prefix
@@ -241,7 +242,7 @@ class FewShotCustomDataset(CustomDataset):
         logger = get_root_logger()
         logger.info(self.__repr__())
 
-    def ann_cfg_parser(self, ann_cfg):
+    def ann_cfg_parser(self, ann_cfg: List[Dict]) -> List[Dict]:
         """Parse annotation config to annotation information.
 
         Args:
@@ -273,7 +274,7 @@ class FewShotCustomDataset(CustomDataset):
                 f'ann_file and saved_dataset'
         return self.load_annotations(ann_cfg)
 
-    def get_ann_info(self, idx):
+    def get_ann_info(self, idx: int) -> Dict:
         """Get annotation by index.
 
         When override this function please make sure same annotations are used
@@ -288,7 +289,10 @@ class FewShotCustomDataset(CustomDataset):
 
         return copy.deepcopy(self.data_infos[idx]['ann'])
 
-    def prepare_train_img(self, idx, pipeline_key=None, gt_idx=None):
+    def prepare_train_img(self,
+                          idx: int,
+                          pipeline_key: Optional[str] = None,
+                          gt_idx: Optional[List[int]] = None) -> Dict:
         """Get training data and annotations after pipeline.
 
         Args:
@@ -326,7 +330,8 @@ class FewShotCustomDataset(CustomDataset):
         else:
             return self.multi_pipelines[pipeline_key](results)
 
-    def _filter_annotations(self, data_infos, ann_shot_filter):
+    def _filter_annotations(self, data_infos: List[Dict],
+                            ann_shot_filter: Dict) -> List[Dict]:
         """Filter out extra annotations of specific class, while annotations of
         classes not in filter remain unchanged and the ignored annotations will
         be removed.
@@ -394,7 +399,7 @@ class FewShotCustomDataset(CustomDataset):
                     ann=selected_ann))
         return new_data_infos
 
-    def _filter_bboxs(self, min_bbox_size):
+    def _filter_bboxs(self, min_bbox_size: int) -> List[Dict]:
         new_data_infos = []
         for data_info in self.data_infos:
             ann = data_info['ann']
@@ -425,7 +430,7 @@ class FewShotCustomDataset(CustomDataset):
             new_data_infos.append(data_info)
         return new_data_infos
 
-    def _set_group_flag(self):
+    def _set_group_flag(self) -> None:
         """Set flag according to image aspect ratio.
 
         Images with aspect ratio greater than 1 will be set as group 1,
@@ -436,9 +441,9 @@ class FewShotCustomDataset(CustomDataset):
         """
         self.flag = np.zeros(len(self), dtype=np.uint8)
 
-    def load_annotations_saved(self, ann_cfg):
+    def load_annotations_saved(self, ann_file: str) -> List[Dict]:
         """Load data_infos from saved json."""
-        with open(ann_cfg) as f:
+        with open(ann_file) as f:
             data_infos = json.load(f)
         meta_idx = None
         for i, data_info in enumerate(data_infos):
@@ -465,7 +470,7 @@ class FewShotCustomDataset(CustomDataset):
             data_infos.pop(meta_idx)
         return data_infos
 
-    def save_data_infos(self, output_path):
+    def save_data_infos(self, output_path: str) -> None:
         """Save data_infos into json."""
         meta_info = [{'CLASSES': self.CLASSES, 'img_prefix': self.img_prefix}]
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -476,7 +481,7 @@ class FewShotCustomDataset(CustomDataset):
                 indent=4,
                 cls=NumpyEncoder)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Print the number of instances of each class."""
         result = (f'\n{self.__class__.__name__} {self.dataset_name} '
                   f'with number of images {len(self)}, '

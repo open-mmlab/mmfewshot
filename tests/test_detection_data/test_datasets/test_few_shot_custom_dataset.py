@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from mmfewshot.detection.datasets import FewShotCustomDataset
+from mmfewshot.detection.datasets import FewShotBaseDataset
 
 data_infos = [
     {
@@ -55,7 +55,7 @@ data_infos = [
 ]
 
 
-@patch('mmfewshot.detection.datasets.FewShotCustomDataset.load_annotations',
+@patch('mmfewshot.detection.datasets.FewShotBaseDataset.load_annotations',
        MagicMock(return_value=data_infos))
 def test_few_shot_custom_dataset():
     dataconfig = {
@@ -78,7 +78,7 @@ def test_few_shot_custom_dataset():
         'classes': ('cat', 'dog', 'person', 'car', 'bird')
     }
 
-    few_shot_custom_dataset = FewShotCustomDataset(**dataconfig)
+    few_shot_custom_dataset = FewShotBaseDataset(**dataconfig)
     original_data_infos = copy.deepcopy(few_shot_custom_dataset.data_infos)
 
     # test prepare_train_img()

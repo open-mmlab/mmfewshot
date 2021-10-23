@@ -6,14 +6,14 @@ from mmcv.parallel.data_container import DataContainer
 from torch.utils.data.dataloader import default_collate
 
 
-def multi_pipeline_collate_fn(batch, samples_per_gpu=1):
+def multi_pipeline_collate_fn(batch, samples_per_gpu: int = 1):
     """Puts each data field into a tensor/DataContainer with outer dimension
     batch size. This is mainly used in query_support dataloader. The main
     difference with the :func:`collate_fn`  in mmcv is it can process
     list[list[DataContainer]].
 
     Extend default_collate to add support for
-    :type:`~mmcv.parallel.DataContainer`. There are 3 cases.
+    :type:`~mmcv.parallel.DataContainer`. There are 3 cases:
 
     1. cpu_only = True, e.g., meta data.
     2. cpu_only = False, stack = True, e.g., images tensors.

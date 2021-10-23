@@ -3,16 +3,16 @@ import logging
 import os.path as osp
 import tempfile
 from collections import OrderedDict
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 
 import mmcv
 import numpy as np
 from mmcv.utils import print_log
-from mmdet.core import eval_recalls
 from mmdet.datasets.api_wrappers import COCO, COCOeval
 from mmdet.datasets.builder import DATASETS
 from terminaltables import AsciiTable
 
-from .few_shot_custom import FewShotCustomDataset
+from .few_shot_base import FewShotBaseDataset
 
 # pre-defined classes split for few shot setting
 COCO_SPLIT = dict(
@@ -50,7 +50,7 @@ COCO_SPLIT = dict(
 
 
 @DATASETS.register_module()
-class FewShotCocoDataset(FewShotCustomDataset):
+class FewShotCocoDataset(FewShotBaseDataset):
     """COCO dataset for few shot detection.
 
     Args:
@@ -78,14 +78,14 @@ class FewShotCocoDataset(FewShotCustomDataset):
     """
 
     def __init__(self,
-                 classes=None,
-                 num_novel_shots=None,
-                 num_base_shots=None,
-                 ann_shot_filter=None,
-                 min_bbox_area=None,
-                 dataset_name=None,
-                 test_mode=False,
-                 **kwargs):
+                 classes: Optional[Union[str, Sequence[str]]] = None,
+                 num_novel_shots: Optional[int] = None,
+                 num_base_shots: Optional[int] = None,
+                 ann_shot_filter: Optional[Dict[str, int]] = None,
+                 min_bbox_area: Optional[Union[int, float]] = None,
+                 dataset_name: Optional[str] = None,
+                 test_mode: bool = False,
+                 **kwargs) -> None:
         if dataset_name is None:
             self.dataset_name = 'Test dataset' \
                 if test_mode else 'Train dataset'
@@ -113,21 +113,21 @@ class FewShotCocoDataset(FewShotCustomDataset):
         self.coco = None
         self.img_ids = None
 
-        super(FewShotCocoDataset, self).__init__(
+        super().__init__(
             classes=None,
             ann_shot_filter=ann_shot_filter,
             dataset_name=dataset_name,
             test_mode=test_mode,
             **kwargs)
 
-    def get_classes(self, classes):
+    def get_classes(self, classes: Union[str, Sequence[str]]) -> List[str]:
         """Get class names.
 
         Args:
             classes (str | Sequence[str]): Classes for model training and
-            provide fixed label for each class. When classes is string,
-            it will load pre-defined classes in `FewShotCocoDataset`.
-            For example: 'NOVEL_CLASSES'.
+                provide fixed label for each class. When classes is string,
+                it will load pre-defined classes in `FewShotCocoDataset`.
+                For example: 'NOVEL_CLASSES'.
 
         Returns:
             list[str]: list of class names.
@@ -152,7 +152,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
             raise ValueError(f'Unsupported type {type(classes)} of classes.')
         return class_names
 
-    def _create_ann_shot_filter(self):
+    def _create_ann_shot_filter(self) -> Dict:
         """generate ann_shot_filter by novel and base classes."""
         ann_shot_filter = {}
         if self.num_novel_shots is not None:
@@ -163,7 +163,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
                 ann_shot_filter[class_name] = self.num_base_shots
         return ann_shot_filter
 
-    def load_annotations(self, ann_cfg):
+    def load_annotations(self, ann_cfg: List[Dict]) -> List[Dict]:
         """Support to Load annotation from two type of ann_cfg.
 
             - type of 'ann_file': COCO-style annotation file.
@@ -186,7 +186,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
                                  f'{ann_cfg_["type"]} in ann_cfg.')
         return data_infos
 
-    def load_annotations_coco(self, ann_file):
+    def load_annotations_coco(self, ann_file: str) -> List[Dict]:
         """Load annotation from COCO style annotation file.
 
         Args:
@@ -225,7 +225,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
         ), f'{self.dataset_name}: Annotation ids in {ann_file} are not unique!'
         return data_infos
 
-    def _get_ann_info(self, data_info):
+    def _get_ann_info(self, data_info: Dict) -> Dict:
         """Get COCO annotation by index.
 
         Args:
@@ -240,7 +240,9 @@ class FewShotCocoDataset(FewShotCustomDataset):
         ann_info = self.coco.load_anns(ann_ids)
         return self._parse_ann_info(data_info, ann_info)
 
-    def _filter_imgs(self, min_size=32, min_bbox_area=None):
+    def _filter_imgs(self,
+                     min_size: int = 32,
+                     min_bbox_area: Optional[int] = None) -> List[int]:
         """Filter images not meet the demand.
 
         Args:
@@ -275,7 +277,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
         self.img_ids = valid_img_ids
         return valid_inds
 
-    def _parse_ann_info(self, img_info, ann_info):
+    def _parse_ann_info(self, img_info: Dict, ann_info: List[Dict]) -> Dict:
         """Parse bbox and mask annotation.
 
         Args:
@@ -326,12 +328,12 @@ class FewShotCocoDataset(FewShotCustomDataset):
 
         return ann
 
-    def xyxy2xywh(self, bbox):
+    def xyxy2xywh(self, bbox: np.ndarray) -> List[float]:
         """Convert ``xyxy`` style bounding boxes to ``xywh`` style for COCO
         evaluation.
 
         Args:
-            bbox (numpy.ndarray): The bounding boxes, shape (4, ), in
+            bbox (np.ndarray): The bounding boxes, shape (4, ), in
                 ``xyxy`` order.
 
         Returns:
@@ -346,7 +348,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
             _bbox[3] - _bbox[1],
         ]
 
-    def _proposal2json(self, results):
+    def _proposal2json(self, results: List[np.ndarray]) -> List[Dict]:
         """Convert proposal results to COCO json style."""
         json_results = []
         for idx in range(len(self)):
@@ -361,7 +363,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
                 json_results.append(data)
         return json_results
 
-    def _det2json(self, results):
+    def _det2json(self, results: List[np.ndarray]) -> List[Dict]:
         """Convert detection results to COCO json style."""
         json_results = []
         for idx in range(len(self)):
@@ -378,7 +380,8 @@ class FewShotCocoDataset(FewShotCustomDataset):
                     json_results.append(data)
         return json_results
 
-    def results2json(self, results, outfile_prefix):
+    def results2json(self, results: List[Union[List, Tuple, np.ndarray]],
+                     outfile_prefix: str) -> Dict:
         """Dump the detection results to a COCO style json file.
 
         There are 3 types of results: proposals, bbox predictions, mask
@@ -411,31 +414,10 @@ class FewShotCocoDataset(FewShotCustomDataset):
             raise TypeError('invalid type of results')
         return result_files
 
-    def fast_eval_recall(self, results, proposal_nums, iou_thrs, logger=None):
-        gt_bboxes = []
-        for i in range(len(self.img_ids)):
-            ann_ids = self.coco.get_ann_ids(img_ids=self.img_ids[i])
-            ann_info = self.coco.load_anns(ann_ids)
-            if len(ann_info) == 0:
-                gt_bboxes.append(np.zeros((0, 4)))
-                continue
-            bboxes = []
-            for ann in ann_info:
-                if ann.get('ignore', False) or ann['iscrowd']:
-                    continue
-                x1, y1, w, h = ann['bbox']
-                bboxes.append([x1, y1, x1 + w, y1 + h])
-            bboxes = np.array(bboxes, dtype=np.float32)
-            if bboxes.shape[0] == 0:
-                bboxes = np.zeros((0, 4))
-            gt_bboxes.append(bboxes)
-
-        recalls = eval_recalls(
-            gt_bboxes, results, proposal_nums, iou_thrs, logger=logger)
-        ar = recalls.mean(axis=1)
-        return ar
-
-    def format_results(self, results, jsonfile_prefix=None, **kwargs):
+    def format_results(self,
+                       results: List[Union[Tuple, np.ndarray]],
+                       jsonfile_prefix: Optional[str] = None,
+                       **kwargs) -> Tuple[Dict, object]:
         """Format the results to json (standard format for COCO evaluation).
 
         Args:
@@ -464,15 +446,15 @@ class FewShotCocoDataset(FewShotCustomDataset):
         return result_files, tmp_dir
 
     def evaluate(self,
-                 results,
-                 metric='bbox',
-                 logger=None,
-                 jsonfile_prefix=None,
-                 classwise=False,
-                 proposal_nums=(100, 300, 1000),
-                 iou_thrs=None,
-                 metric_items=None,
-                 class_splits=None):
+                 results: List[Sequence],
+                 metric: Union[str, List[str]] = 'bbox',
+                 logger: Optional[object] = None,
+                 jsonfile_prefix: Optional[str] = None,
+                 classwise: bool = False,
+                 proposal_nums: Sequence[int] = (100, 300, 1000),
+                 iou_thrs: Optional[Union[float, Sequence[float]]] = None,
+                 metric_items: Optional[Union[List[str], str]] = None,
+                 class_splits: Optional[List[str]] = None) -> Dict:
         """Evaluation in COCO protocol and summary results of different splits
         of classes.
 
@@ -480,7 +462,7 @@ class FewShotCocoDataset(FewShotCustomDataset):
             results (list[list | tuple]): Testing results of the dataset.
             metric (str | list[str]): Metrics to be evaluated. Options are
                 'bbox', 'proposal', 'proposal_fast'. Default: 'bbox'
-            logger (logging.Logger | str | None): Logger used for printing
+            logger (logging.Logger | None): Logger used for printing
                 related information during evaluation. Default: None.
             jsonfile_prefix (str | None): The prefix of json files. It includes
                 the file path and the prefix of filename, e.g., "a/b/prefix".
@@ -489,12 +471,12 @@ class FewShotCocoDataset(FewShotCustomDataset):
             proposal_nums (Sequence[int]): Proposal number used for evaluating
                 recalls, such as recall@100, recall@1000.
                 Default: (100, 300, 1000).
-            iou_thrs (Sequence[float], optional): IoU threshold used for
+            iou_thrs (Sequence[float] | float | None): IoU threshold used for
                 evaluating recalls/mAPs. If set to a list, the average of all
                 IoUs will also be computed. If not specified, [0.50, 0.55,
                 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95] will be used.
                 Default: None.
-            metric_items (list[str] | str, optional): Metric items that will
+            metric_items (list[str] | str | None): Metric items that will
                 be returned. If not specified, ``['AR@100', 'AR@300',
                 'AR@1000', 'AR_s@1000', 'AR_m@1000', 'AR_l@1000' ]`` will be
                 used when ``metric=='proposal'``, ``['mAP', 'mAP_50', 'mAP_75',
@@ -531,17 +513,6 @@ class FewShotCocoDataset(FewShotCustomDataset):
             if logger is None:
                 msg = '\n' + msg
             print_log(msg, logger=logger)
-
-            if metric == 'proposal_fast':
-                ar = self.fast_eval_recall(
-                    results, proposal_nums, iou_thrs, logger='silent')
-                log_msg = []
-                for i, num in enumerate(proposal_nums):
-                    eval_results[f'AR@{num}'] = ar[i]
-                    log_msg.append(f'\nAR@{num}\t{ar[i]:.4f}')
-                log_msg = ''.join(log_msg)
-                print_log(log_msg, logger=logger)
-                continue
 
             iou_type = 'bbox' if metric == 'proposal' else metric
             if metric not in result_files:
@@ -588,35 +559,35 @@ class FewShotCocoDataset(FewShotCustomDataset):
         return eval_results
 
     def _evaluate_by_class_split(self,
-                                 cocoGt,
-                                 cocoDt,
-                                 iou_type,
-                                 proposal_nums,
-                                 iou_thrs,
-                                 cat_ids,
-                                 metric,
-                                 metric_items,
-                                 eval_results,
-                                 classwise,
-                                 logger,
-                                 split_name=''):
+                                 cocoGt: object,
+                                 cocoDt: object,
+                                 iou_type: str,
+                                 proposal_nums: Sequence[int],
+                                 iou_thrs: Union[float, Sequence[float]],
+                                 cat_ids: List[int],
+                                 metric: str,
+                                 metric_items: Union[str, List[str]],
+                                 eval_results: Dict,
+                                 classwise: bool,
+                                 logger: object,
+                                 split_name: str = '') -> Dict:
         """Evaluation a split of classes in COCO protocol.
 
         Args:
             cocoGt (object): coco object with ground truth annotations.
             cocoDt (object): coco object with detection results.
             iou_type (str): Type of IOU.
-            proposal_nums (int): Number of proposals.
-            iou_thrs (list[int]): Thresholds of IoU.
+            proposal_nums (Sequence[int]): Number of proposals.
+            iou_thrs (float | Sequence[float]): Thresholds of IoU.
             cat_ids (list[int]): Class ids of classes to be evaluated.
             metric (str): Metrics to be evaluated.
-            metric_items (list[str] | str, optional): Metric items that will
+            metric_items (str | list[str]): Metric items that will
                 be returned. If not specified, ``['AR@100', 'AR@300',
                 'AR@1000', 'AR_s@1000', 'AR_m@1000', 'AR_l@1000' ]`` will be
                 used when ``metric=='proposal'``, ``['mAP', 'mAP_50', 'mAP_75',
                 'mAP_s', 'mAP_m', 'mAP_l']`` will be used when
                 ``metric=='bbox'``.
-            eval_results dict[str, float]: COCO style evaluation metric.
+            eval_results (dict[str, float]): COCO style evaluation metric.
             classwise (bool): Whether to evaluating the AP for each class.
             split_name (str): Name of split. Default:''.
 
@@ -738,10 +709,10 @@ class FewShotCocoCopyDataset(FewShotCocoDataset):
             dataset. Example: [dict(data_infos=FewShotCocoDataset.data_infos)]
     """
 
-    def __init__(self, ann_cfg, **kwargs):
-        super(FewShotCocoCopyDataset, self).__init__(ann_cfg=ann_cfg, **kwargs)
+    def __init__(self, ann_cfg: Union[List[Dict], Dict], **kwargs) -> None:
+        super().__init__(ann_cfg=ann_cfg, **kwargs)
 
-    def ann_cfg_parser(self, ann_cfg):
+    def ann_cfg_parser(self, ann_cfg: Union[List[Dict], Dict]) -> List[Dict]:
         """Parse annotation config from a copy of other dataset's `data_infos`.
 
         Args:
@@ -781,86 +752,38 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
             annotation from `DEFAULT_ANN_CONFIG`.
             For example: [dict(method='TFA', setting='1shot')].
     """
+    coco_benchmark = {
+        f'{shot}SHOT': [
+            dict(
+                type='ann_file',
+                ann_file=f'data/few_shot_coco_split/{shot}shot/'
+                f'full_box_{shot}shot_{class_name}_trainval.json')
+            for class_name in COCO_SPLIT['ALL_CLASSES']
+        ]
+        for shot in [10, 30]
+    }
+
     # pre-defined annotation config for model reproducibility
     DEFAULT_ANN_CONFIG = dict(
-        TFA={
-            f'{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_coco_split/{shot}shot/'
-                    f'full_box_{shot}shot_{class_name}_trainval.json')
-                for class_name in COCO_SPLIT['ALL_CLASSES']
-            ]
-            for shot in [10, 30]
-        },
-        FSCE={
-            f'{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_coco_split/{shot}shot/'
-                    f'full_box_{shot}shot_{class_name}_trainval.json')
-                for class_name in COCO_SPLIT['ALL_CLASSES']
-            ]
-            for shot in [10, 30]
-        },
+        Benchmark=coco_benchmark,
+        TFA=coco_benchmark,
+        FSCE=coco_benchmark,
         Attention_RPN={
-            '10SHOT': [
+            **coco_benchmark, 'official_10SHOT': [
                 dict(
                     type='ann_file',
-                    ann_file='data/few_shot_coco_split/fsod_10shot/'
-                    'final_split_voc_10_shot_instances_train2017.json')
-            ],
-            '10SHOT14': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_coco_split/10shot/'
-                    f'full_box_10shot_{class_name}_trainval.json')
-                for class_name in COCO_SPLIT['ALL_CLASSES']
-            ],
-            '30SHOT14': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_coco_split/'
-                    f'30shot/full_box_30shot_{class_name}_trainval.json')
-                for class_name in COCO_SPLIT['ALL_CLASSES']
+                    ann_file='data/few_shot_ann/coco/attention_rpn_10shot/'
+                    'official_10_shot.json')
             ]
         },
-        MPSR={
-            f'{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_coco_split/{shot}shot/'
-                    f'full_box_{shot}shot_{class_name}_trainval.json')
-                for class_name in COCO_SPLIT['ALL_CLASSES']
-            ]
-            for shot in [10, 30]
-        },
-        MetaRCNN={
-            f'{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_coco_split/{shot}shot/'
-                    f'full_box_{shot}shot_{class_name}_trainval.json')
-                for class_name in COCO_SPLIT['ALL_CLASSES']
-            ]
-            for shot in [10, 30]
-        },
-        FSDetView={
-            f'{shot}SHOT': [
-                dict(
-                    type='ann_file',
-                    ann_file=f'data/few_shot_coco_split/{shot}shot/'
-                    f'full_box_{shot}shot_{class_name}_trainval.json')
-                for class_name in COCO_SPLIT['ALL_CLASSES']
-            ]
-            for shot in [10, 30]
-        })
+        MPSR=coco_benchmark,
+        MetaRCNN=coco_benchmark,
+        FSDetView=coco_benchmark)
 
-    def __init__(self, ann_cfg, **kwargs):
-        super(FewShotCocoDefaultDataset, self).__init__(
-            ann_cfg=ann_cfg, **kwargs)
+    def __init__(self, ann_cfg: List[Dict], **kwargs) -> None:
+        super().__init__(ann_cfg=ann_cfg, **kwargs)
 
-    def ann_cfg_parser(self, ann_cfg):
+    def ann_cfg_parser(self, ann_cfg: List[Dict]) -> List[Dict]:
         """Parse pre-defined annotation config to annotation information.
 
         Args:

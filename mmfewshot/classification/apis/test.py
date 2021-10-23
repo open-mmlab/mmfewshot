@@ -1,15 +1,18 @@
 import copy
+from typing import Dict, Optional, Union
 
 import mmcv
 import numpy as np
 import torch
 from mmcls.apis.test import collect_results_cpu
-from mmcv.parallel import MMDataParallel
+from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import build_optimizer, get_dist_info
 from mmcv.utils import print_log
+from torch import nn
+from torch.utils.data import DataLoader
 
 from mmfewshot.classification.datasets import label_wrapper
-from mmfewshot.classification.utils import DeviceWrapper
+from mmfewshot.classification.utils import MetaTestParallel
 
 Z_SCORE = {
     0.50: 0.674,
@@ -21,16 +24,16 @@ Z_SCORE = {
 }
 
 
-def single_gpu_meta_test(model,
-                         num_test_tasks,
-                         support_dataloader,
-                         query_dataloader,
-                         test_set_dataloader,
-                         meta_test_cfg=None,
-                         eval_kwargs=None,
-                         logger=None,
-                         confidence_interval=0.95,
-                         show_task_results=False):
+def single_gpu_meta_test(model: Union[MMDataParallel, nn.Module],
+                         num_test_tasks: int,
+                         support_dataloader: DataLoader,
+                         query_dataloader: DataLoader,
+                         test_set_dataloader: Optional[DataLoader] = None,
+                         meta_test_cfg: Optional[Dict] = None,
+                         eval_kwargs: Optional[Dict] = None,
+                         logger: Optional[object] = None,
+                         confidence_interval: float = 0.95,
+                         show_task_results: bool = False) -> Dict:
     """Meta testing on single gpu.
 
     Args:
@@ -41,11 +44,11 @@ def single_gpu_meta_test(model,
         query_dataloader (:obj:`DataLoader`): A PyTorch dataloader of query
             data.
         test_set_dataloader (:obj:`DataLoader`): A PyTorch dataloader of all
-            test data.
+            test data. Default: None.
         meta_test_cfg (dict): Config for meta testing. Default: None.
         eval_kwargs (dict): Any keyword argument to be used for evaluation.
             Default: None.
-        logger (logging.Logger | optional): Logger used for printing
+        logger (logging.Logger | None): Logger used for printing
                 related information during evaluation. Default: None.
         confidence_interval (float): Confidence interval. Default: 0.95.
         show_task_results (bool): Whether to record the eval result of
@@ -57,12 +60,12 @@ def single_gpu_meta_test(model,
     """
     assert confidence_interval in Z_SCORE.keys()
     # To avoid deep copying the whole :obj:`MMDataParallel`, we simply
-    # copy the module and wrap it with a :class:`DeviceWrapper`.
-    # DeviceWrapper will send data to the same device as model.
+    # copy the module and wrap it with a :class:`MetaTestParallel`.
+    # MetaTestParallel will send data to the same device as model.
     if isinstance(model, MMDataParallel):
-        model = DeviceWrapper(copy.deepcopy(model.module))
+        model = MetaTestParallel(copy.deepcopy(model.module))
     else:
-        model = DeviceWrapper(copy.deepcopy(model))
+        model = MetaTestParallel(copy.deepcopy(model))
 
     if meta_test_cfg.get('fast_test', False):
         print_log('extracting features from all images.', logger=logger)
@@ -99,16 +102,16 @@ def single_gpu_meta_test(model,
     return meta_eval_results
 
 
-def multi_gpu_meta_test(model,
-                        num_test_tasks,
-                        support_dataloader,
-                        query_dataloader,
-                        test_set_dataloader=None,
-                        meta_test_cfg=None,
-                        eval_kwargs=None,
-                        logger=None,
-                        confidence_interval=0.95,
-                        show_task_results=False):
+def multi_gpu_meta_test(model: MMDistributedDataParallel,
+                        num_test_tasks: int,
+                        support_dataloader: DataLoader,
+                        query_dataloader: DataLoader,
+                        test_set_dataloader: Optional[DataLoader] = None,
+                        meta_test_cfg: Optional[Dict] = None,
+                        eval_kwargs: Optional[Dict] = None,
+                        logger: Optional[object] = None,
+                        confidence_interval: float = 0.95,
+                        show_task_results: bool = False) -> Dict:
     """Distributed meta testing on multiple gpu, the number of test tasks for
     each GPU is ceil(num_test_tasks / world_size).
 
@@ -124,7 +127,7 @@ def multi_gpu_meta_test(model,
         meta_test_cfg (dict): Config for meta testing. Default: None.
         eval_kwargs (dict): Any keyword argument to be used for evaluation.
             Default: None.
-        logger (logging.Logger | optional): Logger used for printing
+        logger (logging.Logger | None): Logger used for printing
             related information during evaluation. Default: None.
         confidence_interval (float): Confidence interval. Default: 0.95.
         show_task_results (bool): Whether to record the eval result of
@@ -140,9 +143,9 @@ def multi_gpu_meta_test(model,
     # on different GPU should be independent. :obj:`MMDistributedDataParallel`
     # always automatically synchronizes the grad in different GPUs when doing
     # the loss backward, which can not meet the requirements. Thus we simply
-    # copy the module and wrap it with an :obj:`DeviceWrapper`, which will
+    # copy the module and wrap it with an :obj:`MetaTestParallel`, which will
     # send data to the device model.
-    model = DeviceWrapper(copy.deepcopy(model.module))
+    model = MetaTestParallel(copy.deepcopy(model.module))
     if meta_test_cfg.get('fast_test', False):
         print_log('extracting features from all images.', logger=logger)
         extract_features_for_fast_test(model, support_dataloader,
@@ -192,14 +195,16 @@ def multi_gpu_meta_test(model,
         return None
 
 
-def extract_features_for_fast_test(model, support_dataloader, query_dataloader,
-                                   test_set_dataloader):
+def extract_features_for_fast_test(model: MetaTestParallel,
+                                   support_dataloader: DataLoader,
+                                   query_dataloader: DataLoader,
+                                   test_set_dataloader: DataLoader) -> None:
     """Extract features from fixed backbone for all test data to accelerate
     testing. The extracted feats will be saved into `support_dataloader` and
     `query_dataloader`.
 
     Args:
-        model (:obj:`DeviceWrapper`): Model to be meta tested.
+        model (:obj:`MetaTestParallel`): Model to be meta tested.
         support_dataloader (:obj:`DataLoader`): A PyTorch dataloader of
             support data.
         query_dataloader (:obj:`DataLoader`): A PyTorch dataloader of
@@ -225,12 +230,12 @@ def extract_features_for_fast_test(model, support_dataloader, query_dataloader,
     support_dataloader.dataset.cache_feats(feats, img_metas_list)
 
 
-def test_single_task(model, support_dataloader, query_dataloader,
-                     meta_test_cfg):
+def test_single_task(model: MetaTestParallel, support_dataloader: DataLoader,
+                     query_dataloader: DataLoader, meta_test_cfg: Dict):
     """Task single task.
 
     Args:
-        model (:obj:`DeviceWrapper`): Model to be meta tested.
+        model (:obj:`MetaTestParallel`): Model to be meta tested.
         support_dataloader (:obj:`DataLoader`): A PyTorch dataloader of
             support data.
         query_dataloader (:obj:`DataLoader`): A PyTorch dataloader of

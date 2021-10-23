@@ -1,5 +1,6 @@
 import copy
 from abc import ABCMeta, abstractmethod
+from typing import Dict, List, Mapping, Optional, Sequence, Union
 
 import mmcv
 import numpy as np
@@ -11,7 +12,7 @@ from torch.utils.data import Dataset
 
 
 @DATASETS.register_module()
-class FewShotCustomDataset(Dataset, metaclass=ABCMeta):
+class FewShotBaseDataset(Dataset, metaclass=ABCMeta):
     """Base few shot dataset.
 
     Args:
@@ -28,8 +29,12 @@ class FewShotCustomDataset(Dataset, metaclass=ABCMeta):
 
     CLASSES = None
 
-    def __init__(self, data_prefix, pipeline, classes=None, ann_file=None):
-        super(FewShotCustomDataset, self).__init__()
+    def __init__(self,
+                 data_prefix: str,
+                 pipeline: List[Dict],
+                 classes: Optional[Union[str, List[str]]] = None,
+                 ann_file: Optional[str] = None) -> None:
+        super().__init__()
 
         self.ann_file = ann_file
         self.data_prefix = data_prefix
@@ -47,7 +52,7 @@ class FewShotCustomDataset(Dataset, metaclass=ABCMeta):
         pass
 
     @property
-    def class_to_idx(self):
+    def class_to_idx(self) -> Mapping:
         """Map mapping class name to class index.
 
         Returns:
@@ -56,24 +61,27 @@ class FewShotCustomDataset(Dataset, metaclass=ABCMeta):
 
         return {_class: i for i, _class in enumerate(self.CLASSES)}
 
-    def prepare_data(self, idx):
+    def prepare_data(self, idx: int) -> Dict:
         results = copy.deepcopy(self.data_infos[idx])
         return self.pipeline(results)
 
-    def sample_shots_by_class_id(self, class_id, num_shots):
+    def sample_shots_by_class_id(self, class_id: int,
+                                 num_shots: int) -> List[int]:
         """Random sample shots of given class id."""
         all_shot_ids = self.data_infos_class_dict[class_id]
         return np.random.choice(
             all_shot_ids, num_shots, replace=False).tolist()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data_infos)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Dict:
         return self.prepare_data(idx)
 
     @classmethod
-    def get_classes(cls, classes=None):
+    def get_classes(cls,
+                    classes: Union[Sequence[str],
+                                   str] = None) -> Sequence[str]:
         """Get class names of current dataset.
 
         Args:
@@ -105,11 +113,11 @@ class FewShotCustomDataset(Dataset, metaclass=ABCMeta):
         return class_names
 
     @staticmethod
-    def evaluate(results,
-                 gt_labels,
-                 metric='accuracy',
-                 metric_options=None,
-                 logger=None):
+    def evaluate(results: List,
+                 gt_labels: np.array,
+                 metric: Union[str, List[str]] = 'accuracy',
+                 metric_options: Optional[dict] = None,
+                 logger: Optional[object] = None) -> Dict:
         """Evaluate the dataset.
 
         Args:
@@ -117,11 +125,11 @@ class FewShotCustomDataset(Dataset, metaclass=ABCMeta):
             gt_labels (np.ndarray): Ground truth labels.
             metric (str | list[str]): Metrics to be evaluated.
                 Default value is `accuracy`.
-            metric_options (dict, optional): Options for calculating metrics.
+            metric_options (dict | None): Options for calculating metrics.
                 Allowed keys are 'topk', 'thrs' and 'average_mode'.
-                Defaults to None.
-            logger (logging.Logger | str, optional): Logger used for printing
-                related information during evaluation. Defaults to None.
+                Default: None.
+            logger (logging.Logger | None): Logger used for printing
+                related information during evaluation. Default: None.
 
         Returns:
             dict: evaluation results

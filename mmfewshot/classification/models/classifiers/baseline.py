@@ -1,3 +1,5 @@
+from typing import Dict
+
 from mmcls.models.builder import CLASSIFIERS
 
 from .finetune_base import FinetuneBaseClassifier
@@ -14,11 +16,11 @@ class BaselineClassifier(FinetuneBaseClassifier):
     """
 
     def __init__(self,
-                 head=dict(
+                 head: Dict = dict(
                      type='LinearHead', num_classes=100, in_channels=1024),
-                 meta_test_head=dict(
+                 meta_test_head: Dict = dict(
                      type='LinearHead', num_classes=5, in_channels=1024),
                  *args,
-                 **kwargs):
-        super(BaselineClassifier, self).__init__(
+                 **kwargs) -> None:
+        super().__init__(
             head=head, meta_test_head=meta_test_head, *args, **kwargs)

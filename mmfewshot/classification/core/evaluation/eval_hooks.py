@@ -1,8 +1,9 @@
 import os
 import os.path as osp
 import warnings
+from typing import Dict, Optional
 
-from mmcv.runner import Hook, get_dist_info
+from mmcv.runner import Hook, Runner, get_dist_info
 from torch.utils.data import DataLoader
 
 from mmfewshot.classification.apis import (Z_SCORE, multi_gpu_meta_test,
@@ -33,17 +34,17 @@ class MetaTestEvalHook(Hook):
     """
 
     def __init__(self,
-                 support_dataloader,
-                 query_dataloader,
-                 test_set_dataloader,
-                 num_test_tasks,
-                 interval=1,
-                 by_epoch=True,
-                 meta_test_cfg=None,
-                 confidence_interval=0.95,
-                 save_best=True,
-                 key_indicator='accuracy_mean',
-                 **eval_kwargs):
+                 support_dataloader: DataLoader,
+                 query_dataloader: DataLoader,
+                 test_set_dataloader: DataLoader,
+                 num_test_tasks: int,
+                 interval: int = 1,
+                 by_epoch: bool = True,
+                 meta_test_cfg: Optional[Dict] = None,
+                 confidence_interval: float = 0.95,
+                 save_best: bool = True,
+                 key_indicator: str = 'accuracy_mean',
+                 **eval_kwargs) -> None:
         warnings.warn(
             'DeprecationWarning: EvalHook and DistEvalHook in mmcls will be '
             'deprecated, please install mmcv through master branch.')
@@ -77,7 +78,7 @@ class MetaTestEvalHook(Hook):
         self.best_score = 0.0
         self.key_indicator = key_indicator
 
-    def before_run(self, runner):
+    def before_run(self, runner: Runner) -> None:
         if self.save_best is not None:
             if runner.meta is None:
                 warnings.warn('runner.meta is None. Creating an empty one.')
@@ -86,18 +87,18 @@ class MetaTestEvalHook(Hook):
             self.best_ckpt_path = runner.meta['hook_msgs'].get(
                 'best_ckpt', None)
 
-    def after_train_epoch(self, runner):
+    def after_train_epoch(self, runner: Runner) -> None:
         if not self.by_epoch or not self.every_n_epochs(runner, self.interval):
             return
         self.evaluate(runner)
 
-    def after_train_iter(self, runner):
+    def after_train_iter(self, runner: Runner) -> None:
         if self.by_epoch or not self.every_n_iters(runner, self.interval):
             return
         runner.log_buffer.clear()
         self.evaluate(runner)
 
-    def evaluate(self, runner):
+    def evaluate(self, runner: Runner) -> Dict:
         meta_eval_results = single_gpu_meta_test(
             runner.model,
             self.num_test_tasks,
@@ -115,7 +116,7 @@ class MetaTestEvalHook(Hook):
         runner.log_buffer.ready = True
         return meta_eval_results
 
-    def _save_ckpt(self, runner, key_score):
+    def _save_ckpt(self, runner: Runner, key_score: float) -> None:
         """Save the best checkpoint.
 
         It will compare the score according to the compare function, write
@@ -153,7 +154,7 @@ class MetaTestEvalHook(Hook):
 class DistMetaTestEvalHook(MetaTestEvalHook):
     """Distributed evaluation hook."""
 
-    def evaluate(self, runner):
+    def evaluate(self, runner: Runner) -> Dict:
         meta_eval_results = multi_gpu_meta_test(
             runner.model,
             self.num_test_tasks,
@@ -164,7 +165,7 @@ class DistMetaTestEvalHook(MetaTestEvalHook):
             eval_kwargs=self.eval_kwargs,
             logger=runner.logger,
             confidence_interval=self.confidence_interval)
-        rank, world_size = get_dist_info()
+        rank, _ = get_dist_info()
         if rank == 0:
             if self.save_best:
                 self._save_ckpt(runner, meta_eval_results[self.key_indicator])

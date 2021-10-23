@@ -1,4 +1,5 @@
 from multiprocessing import Pool
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from mmdet.core import average_precision, print_map_summary
@@ -6,16 +7,16 @@ from mmdet.core.evaluation.mean_ap import (get_cls_results, tpfp_default,
                                            tpfp_imagenet)
 
 
-def eval_map(det_results,
-             annotations,
-             classes,
-             scale_ranges=None,
-             iou_thr=0.5,
-             dataset=None,
-             logger=None,
-             tpfp_fn=None,
-             nproc=4,
-             use_legacy_coordinate=False):
+def eval_map(det_results: List[List[np.ndarray]],
+             annotations: List[Dict],
+             classes: List[str],
+             scale_ranges: Optional[List[Tuple]] = None,
+             iou_thr: float = 0.5,
+             dataset: Optional[Union[List[str], str]] = None,
+             logger: Optional[object] = None,
+             tpfp_fn: Optional[callable] = None,
+             nproc: int = 4,
+             use_legacy_coordinate: bool = False) -> Tuple[List, List[Dict]]:
     """Evaluate mAP of a dataset. :func:`eval_map` in mmdetection predefine the
     names of classes and thus not support arbitrary class splits.
 
@@ -40,7 +41,7 @@ def eval_map(det_results,
         dataset (list[str] | str | None): Dataset name or dataset classes,
             there are minor differences in metrics for different datsets, e.g.
             "voc07", "imagenet_det", etc. Default: None.
-        logger (logging.Logger | str | None): The way to print the mAP
+        logger (logging.Logger | None): The way to print the mAP
             summary. See `mmcv.utils.print_log()` for details. Default: None.
         tpfp_fn (callable | None): The function used to determine true false
             positives. If None, :func:`tpfp_default` is used as default
@@ -55,7 +56,7 @@ def eval_map(det_results,
             Default: False.
 
     Returns:
-        tuple: (mAP, [dict, dict, ...])
+        tuple: (list, [dict, dict, ...])
     """
     assert len(det_results) == len(annotations)
 

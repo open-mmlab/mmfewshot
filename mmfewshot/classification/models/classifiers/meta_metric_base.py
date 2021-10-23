@@ -1,4 +1,9 @@
+from typing import Dict, List, Optional, Union
+
+import torch
 from mmcls.models.builder import CLASSIFIERS
+from torch import Tensor
+from typing_extensions import Literal
 
 from .base import FewShotBaseClassifier
 
@@ -8,12 +13,13 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
     """Base class for meta metric based classifier."""
 
     def forward(self,
-                img=None,
-                feats=None,
-                support_data=None,
-                query_data=None,
-                mode='train',
-                **kwargs):
+                img: Tensor = None,
+                feats: Tensor = None,
+                support_data: Dict = None,
+                query_data: Dict = None,
+                mode: Literal['train', 'support', 'query',
+                              'extract_feat'] = 'train',
+                **kwargs) -> Union[Dict, List, Tensor]:
         """Calls one of (:func:`forward_train`, :func:`forward_query`,
         :func:`forward_support` and :func:`extract_feat`) according to
         the `mode`. The inputs of forward function would change with the
@@ -59,7 +65,7 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
         else:
             raise ValueError()
 
-    def train_step(self, data, optimizer):
+    def train_step(self, data: Dict, optimizer: torch.optim.Optimizer) -> Dict:
         """The iteration step during training.
 
         This method defines an iteration step during training, except for the
@@ -70,7 +76,7 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
 
         Args:
             data (dict): The output of dataloader.
-            optimizer (:obj:`torch.optim.Optimizer` | dict): The optimizer of
+            optimizer (:obj:`torch.optim.Optimizer`): The optimizer of
                 runner is passed to ``train_step()``. This argument is unused
                 and reserved.
 
@@ -95,7 +101,7 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
 
         return outputs
 
-    def val_step(self, data, optimizer):
+    def val_step(self, data: Dict, optimizer: torch.optim.Optimizer) -> Dict:
         """The iteration step during validation.
 
         This method shares the same signature as :func:`train_step`, but used
@@ -112,7 +118,8 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
 
         return outputs
 
-    def forward_train(self, support_data, query_data, **kwargs):
+    def forward_train(self, support_data: Dict, query_data: Dict,
+                      **kwargs) -> Dict:
         """Forward computation during training.
 
         Args:
@@ -146,16 +153,20 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
 
         return losses
 
-    def forward_support(self, gt_label, img=None, feats=None, **kwargs):
+    def forward_support(self,
+                        gt_label: Tensor,
+                        img: Optional[Tensor] = None,
+                        feats: Optional[Tensor] = None,
+                        **kwargs) -> Dict:
         """Forward support data in meta testing.
 
         Input can be either images or extracted features.
 
         Args:
-            img (Tensor | None): With shape (N, C, H, W). Default: None.
-            feats (Tensor | None): With shape (N, C).
             gt_label (Tensor): It should be of shape (N, 1) encoding the
                 ground-truth label of input images.
+            img (Tensor | None): With shape (N, C, H, W). Default: None.
+            feats (Tensor | None): With shape (N, C).
 
         Returns:
             dict[str, Tensor]: A dictionary of loss components
@@ -167,7 +178,10 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
             x = feats
         return self.head.forward_support(x, gt_label)
 
-    def forward_query(self, img=None, feats=None, **kwargs):
+    def forward_query(self,
+                      img: Tensor = None,
+                      feats: Tensor = None,
+                      **kwargs) -> List:
         """Forward query data in meta testing.
 
         Input can be either images or extracted features.
@@ -186,7 +200,7 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
             x = feats
         return self.head.forward_query(x)
 
-    def before_meta_test(self, meta_test_cfg, **kwargs):
+    def before_meta_test(self, meta_test_cfg: Dict, **kwargs) -> None:
         """Used in meta testing.
 
         This function will be called before the meta testing.
@@ -198,7 +212,7 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
                 param.requires_grad = False
         self.meta_test_cfg = meta_test_cfg
 
-    def before_forward_support(self, **kwargs):
+    def before_forward_support(self, **kwargs) -> None:
         """Used in meta testing.
 
         This function will be called before model forward support data during
@@ -206,7 +220,7 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
         """
         self.head.before_forward_support()
 
-    def before_forward_query(self, **kwargs):
+    def before_forward_query(self, **kwargs) -> None:
         """Used in meta testing.
 
         This function will be called before model forward query data during

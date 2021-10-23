@@ -1,3 +1,3 @@
-from .device_wrapper import DeviceWrapper
+from .meta_test_parallel import MetaTestParallel
 
-__all__ = ['DeviceWrapper']
+__all__ = ['MetaTestParallel']

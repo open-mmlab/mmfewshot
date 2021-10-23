@@ -4,7 +4,9 @@ import sys
 import torch.distributed as dist
 from mmcv.runner import DistEvalHook as BaseDistEvalHook
 from mmcv.runner import EvalHook as BaseEvalHook
+from mmcv.runner import Runner
 from torch.nn.modules.batchnorm import _BatchNorm
+from torch.utils.data import DataLoader
 
 
 class QuerySupportEvalHook(BaseEvalHook):
@@ -15,19 +17,20 @@ class QuerySupportEvalHook(BaseEvalHook):
     `val_dataloader`.
 
     Args:
-        model_init_dataloader (nn.DataLoader): A PyTorch dataloader of
+        model_init_dataloader (DataLoader): A PyTorch dataloader of
             `model_init` dataset.
-        val_dataloader (nn.DataLoader): A PyTorch dataloader of dataset to be
+        val_dataloader (DataLoader): A PyTorch dataloader of dataset to be
             evaluated.
         **eval_kwargs: Evaluation arguments fed into the evaluate function of
             the dataset.
     """
 
-    def __init__(self, model_init_dataloader, val_dataloader, **eval_kwargs):
+    def __init__(self, model_init_dataloader: DataLoader,
+                 val_dataloader: DataLoader, **eval_kwargs) -> None:
         super().__init__(val_dataloader, **eval_kwargs)
         self.model_init_dataloader = model_init_dataloader
 
-    def _do_evaluate(self, runner):
+    def _do_evaluate(self, runner: Runner) -> None:
         """perform evaluation and save checkpoint."""
         if not self._should_evaluate(runner):
             return
@@ -48,19 +51,20 @@ class QuerySupportDistEvalHook(BaseDistEvalHook):
     model initialization and then evaluate the data from `val_dataloader`.
 
     Args:
-        model_init_dataloader (nn.DataLoader): A PyTorch dataloader of
+        model_init_dataloader (DataLoader): A PyTorch dataloader of
             `model_init` dataset.
-        val_dataloader (nn.DataLoader): A PyTorch dataloader of dataset to be
+        val_dataloader (DataLoader): A PyTorch dataloader of dataset to be
             evaluated.
         **eval_kwargs: Evaluation arguments fed into the evaluate function of
             the dataset.
     """
 
-    def __init__(self, model_init_dataloader, val_dataloader, **eval_kwargs):
+    def __init__(self, model_init_dataloader: DataLoader,
+                 val_dataloader: DataLoader, **eval_kwargs) -> None:
         super().__init__(val_dataloader, **eval_kwargs)
         self.model_init_dataloader = model_init_dataloader
 
-    def _do_evaluate(self, runner):
+    def _do_evaluate(self, runner: Runner) -> None:
         """perform evaluation and save checkpoint."""
 
         if not self._should_evaluate(runner):

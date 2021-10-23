@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from mmcv.parallel import DataContainer as DC
 from mmdet.datasets.builder import PIPELINES
 from mmdet.datasets.pipelines import Collect, DefaultFormatBundle
@@ -6,7 +8,7 @@ from mmdet.datasets.pipelines import Collect, DefaultFormatBundle
 @PIPELINES.register_module()
 class MultiScaleFormatBundle(DefaultFormatBundle):
 
-    def __call__(self, results_list):
+    def __call__(self, results_list: List[Dict]) -> List[Dict]:
         """Transform and format common fields of each results in
         `results_list`.
 
@@ -26,7 +28,7 @@ class MultiScaleFormatBundle(DefaultFormatBundle):
 @PIPELINES.register_module()
 class MultiScaleCollect(Collect):
 
-    def __call__(self, results_list):
+    def __call__(self, results_list: List[Dict]) -> Dict:
         """Collect all keys of each results in `results_list`.
 
         The keys in `meta_keys` will be converted to :obj:mmcv.DataContainer.

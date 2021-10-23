@@ -2,6 +2,7 @@ import torch.nn as nn
 from mmcv.runner import auto_fp16
 from mmdet.models.builder import SHARED_HEADS
 from mmdet.models.roi_heads import ResLayer
+from torch import Tensor
 
 
 @SHARED_HEADS.register_module()
@@ -9,12 +10,12 @@ class MetaRCNNResLayer(ResLayer):
     """Shared resLayer for metarcnn and fsdetview."""
 
     def __init__(self, *args, **kwargs):
-        super(MetaRCNNResLayer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.max_pool = nn.MaxPool2d(2)
         self.sigmoid = nn.Sigmoid()
 
     @auto_fp16()
-    def forward(self, x, is_support=False):
+    def forward(self, x: Tensor, is_support: bool = False) -> Tensor:
         """Forward function.
 
         Args:

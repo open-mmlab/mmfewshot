@@ -1,12 +1,14 @@
 import os.path as osp
 import pickle
 import warnings
+from typing import Dict, List, Optional, Sequence, Union
 
 import mmcv
 import numpy as np
 from mmcls.datasets.builder import DATASETS
+from typing_extensions import Literal
 
-from .few_shot_custom import FewShotCustomDataset
+from .few_shot_base import FewShotBaseDataset
 
 TRAIN_CLASSES = [
     ('Yorkshire terrier', 'terrier'), ('space shuttle', 'craft'),
@@ -545,7 +547,7 @@ TEST_CLASSES = [
 
 
 @DATASETS.register_module()
-class TieredImageNetDataset(FewShotCustomDataset):
+class TieredImageNetDataset(FewShotBaseDataset):
     """TieredImageNet dataset for few shot classification.
 
     Args:
@@ -561,16 +563,22 @@ class TieredImageNetDataset(FewShotCustomDataset):
     VAL_CLASSES = VAL_CLASSES
     TEST_CLASSES = TEST_CLASSES
 
-    def __init__(self, subset='train', *args, **kwargs):
+    def __init__(self,
+                 subset: Literal['train', 'test', 'val'] = 'train',
+                 *args,
+                 **kwargs):
         if isinstance(subset, str):
             subset = [subset]
         for subset_ in subset:
             assert subset_ in ['train', 'test', 'val']
         self.subset = subset
         self.GENERAL_CLASSES = self.get_general_classes()
-        super(TieredImageNetDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-    def get_classes(self, classes=None):
+    def get_classes(
+            self,
+            classes: Optional[Union[Sequence[str],
+                                    str]] = None) -> Sequence[str]:
         """Get class names of current dataset.
 
         Args:
@@ -609,7 +617,7 @@ class TieredImageNetDataset(FewShotCustomDataset):
             raise ValueError(f'Unsupported type {type(classes)} of classes.')
         return class_names
 
-    def get_general_classes(self):
+    def get_general_classes(self) -> List[str]:
         """Get general classes of each classes."""
         general_classes = []
         for subset_ in self.subset:
@@ -624,7 +632,7 @@ class TieredImageNetDataset(FewShotCustomDataset):
                                  f'support train, val or test.')
         return general_classes
 
-    def load_annotations(self):
+    def load_annotations(self) -> List[Dict]:
         """Load annotation according to the classes subset."""
         data_infos = []
         for subset_ in self.subset:

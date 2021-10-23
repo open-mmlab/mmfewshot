@@ -1,12 +1,14 @@
 import os
 import os.path as osp
+from typing import Dict, List, Optional, Sequence, Union
 
 import mmcv
 import numpy as np
 from mmcls.datasets.builder import DATASETS
+from typing_extensions import Literal
 
 from mmfewshot.utils import local_numpy_seed
-from .few_shot_custom import FewShotCustomDataset
+from .few_shot_base import FewShotBaseDataset
 
 ALL_CLASSES = [
     '001.Black_footed_Albatross',
@@ -213,7 +215,7 @@ ALL_CLASSES = [
 
 
 @DATASETS.register_module()
-class CUBDataset(FewShotCustomDataset):
+class CUBDataset(FewShotBaseDataset):
     """CUB dataset for few shot classification.
 
     Args:
@@ -230,7 +232,11 @@ class CUBDataset(FewShotCustomDataset):
     resource = 'http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/'
     ALL_CLASSES = ALL_CLASSES
 
-    def __init__(self, classes_id_seed=None, subset='train', *args, **kwargs):
+    def __init__(self,
+                 classes_id_seed: int = None,
+                 subset: Literal['train', 'test', 'val'] = 'train',
+                 *args,
+                 **kwargs) -> None:
         self.classes_id_seed = classes_id_seed
         self.num_all_classes = len(self.ALL_CLASSES)
 
@@ -239,9 +245,12 @@ class CUBDataset(FewShotCustomDataset):
         for subset_ in subset:
             assert subset_ in ['train', 'test', 'val']
         self.subset = subset
-        super(CUBDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-    def get_classes(self, classes=None):
+    def get_classes(
+            self,
+            classes: Optional[Union[Sequence[str],
+                                    str]] = None) -> Sequence[str]:
         """Get class names of current dataset.
 
         Args:
@@ -293,7 +302,7 @@ class CUBDataset(FewShotCustomDataset):
             raise ValueError(f'Unsupported type {type(classes)} of classes.')
         return class_names
 
-    def load_annotations(self):
+    def load_annotations(self) -> List[Dict]:
         """Load annotation according to the classes subset."""
         image_root_path = osp.join(self.data_prefix, 'images')
 

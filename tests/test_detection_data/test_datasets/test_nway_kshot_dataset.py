@@ -8,7 +8,7 @@ def test_nway_kshot_dataset():
     set_random_seed(2021)
     # test regular and few shot annotations
     dataconfigs = [{
-        'type': 'NwayKshotDataset',
+        'type': 'NWayKShotDataset',
         'support_way': 5,
         'support_shot': 1,
         'dataset': {
@@ -35,7 +35,7 @@ def test_nway_kshot_dataset():
             True
         }
     }, {
-        'type': 'NwayKshotDataset',
+        'type': 'NWayKShotDataset',
         'support_way': 5,
         'support_shot': 1,
         'dataset': {

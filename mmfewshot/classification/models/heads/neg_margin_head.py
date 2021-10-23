@@ -1,10 +1,12 @@
 import math
+from typing import Dict, List
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcls.models.builder import HEADS
 from mmcls.models.heads import ClsHead
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -22,14 +24,14 @@ class NegMarginHead(ClsHead):
     """
 
     def __init__(self,
-                 num_classes,
-                 in_channels,
-                 temperature=30.0,
-                 margin=0.0,
-                 metric_type='cosine',
+                 num_classes: int,
+                 in_channels: int,
+                 temperature: float = 30.0,
+                 margin: float = 0.0,
+                 metric_type: str = 'cosine',
                  *args,
-                 **kwargs):
-        super(NegMarginHead, self).__init__(*args, **kwargs)
+                 **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         assert num_classes > 0, f'num_classes={num_classes} ' \
                                 f'must be a positive integer'
         assert margin <= 0, f'margin = {margin} should <= 0'
@@ -41,12 +43,12 @@ class NegMarginHead(ClsHead):
         self.margin = margin
         self.init_layers()
 
-    def init_layers(self):
+    def init_layers(self) -> None:
         self.weight = nn.Parameter(
             torch.FloatTensor(self.num_classes, self.in_channels))
         nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
 
-    def forward_train(self, x, gt_label, **kwargs):
+    def forward_train(self, x: Tensor, gt_label: Tensor, **kwargs) -> Dict:
         """Forward training data."""
         if self.metric_type == 'cosine':
             similarity = F.linear(F.normalize(x), F.normalize(self.weight))
@@ -67,11 +69,11 @@ class NegMarginHead(ClsHead):
         losses = self.loss(cls_score, gt_label)
         return losses
 
-    def forward_support(self, x, gt_label, **kwargs):
+    def forward_support(self, x: Tensor, gt_label: Tensor, **kwargs) -> Dict:
         """Forward support data in meta testing."""
         return self.forward_train(x, gt_label, **kwargs)
 
-    def forward_query(self, x):
+    def forward_query(self, x: Tensor) -> List:
         """Forward query data in meta testing."""
         if self.metric_type == 'cosine':
             similarity = F.linear(F.normalize(x), F.normalize(self.weight))
@@ -85,7 +87,7 @@ class NegMarginHead(ClsHead):
         pred = list(pred.detach().cpu().numpy())
         return pred
 
-    def before_forward_support(self):
+    def before_forward_support(self) -> None:
         """Used in meta testing.
 
         This function will be called before model forward support data during
@@ -94,7 +96,7 @@ class NegMarginHead(ClsHead):
         self.init_layers()
         self.train()
 
-    def before_forward_query(self):
+    def before_forward_query(self) -> None:
         """Used in meta testing.
 
         This function will be called before model forward query data during

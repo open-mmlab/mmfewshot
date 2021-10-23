@@ -1,8 +1,12 @@
+from typing import List, Union
+
 import numpy as np
 import torch
+from torch import Tensor
 
 
-def label_wrapper(labels, class_ids):
+def label_wrapper(labels: Union[Tensor, np.ndarray, List],
+                  class_ids: List[int]) -> Union[Tensor, np.ndarray, list]:
     """Map input labels into range of 0 to numbers of classes-1.
 
     It is usually used in the meta testing phase.

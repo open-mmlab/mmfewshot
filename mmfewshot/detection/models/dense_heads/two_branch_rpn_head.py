@@ -1,13 +1,17 @@
 import copy
+from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.ops import batched_nms
 from mmcv.runner import force_fp32
+from mmcv.utils import ConfigDict
 from mmdet.core import images_to_levels, multi_apply
 from mmdet.models import RPNHead
 from mmdet.models.builder import HEADS
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -18,11 +22,11 @@ class TwoBranchRPNHead(RPNHead):
         mid_channels (int): Input channels of `rpn_cls_conv`. Default: 64.
     """
 
-    def __init__(self, mid_channels=64, **kwargs):
+    def __init__(self, mid_channels: int = 64, **kwargs) -> None:
         self.mid_channels = mid_channels
         super(TwoBranchRPNHead, self).__init__(**kwargs)
 
-    def _init_layers(self):
+    def _init_layers(self) -> None:
         """Initialize layers of the head."""
         self.rpn_conv = nn.Conv2d(
             self.in_channels, self.feat_channels, 3, padding=1)
@@ -31,7 +35,7 @@ class TwoBranchRPNHead(RPNHead):
         self.rpn_cls = nn.Conv2d(self.mid_channels, self.cls_out_channels, 1)
         self.rpn_reg = nn.Conv2d(self.feat_channels, self.num_anchors * 4, 1)
 
-    def forward_single(self, feat):
+    def forward_single(self, feat: Tensor) -> Tuple[Tensor, Tensor]:
         """Forward feature map of a single scale level."""
         feat = self.rpn_conv(feat)
         feat = F.relu(feat, inplace=True)
@@ -42,7 +46,7 @@ class TwoBranchRPNHead(RPNHead):
         rpn_bbox_pred = self.rpn_reg(feat)
         return rpn_cls_score, rpn_bbox_pred
 
-    def forward_auxiliary_single(self, feat):
+    def forward_auxiliary_single(self, feat: Tensor) -> Tuple[Tensor, ]:
         """Forward auxiliary feature map of a single scale level."""
         feat = self.rpn_conv(feat)
         feat = F.relu(feat, inplace=True)
@@ -54,7 +58,7 @@ class TwoBranchRPNHead(RPNHead):
         rpn_cls_score = self.rpn_cls(cls_feat).view(-1, self.num_anchors, h, w)
         return rpn_cls_score,
 
-    def forward_auxiliary(self, feats):
+    def forward_auxiliary(self, feats: Tuple[Tensor]) -> List[Tensor]:
         """Forward auxiliary features at multiple scales.
 
         Args:
@@ -67,7 +71,7 @@ class TwoBranchRPNHead(RPNHead):
         """
         return multi_apply(self.forward_auxiliary_single, feats)
 
-    def forward_auxiliary_train(self, feats):
+    def forward_auxiliary_train(self, feats: Tuple[Tensor]) -> Tuple[Dict, ]:
         """Forward function and calculate loss for auxiliary data in training.
 
         Args:
@@ -75,13 +79,14 @@ class TwoBranchRPNHead(RPNHead):
                 is a 4D-tensor.
 
         Returns:
-            dict[str, Tensor]: A dictionary of loss components.
+            tuple[dict[str, Tensor]]: A dictionary of loss components.
         """
         outs, = self.forward_auxiliary(feats)
         return outs,
 
-    def auxiliary_loss_single(self, cls_score, labels, label_weights,
-                              num_total_samples):
+    def auxiliary_loss_single(self, cls_score: Tensor, labels: Tensor,
+                              label_weights: Tensor,
+                              num_total_samples: int) -> Tuple[Dict, ]:
         """Compute loss of a single scale level.
 
         Args:
@@ -94,11 +99,11 @@ class TwoBranchRPNHead(RPNHead):
             num_total_samples (int): The number of positive anchors.
 
         Returns:
-            dict[str, Tensor]: A dictionary of loss components.
+            tuple[dict[str, Tensor]]: A dictionary of loss components.
         """
         # classification loss only
-        labels = labels.reshape(-1)
-        label_weights = label_weights.reshape(-1)
+        labels = labels.flatten()
+        label_weights = label_weights.flatten()
         cls_score = cls_score.permute(0, 2, 3,
                                       1).reshape(-1, self.cls_out_channels)
         losses_cls = self.loss_cls(
@@ -106,14 +111,14 @@ class TwoBranchRPNHead(RPNHead):
         return losses_cls,
 
     def forward_train(self,
-                      x,
-                      auxiliary_rpn_feats,
-                      img_metas,
-                      gt_bboxes,
-                      gt_labels=None,
-                      gt_bboxes_ignore=None,
-                      proposal_cfg=None,
-                      **kwargs):
+                      x: List[Tensor],
+                      auxiliary_rpn_feats: List[Tensor],
+                      img_metas: List[Dict],
+                      gt_bboxes: Tensor,
+                      gt_labels: Optional[Tensor] = None,
+                      gt_bboxes_ignore: Optional[Tensor] = None,
+                      proposal_cfg: Optional[ConfigDict] = None,
+                      **kwargs) -> Tuple[Dict, List[Tensor]]:
         """
         Args:
             x (list[Tensor]): Features from FPN, each item with shape
@@ -125,16 +130,16 @@ class TwoBranchRPNHead(RPNHead):
             gt_bboxes (Tensor): Ground truth bboxes of the image,
                 shape (num_gts, 4).
             gt_labels (Tensor): Ground truth labels of each box,
-                shape (num_gts,).
+                shape (num_gts,). Default: None.
             gt_bboxes_ignore (Tensor): Ground truth bboxes to be
-                ignored, shape (num_ignored_gts, 4).
-            proposal_cfg (mmcv.Config): Test / postprocessing configuration,
-                if None, test_cfg would be used
+                ignored, shape (num_ignored_gts, 4). Default: None.
+            proposal_cfg (ConfigDict): Test / postprocessing configuration,
+                if None, test_cfg would be used. Default: None.
 
         Returns:
             tuple:
                 losses: (dict[str, Tensor]): A dictionary of loss components.
-                proposal_list (list[Tensor]): Proposals of each image.
+                proposal_list (List[Tensor]): Proposals of each image.
         """
         outs = self(x)
         auxiliary_cls_scores = self.forward_auxiliary_train(
@@ -145,8 +150,9 @@ class TwoBranchRPNHead(RPNHead):
         proposal_list = self.get_bboxes(*outs, img_metas, cfg=proposal_cfg)
         return losses, proposal_list
 
-    def loss_bbox_single(self, bbox_pred, anchors, bbox_targets, bbox_weights,
-                         num_total_samples):
+    def loss_bbox_single(self, bbox_pred: Tensor, anchors: Tensor,
+                         bbox_targets: Tensor, bbox_weights: Tensor,
+                         num_total_samples: int) -> Tuple[Dict, ]:
         """Compute loss of a single scale level.
 
         Args:
@@ -163,7 +169,7 @@ class TwoBranchRPNHead(RPNHead):
                 positive anchors.
 
         Returns:
-            dict[str, Tensor]: A dictionary of loss components.
+            tuple[dict[str, Tensor]]: A dictionary of loss components.
         """
 
         # regression loss
@@ -183,8 +189,9 @@ class TwoBranchRPNHead(RPNHead):
             avg_factor=num_total_samples)
         return loss_bbox,
 
-    def loss_cls_single(self, cls_score, labels, label_weights,
-                        num_total_samples):
+    def loss_cls_single(self, cls_score: Tensor, labels: Tensor,
+                        label_weights: Tensor,
+                        num_total_samples: int) -> Tuple[Dict, ]:
         """Compute loss of a single scale level.
 
         Args:
@@ -199,11 +206,11 @@ class TwoBranchRPNHead(RPNHead):
                 positive anchors.
 
         Returns:
-            dict[str, Tensor]: A dictionary of loss components.
+            tuple[dict[str, Tensor]]: A dictionary of loss components.
         """
         # classification loss
-        labels = labels.reshape(-1)
-        label_weights = label_weights.reshape(-1)
+        labels = labels.flatten()
+        label_weights = label_weights.flatten()
         cls_score = cls_score.permute(0, 2, 3,
                                       1).reshape(-1, self.cls_out_channels)
         loss_cls = self.loss_cls(
@@ -213,13 +220,13 @@ class TwoBranchRPNHead(RPNHead):
 
     @force_fp32(apply_to=('cls_scores', 'bbox_preds', 'auxiliary_cls_scores'))
     def loss(self,
-             cls_scores,
-             bbox_preds,
-             gt_bboxes,
-             gt_labels,
-             img_metas,
-             gt_bboxes_ignore=None,
-             auxiliary_cls_scores=None):
+             cls_scores: List[Tensor],
+             bbox_preds: List[Tensor],
+             gt_bboxes: List[Tensor],
+             gt_labels: List[Tensor],
+             img_metas: List[Dict],
+             gt_bboxes_ignore: Optional[List[Tensor]] = None,
+             auxiliary_cls_scores: Optional[List[Tensor]] = None) -> Dict:
         """Compute losses of the head.
 
         Args:
@@ -232,11 +239,11 @@ class TwoBranchRPNHead(RPNHead):
             gt_labels (list[Tensor]): class indices corresponding to each box
             img_metas (list[dict]): Meta information of each image, e.g.,
                 image size, scaling factor, etc.
-            gt_bboxes_ignore (None | list[Tensor]): specify which bounding
+            gt_bboxes_ignore (list[Tensor] | None): specify which bounding
                 boxes can be ignored when computing the loss. Default: None.
-            auxiliary_cls_scores (list[Tensor]): Box scores for each scale
-                level, each item with shape (N, num_anchors * num_classes,
-                H, W). Default: None.
+            auxiliary_cls_scores (list[Tensor] | None): Box scores for each
+                scale level, each item with shape (N, num_anchors *
+                num_classes, H, W). Default: None.
 
         Returns:
             dict[str, Tensor]: A dictionary of loss components.
@@ -257,8 +264,6 @@ class TwoBranchRPNHead(RPNHead):
             gt_bboxes_ignore_list=gt_bboxes_ignore,
             gt_labels_list=gt_labels,
             label_channels=label_channels)
-        if cls_reg_targets is None:
-            return None
         (labels_list, label_weights_list, bbox_targets_list, bbox_weights_list,
          num_total_pos, num_total_neg) = cls_reg_targets
         num_total_samples_main = (
@@ -314,13 +319,13 @@ class TwoBranchRPNHead(RPNHead):
             rpn_loss_bbox=losses_bbox)
 
     def _get_bboxes_single(self,
-                           cls_scores,
-                           bbox_preds,
-                           mlvl_anchors,
-                           img_shape,
-                           scale_factor,
-                           cfg,
-                           rescale=False):
+                           cls_scores: List[Tensor],
+                           bbox_preds: List[Tensor],
+                           mlvl_anchors: List[Tensor],
+                           img_shape: Tuple[int],
+                           scale_factor: np.ndarray,
+                           cfg: ConfigDict,
+                           rescale: bool = False) -> Tensor:
         """Transform outputs for a single batch item into bbox predictions.
 
         Args:
@@ -332,9 +337,9 @@ class TwoBranchRPNHead(RPNHead):
                 each item has shape (num_total_anchors, 4).
             img_shape (tuple[int]): Shape of the input image,
                 (height, width, 3).
-            scale_factor (ndarray): Scale factor of the image arrange as
+            scale_factor (np.ndarray): Scale factor of the image arrange as
                 (w_scale, h_scale, w_scale, h_scale).
-            cfg (mmcv.Config): Test / postprocessing configuration,
+            cfg (ConfigDict): Test / postprocessing configuration,
                 if None, test_cfg would be used.
             rescale (bool): If True, return boxes in original image space.
                 Default: False.
@@ -358,7 +363,7 @@ class TwoBranchRPNHead(RPNHead):
             assert rpn_cls_score.size()[-2:] == rpn_bbox_pred.size()[-2:]
             rpn_cls_score = rpn_cls_score.permute(1, 2, 0)
             if self.use_sigmoid_cls:
-                rpn_cls_score = rpn_cls_score.reshape(-1)
+                rpn_cls_score = rpn_cls_score.flatten()
                 scores = rpn_cls_score.sigmoid()
             else:
                 rpn_cls_score = rpn_cls_score.reshape(-1, 2)
@@ -418,12 +423,12 @@ class TwoBranchRPNHead(RPNHead):
             return proposals.new_zeros(0, 5)
 
     def get_bboxes(self,
-                   cls_scores,
-                   bbox_preds,
-                   img_metas,
-                   cfg=None,
-                   rescale=False,
-                   with_nms=True):
+                   cls_scores: List[Tensor],
+                   bbox_preds: List[Tensor],
+                   img_metas: List[Dict],
+                   cfg: Optional[ConfigDict] = None,
+                   rescale: bool = False,
+                   with_nms: bool = True) -> List[Tensor]:
         """Transform network output for a batch into bbox predictions.
 
         Args:
@@ -433,7 +438,7 @@ class TwoBranchRPNHead(RPNHead):
                 level with shape (N, num_anchors * 4, H, W)
             img_metas (list[dict]): Meta information of each image, e.g.,
                 image size, scaling factor, etc.
-            cfg (mmcv.Config | None): Test / postprocessing configuration,
+            cfg (ConfigDict | None): Test / postprocessing configuration,
                 if None, test_cfg would be used
             rescale (bool): If True, return boxes in original image space.
                 Default: False.
@@ -441,12 +446,8 @@ class TwoBranchRPNHead(RPNHead):
                 Default: True.
 
         Returns:
-            list[tuple[Tensor, Tensor]]: Each item in result_list is 2-tuple.
-                The first item is an (n, 5) tensor, where the first 4 columns
-                are bounding box positions (tl_x, tl_y, br_x, br_y) and the
-                5-th column is a score between 0 and 1. The second item is a
-                (n,) tensor where each item is the predicted class label of the
-                corresponding box.
+            List[Tensor]: Proposals of each image, each item has shape (n, 5),
+                where 5 represent (tl_x, tl_y, br_x, br_y, score).
         """
         assert with_nms, '``with_nms`` in RPNHead should always True'
         assert len(cls_scores) == len(bbox_preds)

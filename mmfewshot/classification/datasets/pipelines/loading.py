@@ -1,4 +1,5 @@
 import os.path as osp
+from typing import Dict
 
 import mmcv
 import numpy as np
@@ -10,7 +11,7 @@ from mmcls.datasets.pipelines import LoadImageFromFile
 class LoadImageFromBytes(LoadImageFromFile):
     """Load an image from bytes."""
 
-    def __call__(self, results):
+    def __call__(self, results: Dict) -> Dict:
         if self.file_client is None:
             self.file_client = mmcv.FileClient(**self.file_client_args)
         if results['img_prefix'] is not None:

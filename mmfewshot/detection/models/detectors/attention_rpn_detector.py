@@ -1,6 +1,11 @@
+from typing import Dict, List, Optional
+
+import numpy as np
 import torch
+from mmcv.utils import ConfigDict
 from mmdet.core import bbox2roi
 from mmdet.models.builder import DETECTORS
+from torch import Tensor
 
 from .query_support_detector import QuerySupportDetector
 
@@ -23,23 +28,23 @@ class AttentionRPNDetector(QuerySupportDetector):
         train_cfg (dict | None): Training config. Useless in CenterNet,
             but we keep this variable for SingleStageDetector. Default: None.
         test_cfg (dict | None): Testing config of CenterNet. Default: None.
-        pretrained (str, optional): model pretrained path. Default: None.
-        init_cfg (dict or list[dict], optional): Initialization config dict.
+        pretrained (str | None): model pretrained path. Default: None.
+        init_cfg (dict | list[dict] | None): Initialization config dict.
             Default: None.
     """
 
     def __init__(self,
-                 backbone,
-                 neck=None,
-                 support_backbone=None,
-                 support_neck=None,
-                 rpn_head=None,
-                 roi_head=None,
-                 train_cfg=None,
-                 test_cfg=None,
-                 pretrained=None,
-                 init_cfg=None):
-        super(AttentionRPNDetector, self).__init__(
+                 backbone: ConfigDict,
+                 neck: Optional[ConfigDict] = None,
+                 support_backbone: Optional[ConfigDict] = None,
+                 support_neck: Optional[ConfigDict] = None,
+                 rpn_head: Optional[ConfigDict] = None,
+                 roi_head: Optional[ConfigDict] = None,
+                 train_cfg: Optional[ConfigDict] = None,
+                 test_cfg: Optional[ConfigDict] = None,
+                 pretrained: Optional[ConfigDict] = None,
+                 init_cfg: Optional[ConfigDict] = None) -> None:
+        super().__init__(
             backbone=backbone,
             neck=neck,
             support_backbone=support_backbone,
@@ -64,7 +69,7 @@ class AttentionRPNDetector(QuerySupportDetector):
         # in :func:`model_init`
         self.inference_support_dict = {}
 
-    def extract_support_feat(self, img):
+    def extract_support_feat(self, img: Tensor) -> List[Tensor]:
         """Extract features of support data.
 
         Args:
@@ -81,11 +86,11 @@ class AttentionRPNDetector(QuerySupportDetector):
         return feats
 
     def forward_model_init(self,
-                           img,
-                           img_metas,
-                           gt_bboxes=None,
-                           gt_labels=None,
-                           **kwargs):
+                           img: Tensor,
+                           img_metas: List[Dict],
+                           gt_bboxes: List[Tensor] = None,
+                           gt_labels: List[Tensor] = None,
+                           **kwargs) -> Dict:
         """Extract and save support features for model initialization.
 
         Args:
@@ -131,7 +136,7 @@ class AttentionRPNDetector(QuerySupportDetector):
             'res5_roi_feats': res5_roi_feat
         }
 
-    def model_init(self):
+    def model_init(self) -> None:
         """process the saved support features for model initialization."""
         self.inference_support_dict.clear()
         gt_labels = torch.cat(self._forward_saved_support_dict['gt_labels'])
@@ -153,7 +158,11 @@ class AttentionRPNDetector(QuerySupportDetector):
         for k in self._forward_saved_support_dict.keys():
             self._forward_saved_support_dict[k].clear()
 
-    def simple_test(self, img, img_metas, proposals=None, rescale=False):
+    def simple_test(self,
+                    img: Tensor,
+                    img_metas: List[Dict],
+                    proposals: Optional[List[Tensor]] = None,
+                    rescale: bool = False) -> List[List[np.ndarray]]:
         """Test without augmentation.
 
         Args:
@@ -164,8 +173,8 @@ class AttentionRPNDetector(QuerySupportDetector):
                 `filename`, `ori_shape`, `pad_shape`, and `img_norm_cfg`.
                 For details on the values of these keys see
                 :class:`mmdet.datasets.pipelines.Collect`.
-            proposals (list[Tensor], optional): override rpn proposals with
-                custom proposals. Use when `with_rpn` is False.
+            proposals (list[Tensor] | None): override rpn proposals with
+                custom proposals. Use when `with_rpn` is False. Default: None.
             rescale (bool): If True, return boxes in original image space.
 
         Returns:

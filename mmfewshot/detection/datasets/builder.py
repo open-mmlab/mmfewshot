@@ -1,26 +1,30 @@
 import copy
 import os.path as osp
 from functools import partial
+from typing import Dict, Optional, Tuple
 
 from mmcv.parallel import collate
 from mmcv.runner import get_dist_info
-from mmcv.utils import build_from_cfg
+from mmcv.utils import ConfigDict, build_from_cfg
 from mmdet.datasets.builder import DATASETS, worker_init_fn
 from mmdet.datasets.dataset_wrappers import (ClassBalancedDataset,
                                              ConcatDataset, RepeatDataset)
 from mmdet.datasets.samplers import (DistributedGroupSampler,
                                      DistributedSampler, GroupSampler)
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset, Sampler
 
 from mmfewshot.utils.infinite_sampler import (DistributedInfiniteGroupSampler,
                                               DistributedInfiniteSampler,
                                               InfiniteGroupSampler)
-from .dataset_wrappers import (NwayKshotDataset, QueryAwareDataset,
+from .dataset_wrappers import (NWayKShotDataset, QueryAwareDataset,
                                TwoBranchDataset)
 from .utils import get_copy_dataset_type
 
 
-def build_dataset(cfg, default_args=None, rank=None, timestamp=None):
+def build_dataset(cfg: ConfigDict,
+                  default_args: Dict = None,
+                  rank: int = None,
+                  timestamp: str = None) -> Dataset:
     # If save_dataset is set to True, dataset will be saved into json.
     save_dataset = cfg.pop('save_dataset', False)
 
@@ -59,7 +63,7 @@ def build_dataset(cfg, default_args=None, rank=None, timestamp=None):
             num_support_ways=cfg['num_support_ways'],
             num_support_shots=cfg['num_support_shots'],
             repeat_times=cfg.get('repeat_times', 1))
-    elif cfg['type'] == 'NwayKshotDataset':
+    elif cfg['type'] == 'NWayKShotDataset':
         query_dataset = build_dataset(cfg['dataset'], default_args)
         if cfg.get('support_dataset', None) is not None:
             if cfg['support_dataset'].pop('copy_from_query_dataset', False):
@@ -76,7 +80,7 @@ def build_dataset(cfg, default_args=None, rank=None, timestamp=None):
         else:
             support_dataset = None
 
-        dataset = NwayKshotDataset(
+        dataset = NWayKShotDataset(
             query_dataset,
             support_dataset,
             num_support_ways=cfg['num_support_ways'],
@@ -122,16 +126,16 @@ def build_dataset(cfg, default_args=None, rank=None, timestamp=None):
     return dataset
 
 
-def build_dataloader(dataset,
-                     samples_per_gpu,
-                     workers_per_gpu,
-                     num_gpus=1,
-                     dist=True,
-                     shuffle=True,
-                     seed=None,
-                     data_cfg=None,
-                     use_infinite_sampler=False,
-                     **kwargs):
+def build_dataloader(dataset: Dataset,
+                     samples_per_gpu: int,
+                     workers_per_gpu: int,
+                     num_gpus: int = 1,
+                     dist: bool = True,
+                     shuffle: bool = True,
+                     seed: Optional[int] = None,
+                     data_cfg: Optional[Dict] = None,
+                     use_infinite_sampler: bool = False,
+                     **kwargs) -> DataLoader:
     """Build PyTorch DataLoader.
 
     In distributed training, each GPU/process has a dataloader.
@@ -184,8 +188,8 @@ def build_dataloader(dataset,
             pin_memory=False,
             worker_init_fn=init_fn,
             **kwargs)
-    elif isinstance(dataset, NwayKshotDataset):
-        from .dataloader_wrappers import NwayKshotDataloader
+    elif isinstance(dataset, NWayKShotDataset):
+        from .dataloader_wrappers import NWayKShotDataloader
         from mmfewshot.utils import multi_pipeline_collate_fn
 
         # initialize query dataloader
@@ -216,7 +220,7 @@ def build_dataloader(dataset,
             use_infinite_sampler=use_infinite_sampler)
 
         # wrap two dataloaders with dataloader wrapper
-        data_loader = NwayKshotDataloader(
+        data_loader = NWayKShotDataloader(
             query_data_loader=query_data_loader,
             support_dataset=support_dataset,
             support_sampler=support_sampler,
@@ -288,14 +292,15 @@ def build_dataloader(dataset,
     return data_loader
 
 
-def build_sampler(dist,
-                  shuffle,
-                  dataset,
-                  num_gpus,
-                  samples_per_gpu,
-                  workers_per_gpu,
-                  seed,
-                  use_infinite_sampler=False):
+def build_sampler(
+        dist: bool,
+        shuffle: bool,
+        dataset: Dataset,
+        num_gpus: int,
+        samples_per_gpu: int,
+        workers_per_gpu: int,
+        seed: int,
+        use_infinite_sampler: bool = False) -> Tuple[Sampler, int, int]:
     """Build pytorch sampler for dataLoader.
 
     Args:

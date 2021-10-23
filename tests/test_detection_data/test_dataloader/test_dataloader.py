@@ -10,7 +10,7 @@ def test_dataloader():
 
     # test regular and few shot annotations
     data_configs = [{
-        'type': 'NwayKshotDataset',
+        'type': 'NWayKShotDataset',
         'support_way': 5,
         'support_shot': 1,
         'dataset': {
@@ -49,7 +49,7 @@ def test_dataloader():
             True
         }
     }, {
-        'type': 'NwayKshotDataset',
+        'type': 'NWayKShotDataset',
         'support_way': 5,
         'support_shot': 1,
         'dataset': {

@@ -1,49 +1,29 @@
-import random
-import warnings
+from typing import Dict, Union
 
-import numpy as np
 import torch
 from mmcls.core import DistOptimizerHook
-from mmcls.utils import get_root_logger
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (HOOKS, DistSamplerSeedHook, EpochBasedRunner,
                          Fp16OptimizerHook, build_optimizer, build_runner)
-from mmcv.utils import build_from_cfg
+from mmcv.utils import ConfigDict, build_from_cfg
+from torch.utils.data import Dataset
 
 from mmfewshot.classification.core.evaluation import (DistMetaTestEvalHook,
                                                       MetaTestEvalHook)
 from mmfewshot.classification.datasets.builder import (
     build_dataloader, build_dataset, build_meta_test_dataloader)
+from mmfewshot.utils import get_root_logger
 
 
-def set_random_seed(seed, deterministic=False):
-    """Set random seed.
-
-    Args:
-        seed (int): Seed to be used.
-        deterministic (bool): Whether to set the deterministic option for
-            CUDNN backend, i.e., set `torch.backends.cudnn.deterministic`
-            to True and `torch.backends.cudnn.benchmark` to False.
-            Default: False.
-    """
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    if deterministic:
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-
-
-def train_model(model,
-                dataset,
-                cfg,
-                distributed=False,
-                validate=False,
-                timestamp=None,
-                device='cuda',
-                meta=None):
-    logger = get_root_logger(cfg.log_level)
+def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
+                dataset: Dataset,
+                cfg: ConfigDict,
+                distributed: bool = False,
+                validate: bool = False,
+                timestamp: str = None,
+                device: str = 'cuda',
+                meta: Dict = None) -> None:
+    logger = get_root_logger(log_level=cfg.log_level)
 
     # prepare data loaders
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
@@ -84,17 +64,6 @@ def train_model(model,
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
 
-    if 'runner' not in cfg:
-        cfg.runner = {
-            'type': 'EpochBasedRunner',
-            'max_epochs': cfg.total_epochs
-        }
-        warnings.warn(
-            'config is now expected to have a `runner` section, '
-            'please set `runner` in your config.', UserWarning)
-    else:
-        if 'total_epochs' in cfg:
-            assert cfg.total_epochs == cfg.runner.max_epochs
     if cfg.use_infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
         cfg.runner['type'] = 'InfiniteEpochBasedRunner'
     runner = build_runner(

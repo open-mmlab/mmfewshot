@@ -14,7 +14,7 @@ data = dict(
         repeat_times=50,
         dataset=dict(
             type='FewShotCocoDefaultDataset',
-            ann_cfg=[dict(method='Attention_RPN', setting='30SHOT14')],
+            ann_cfg=[dict(method='Attention_RPN', setting='30SHOT')],
             num_novel_shots=30,
             classes='NOVEL_CLASSES',
             min_bbox_area=0,

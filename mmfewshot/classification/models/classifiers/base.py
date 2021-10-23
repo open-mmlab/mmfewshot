@@ -1,6 +1,7 @@
 import copy
 from abc import abstractmethod
 from collections import OrderedDict
+from typing import Dict, Optional, Tuple
 
 import torch
 import torch.distributed as dist
@@ -8,6 +9,7 @@ from mmcls.models.builder import (CLASSIFIERS, build_backbone, build_head,
                                   build_neck)
 from mmcls.models.utils import Augments
 from mmcv.runner import BaseModule
+from torch import Tensor
 
 
 @CLASSIFIERS.register_module()
@@ -17,19 +19,19 @@ class FewShotBaseClassifier(BaseModule):
     Args:
         backbone (dict): Config of the backbone.
         neck (dict | None): Config of the neck. Default: None.
-        head (dict): Config of classification head.
+        head (dict | None): Config of classification head.
         train_cfg (dict | None): Training config. Default: None.
-        init_cfg (dict or list[dict], optional): Initialization config dict.
+        init_cfg (dict | list[dict] | None): Initialization config dict.
             Default: None
     """
 
     def __init__(self,
-                 backbone,
-                 neck=None,
-                 head=None,
-                 train_cfg=None,
-                 init_cfg=None):
-        super(FewShotBaseClassifier, self).__init__(init_cfg)
+                 backbone: Dict,
+                 neck: Optional[Dict] = None,
+                 head: Optional[Dict] = None,
+                 train_cfg: Optional[Dict] = None,
+                 init_cfg: Optional[Dict] = None):
+        super().__init__(init_cfg)
 
         self.backbone = build_backbone(copy.deepcopy(backbone))
 
@@ -49,21 +51,21 @@ class FewShotBaseClassifier(BaseModule):
         self.register_buffer('device_indicator', torch.empty(0))
 
     @property
-    def device(self):
+    def device(self) -> torch.device:
         return self.device_indicator.device
 
     def get_device(self):
         return self.device_indicator.get_device()
 
     @property
-    def with_neck(self):
+    def with_neck(self) -> bool:
         return hasattr(self, 'neck') and self.neck is not None
 
     @property
-    def with_head(self):
+    def with_head(self) -> bool:
         return hasattr(self, 'head') and self.head is not None
 
-    def extract_feat(self, img):
+    def extract_feat(self, img: Tensor) -> Tensor:
         """Directly extract features from the backbone."""
         x = self.backbone(img)
         if self.with_neck:
@@ -71,24 +73,22 @@ class FewShotBaseClassifier(BaseModule):
         return x
 
     def forward(self, **kwargs):
-        pass
+        """Forward Function."""
 
     @abstractmethod
     def forward_train(self, **kwargs):
-        pass
+        """Forward training data."""
 
     @abstractmethod
     def forward_support(self, **kwargs):
         """Forward support data in meta testing."""
-        pass
 
     @abstractmethod
     def forward_query(self, **kwargs):
         """Forward query data in meta testing."""
-        pass
 
     @staticmethod
-    def _parse_losses(losses):
+    def _parse_losses(losses: Dict) -> Tuple[Dict, Dict]:
         log_vars = OrderedDict()
         for loss_name, loss_value in losses.items():
             if isinstance(loss_value, torch.Tensor):
@@ -115,7 +115,7 @@ class FewShotBaseClassifier(BaseModule):
 
         return loss, log_vars
 
-    def train_step(self, data, optimizer):
+    def train_step(self, data: Dict, optimizer: torch.optim.Optimizer) -> Dict:
         """The iteration step during training.
 
         This method defines an iteration step during training, except for the
@@ -126,7 +126,7 @@ class FewShotBaseClassifier(BaseModule):
 
         Args:
             data (dict): The output of dataloader.
-            optimizer (:obj:`torch.optim.Optimizer` | dict): The optimizer of
+            optimizer (:obj:`torch.optim.Optimizer`): The optimizer of
                 runner is passed to `train_step()`. This argument is unused
                 and reserved.
 
@@ -149,7 +149,7 @@ class FewShotBaseClassifier(BaseModule):
 
         return outputs
 
-    def val_step(self, data, optimizer):
+    def val_step(self, data: Dict, optimizer: torch.optim.Optimizer) -> Dict:
         """The iteration step during validation.
 
         This method shares the same signature as :func:`train_step`, but used
@@ -165,12 +165,11 @@ class FewShotBaseClassifier(BaseModule):
         return outputs
 
     @abstractmethod
-    def before_meta_test(self, meta_test_cfg, **kwargs):
+    def before_meta_test(self, meta_test_cfg: Dict, **kwargs):
         """Used in meta testing.
 
         This function will be called before the meta testing.
         """
-        pass
 
     @abstractmethod
     def before_forward_support(self, **kwargs):
@@ -179,7 +178,6 @@ class FewShotBaseClassifier(BaseModule):
         This function will be called before model forward support data during
         meta testing.
         """
-        pass
 
     @abstractmethod
     def before_forward_query(self, **kwargs):
@@ -188,4 +186,3 @@ class FewShotBaseClassifier(BaseModule):
         This function will be called before model forward query data during
         meta testing.
         """
-        pass

@@ -1,14 +1,17 @@
+from typing import Dict, List
+
 import torch
 from mmdet.core import bbox2roi, bbox_overlaps
 from mmdet.models.builder import HEADS
 from mmdet.models.roi_heads import StandardRoIHead
+from torch import Tensor
 
 
 @HEADS.register_module()
 class ContrastiveRoIHead(StandardRoIHead):
     """RoI head for `FSCE <https://arxiv.org/abs/2103.05950>`_."""
 
-    def _bbox_forward(self, x, rois):
+    def _bbox_forward(self, x: List[Tensor], rois: Tensor) -> Dict:
         """Box head forward function used in both training and testing phase.
 
          Args:
@@ -32,8 +35,9 @@ class ContrastiveRoIHead(StandardRoIHead):
             contrast_feat=contrast_feat)
         return bbox_results
 
-    def _bbox_forward_train(self, x, sampling_results, gt_bboxes, gt_labels,
-                            img_metas):
+    def _bbox_forward_train(self, x: List[Tensor], sampling_results: object,
+                            gt_bboxes: List[Tensor], gt_labels: List[Tensor],
+                            img_metas: List[Dict]) -> Dict:
         """Forward function and calculate loss for box head in training phase.
 
         Args:

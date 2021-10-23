@@ -1,17 +1,20 @@
 # Copyright (c) 2019 Western Digital Corporation or its affiliates.
 import copy
+from typing import List, Optional
 
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.runner import BaseModule
+from mmcv.utils import ConfigDict
 from mmdet.models.builder import MODELS
+from torch import Tensor
 
 # AGGREGATORS are used for aggregate features from
 # different data pipelines in meta-learning methods.
 AGGREGATORS = MODELS
 
 
-def build_aggregator(cfg):
+def build_aggregator(cfg: ConfigDict) -> nn.Module:
     """Build aggregator."""
     return AGGREGATORS.build(cfg)
 
@@ -22,20 +25,22 @@ class AggregationLayer(BaseModule):
     Each aggregator return aggregated results in different way.
 
     Args:
-        aggregator_cfgs (list[dict]): List of fusion function.
-        init_cfg (dict or list[dict], optional): Initialization config dict.
-            Default: None
+        aggregator_cfgs (list[ConfigDict]): List of fusion function.
+        init_cfg (ConfigDict | None): Initialization config dict. Default: None
     """
 
-    def __init__(self, aggregator_cfgs, init_cfg=None):
-        super(AggregationLayer, self).__init__(init_cfg=init_cfg)
+    def __init__(self,
+                 aggregator_cfgs: List[ConfigDict],
+                 init_cfg: Optional[ConfigDict] = None) -> None:
+        super().__init__(init_cfg=init_cfg)
         self.aggregator_list = nn.ModuleList()
         self.num_aggregators = len(aggregator_cfgs)
         aggregator_cfgs_ = copy.deepcopy(aggregator_cfgs)
         for cfg in aggregator_cfgs_:
             self.aggregator_list.append(build_aggregator(cfg))
 
-    def forward(self, query_feat, support_feat):
+    def forward(self, query_feat: Tensor,
+                support_feat: Tensor) -> List[Tensor]:
         """Return aggregated features of query and support through single or
         multiple aggregators.
 
@@ -63,16 +68,16 @@ class DepthWiseCorrelationAggregator(BaseModule):
         with_fc (bool): Use fully connected layer for aggregated features.
             If set True, `in_channels` and `out_channels` are required.
             Default: False.
-        init_cfg (dict or list[dict], optional): Initialization config dict.
+        init_cfg (ConfigDict | None): Initialization config dict.
             Default: None
     """
 
     def __init__(self,
-                 in_channels=None,
-                 out_channels=None,
-                 with_fc=False,
-                 init_cfg=None):
-        super(DepthWiseCorrelationAggregator, self).__init__(init_cfg=init_cfg)
+                 in_channels: int,
+                 out_channels: int,
+                 with_fc: bool = False,
+                 init_cfg: Optional[ConfigDict] = None) -> None:
+        super().__init__(init_cfg=init_cfg)
         assert in_channels is not None, \
             "DepthWiseCorrelationAggregator require config of 'in_channels'."
         self.in_channels = in_channels
@@ -84,7 +89,7 @@ class DepthWiseCorrelationAggregator(BaseModule):
             self.norm = nn.BatchNorm1d(out_channels)
             self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, query_feat, support_feat):
+    def forward(self, query_feat: Tensor, support_feat: Tensor) -> Tensor:
         """Calculate aggregated features of query and support.
 
         Args:
@@ -121,16 +126,16 @@ class DifferenceAggregator(BaseModule):
         with_fc (bool): Use fully connected layer for aggregated features.
             If set True, `in_channels` and `out_channels` are required.
             Default: False.
-        init_cfg (dict or list[dict], optional): Initialization config dict.
+        init_cfg (ConfigDict | None): Initialization config dict.
             Default: None
     """
 
     def __init__(self,
-                 in_channels=None,
-                 out_channels=None,
-                 with_fc=False,
-                 init_cfg=None):
-        super(DifferenceAggregator, self).__init__(init_cfg=init_cfg)
+                 in_channels: int,
+                 out_channels: int,
+                 with_fc: bool = False,
+                 init_cfg: Optional[ConfigDict] = None) -> None:
+        super().__init__(init_cfg=init_cfg)
         self.with_fc = with_fc
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -139,7 +144,7 @@ class DifferenceAggregator(BaseModule):
             self.norm = nn.BatchNorm1d(out_channels)
             self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, query_feat, support_feat):
+    def forward(self, query_feat: Tensor, support_feat: Tensor) -> Tensor:
         """Calculate aggregated features of query and support.
 
         Args:
@@ -173,16 +178,16 @@ class DotProductAggregator(BaseModule):
         with_fc (bool): Use fully connected layer for aggregated features.
             If set True, `in_channels` and `out_channels` are required.
             Default: False.
-        init_cfg (dict or list[dict], optional): Initialization config dict.
-            Default: None
+        init_cfg (ConfigDict | None): Initialization config dict.
+            Default: None.
     """
 
     def __init__(self,
-                 in_channels=None,
-                 out_channels=None,
-                 with_fc=False,
-                 init_cfg=None):
-        super(DotProductAggregator, self).__init__(init_cfg=init_cfg)
+                 in_channels: int,
+                 out_channels: int,
+                 with_fc: bool = False,
+                 init_cfg: Optional[ConfigDict] = None) -> None:
+        super().__init__(init_cfg=init_cfg)
         self.with_fc = with_fc
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -191,7 +196,7 @@ class DotProductAggregator(BaseModule):
             self.norm = nn.BatchNorm1d(out_channels)
             self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, query_feat, support_feat):
+    def forward(self, query_feat: Tensor, support_feat: Tensor) -> Tensor:
         """Calculate aggregated features of query and support.
 
         Args:

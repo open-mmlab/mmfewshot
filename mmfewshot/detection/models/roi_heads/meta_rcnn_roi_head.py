@@ -1,10 +1,13 @@
 import copy
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
+from mmcv.utils import ConfigDict
 from mmdet.core import bbox2result, bbox2roi
 from mmdet.models.builder import HEADS, build_neck
 from mmdet.models.roi_heads import StandardRoIHead
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -12,26 +15,28 @@ class MetaRCNNRoIHead(StandardRoIHead):
     """Roi head for `MetaRCNN <https://arxiv.org/abs/1908.01998>`_.
 
     Args:
-        aggregation_layer (dict): Config of `aggregation_layer`.
+        aggregation_layer (ConfigDict): Config of `aggregation_layer`.
             Default: None.
     """
 
-    def __init__(self, aggregation_layer=None, **kwargs):
-        super(MetaRCNNRoIHead, self).__init__(**kwargs)
+    def __init__(self,
+                 aggregation_layer: Optional[ConfigDict] = None,
+                 **kwargs) -> None:
+        super().__init__(**kwargs)
         assert aggregation_layer is not None, \
             'missing config of `aggregation_layer`.'
         self.aggregation_layer = build_neck(copy.deepcopy(aggregation_layer))
 
     def forward_train(self,
-                      query_feats,
-                      support_feats,
-                      proposals,
-                      query_img_metas,
-                      query_gt_bboxes,
-                      query_gt_labels,
-                      support_gt_labels,
-                      query_gt_bboxes_ignore=None,
-                      **kwargs):
+                      query_feats: List[Tensor],
+                      support_feats: List[Tensor],
+                      proposals: List[Tensor],
+                      query_img_metas: List[Tensor],
+                      query_gt_bboxes: List[Tensor],
+                      query_gt_labels: List[Tensor],
+                      support_gt_labels: List[Tensor],
+                      query_gt_bboxes_ignore: Optional[List[Tensor]] = None,
+                      **kwargs) -> Dict:
         """Forward function for training.
 
         Args:
@@ -90,9 +95,13 @@ class MetaRCNNRoIHead(StandardRoIHead):
 
         return losses
 
-    def _bbox_forward_train(self, query_feats, support_feats, sampling_results,
-                            query_img_metas, query_gt_bboxes, query_gt_labels,
-                            support_gt_labels):
+    def _bbox_forward_train(self, query_feats: List[Tensor],
+                            support_feats: List[Tensor],
+                            sampling_results: object,
+                            query_img_metas: List[Dict],
+                            query_gt_bboxes: List[Tensor],
+                            query_gt_labels: List[Tensor],
+                            support_gt_labels: List[Tensor]) -> Dict:
         """Forward function and calculate loss for box head in training.
 
         Args:
@@ -171,7 +180,8 @@ class MetaRCNNRoIHead(StandardRoIHead):
         bbox_results.update(loss_bbox=loss_bbox)
         return bbox_results
 
-    def extract_query_roi_feat(self, feats, rois):
+    def extract_query_roi_feat(self, feats: List[Tensor],
+                               rois: Tensor) -> Tensor:
         """Extracting query BBOX features, which is used in both training and
         testing.
 
@@ -189,7 +199,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
             roi_feats = self.shared_head(roi_feats)
         return roi_feats
 
-    def extract_support_feats(self, feats):
+    def extract_support_feats(self, feats: List[Tensor]) -> List[Tensor]:
         """Forward support features through shared layers.
 
         Args:
@@ -208,7 +218,8 @@ class MetaRCNNRoIHead(StandardRoIHead):
             out = feats
         return out
 
-    def _bbox_forward(self, query_roi_feats, support_roi_feats):
+    def _bbox_forward(self, query_roi_feats: Tensor,
+                      support_roi_feats: Tensor) -> Dict:
         """Box head forward function used in both training and testing.
 
         Args:
@@ -228,12 +239,11 @@ class MetaRCNNRoIHead(StandardRoIHead):
         return bbox_results
 
     def simple_test(self,
-                    query_feats,
-                    support_feats_dict,
-                    proposal_list,
-                    query_img_metas,
-                    proposals=None,
-                    rescale=False):
+                    query_feats: List[Tensor],
+                    support_feats_dict: Dict,
+                    proposal_list: List[Tensor],
+                    query_img_metas: List[Dict],
+                    rescale: bool = False) -> List[List[np.ndarray]]:
         """Test without augmentation.
 
         Args:
@@ -248,10 +258,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
                 contain `filename`, `ori_shape`, `pad_shape`, and
                 `img_norm_cfg`. For details on the values of these keys see
                 :class:`mmdet.datasets.pipelines.Collect`.
-            proposals (Tensor or list[Tensor]): Region proposals.
-                Default: None.
-            rescale (bool, optional): Whether to rescale the results.
-                Defaults to False.
+            rescale (bool): Whether to rescale the results. Default: False.
 
         Returns:
             list[list[np.ndarray]]: BBox results of each image and classes.
@@ -274,13 +281,14 @@ class MetaRCNNRoIHead(StandardRoIHead):
 
         return bbox_results
 
-    def simple_test_bboxes(self,
-                           query_feats,
-                           support_feats_dict,
-                           query_img_metas,
-                           proposals,
-                           rcnn_test_cfg,
-                           rescale=False):
+    def simple_test_bboxes(
+            self,
+            query_feats: List[Tensor],
+            support_feats_dict: Dict,
+            query_img_metas: List[Dict],
+            proposals: List[Tensor],
+            rcnn_test_cfg: ConfigDict,
+            rescale: bool = False) -> Tuple[List[Tensor], List[Tensor]]:
         """Test only det bboxes without augmentation.
 
         Args:
@@ -294,7 +302,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
                 contain `filename`, `ori_shape`, `pad_shape`, and
                 `img_norm_cfg`. For details on the values of these keys see
                 :class:`mmdet.datasets.pipelines.Collect`.
-            proposals (Tensor or list[Tensor]): Region proposals.
+            proposals (list[Tensor]): Region proposals.
             rcnn_test_cfg (obj:`ConfigDict`): `test_cfg` of R-CNN.
             rescale (bool): If True, return boxes in original image space.
                 Default: False.

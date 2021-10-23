@@ -1,6 +1,9 @@
+from typing import Dict, List
+
 import torch
 import torch.nn.functional as F
 from mmcls.models.builder import HEADS
+from torch import Tensor
 
 from mmfewshot.classification.datasets import label_wrapper
 from .base_head import FewShotBaseHead
@@ -8,22 +11,20 @@ from .base_head import FewShotBaseHead
 
 @HEADS.register_module()
 class PrototypeHead(FewShotBaseHead):
-    """Classification head for `ProtoNet  <https://arxiv.org/abs/1703.05175>`_.
+    """Classification head for `ProtoNet.
 
-    Args:
-        num_classes (int): Number of categories excluding the background
-            category.
-        in_channels (int): Number of channels in the input feature map.
+    <https://arxiv.org/abs/1703.05175>`_.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(PrototypeHead, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.support_feats = []
         self.support_labels = []
         self.prototype_feats = None
 
-    def forward_train(self, support_feats, support_labels, query_feats,
-                      query_labels, **kwargs):
+    def forward_train(self, support_feats: Tensor, support_labels: Tensor,
+                      query_feats: Tensor, query_labels: Tensor,
+                      **kwargs) -> Dict:
         """Forward training data.
 
         Args:
@@ -48,12 +49,12 @@ class PrototypeHead(FewShotBaseHead):
         losses = self.loss(cls_scores, query_labels)
         return losses
 
-    def forward_support(self, x, gt_label, **kwargs):
+    def forward_support(self, x: Tensor, gt_label: Tensor, **kwargs) -> None:
         """Forward support data in meta testing."""
         self.support_feats.append(x)
         self.support_labels.append(gt_label)
 
-    def forward_query(self, x, **kwargs):
+    def forward_query(self, x: Tensor, **kwargs) -> List:
         """Forward query data in meta testing."""
         assert self.prototype_feats is not None
         cls_scores = -1 * torch.cdist(
@@ -62,7 +63,7 @@ class PrototypeHead(FewShotBaseHead):
         pred = list(pred.detach().cpu().numpy())
         return pred
 
-    def before_forward_support(self):
+    def before_forward_support(self) -> None:
         """Used in meta testing.
 
         This function will be called before model forward support data during
@@ -73,7 +74,7 @@ class PrototypeHead(FewShotBaseHead):
         self.support_labels.clear()
         self.prototype_feats = None
 
-    def before_forward_query(self):
+    def before_forward_query(self) -> None:
         """Used in meta testing.
 
         This function will be called before model forward query data during

@@ -9,15 +9,15 @@ from .version import __version__, short_version
 
 
 def digit_version(version_str):
-    digit_version = []
+    digit_version_ = []
     for x in version_str.split('.'):
         if x.isdigit():
-            digit_version.append(int(x))
+            digit_version_.append(int(x))
         elif x.find('rc') != -1:
             patch_version = x.split('rc')
-            digit_version.append(int(patch_version[0]) - 1)
-            digit_version.append(int(patch_version[1]))
-    return digit_version
+            digit_version_.append(int(patch_version[0]) - 1)
+            digit_version_.append(int(patch_version[1]))
+    return digit_version_
 
 
 mmcv_minimum_version = '1.3.12'
@@ -46,8 +46,8 @@ mmcls_maximum_version = '0.15.0'
 mmcls_version = digit_version(mmcls.__version__)
 
 
-assert (mmcls_version >= digit_version(mmcls_minimum_version)
-        and mmcls_version <= digit_version(mmcls_maximum_version)), \
+assert (digit_version(mmcls_minimum_version) <= mmcls_version
+        <= digit_version(mmcls_maximum_version)), \
     f'MMCLS=={mmcls.__version__} is used but incompatible. ' \
     f'Please install mmcls>={mmcls_minimum_version},\
      <={mmcls_maximum_version}.'

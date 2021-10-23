@@ -1,4 +1,5 @@
 import copy
+from typing import Dict, Optional
 
 import torch
 import torch.nn as nn
@@ -6,6 +7,7 @@ from mmcv.runner import force_fp32
 from mmdet.models.builder import HEADS, build_loss
 from mmdet.models.losses import accuracy
 from mmdet.models.roi_heads import BBoxHead
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -23,24 +25,24 @@ class MetaBBoxHead(BBoxHead):
     """
 
     def __init__(self,
-                 num_meta_classes,
-                 meta_cls_in_channels=2048,
-                 with_meta_cls_loss=True,
-                 meta_cls_loss_weight=None,
-                 loss_meta=dict(
+                 num_meta_classes: int,
+                 meta_cls_in_channels: int = 2048,
+                 with_meta_cls_loss: bool = True,
+                 meta_cls_loss_weight: Optional[float] = None,
+                 loss_meta: Dict = dict(
                      type='CrossEntropyLoss',
                      use_sigmoid=False,
                      loss_weight=1.0),
                  *args,
-                 **kwargs):
-        super(MetaBBoxHead, self).__init__(*args, **kwargs)
+                 **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.with_meta_cls_loss = with_meta_cls_loss
         if with_meta_cls_loss:
             self.fc_meta = nn.Linear(meta_cls_in_channels, num_meta_classes)
             self.meta_cls_loss_weight = meta_cls_loss_weight
             self.loss_meta_cls = build_loss(copy.deepcopy(loss_meta))
 
-    def forward_meta_cls(self, support_feat):
+    def forward_meta_cls(self, support_feat: Tensor) -> Tensor:
         """Forward function for meta classification.
 
         Args:
@@ -54,10 +56,10 @@ class MetaBBoxHead(BBoxHead):
 
     @force_fp32(apply_to='meta_cls_score')
     def loss_meta(self,
-                  meta_cls_score,
-                  meta_cls_labels,
-                  meta_cls_label_weights,
-                  reduction_override=None):
+                  meta_cls_score: Tensor,
+                  meta_cls_labels: Tensor,
+                  meta_cls_label_weights: Tensor,
+                  reduction_override: Optional[str] = None) -> Dict:
         """Meta classification loss.
 
         Args:
@@ -67,12 +69,12 @@ class MetaBBoxHead(BBoxHead):
                 shape (N).
             meta_cls_label_weights (Tensor): Meta classification loss weight
                 of each sample with shape (N).
-            reduction_override (str, optional): The reduction method used to
+            reduction_override (str | None): The reduction method used to
                 override the original reduction method of the loss. Options
                 are "none", "mean" and "sum". Default: None.
 
         Returns:
-            Tensor: The calculated loss.
+            Dict: The calculated loss.
         """
         losses = dict()
         if self.meta_cls_loss_weight is None:

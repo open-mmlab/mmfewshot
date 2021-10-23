@@ -17,6 +17,7 @@ data = dict(
             ann_cfg=[dict(method='Attention_RPN', setting='10SHOT')],
             num_novel_shots=10,
             classes='NOVEL_CLASSES',
+            min_bbox_area=0,
             instance_wise=False)),
     val=dict(classes='NOVEL_CLASSES'),
     test=dict(classes='NOVEL_CLASSES'),
@@ -39,9 +40,9 @@ lr_config = dict(
 log_config = dict(interval=10)
 runner = dict(max_iters=3000)
 # load_from = 'path of base training model'
-load_from = \
-    'work_dirs/attention_rpn_faster_rcnn_r50_c4_coco_base_training/latest.pth'
-
+load_from = 'work_dirs/' \
+            'attention_rpn_faster_rcnn_r50_c4_coco_base_training_14/' \
+            'latest.pth'
 model = dict(
     frozen_parameters=['backbone'],
     rpn_head=dict(

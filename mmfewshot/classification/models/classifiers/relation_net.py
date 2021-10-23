@@ -1,4 +1,5 @@
 import copy
+from typing import Dict
 
 from mmcls.models.builder import CLASSIFIERS
 
@@ -10,8 +11,8 @@ class RelationNetClassifier(MetaMetricBaseClassifier):
     """Implementation of `RelationNet  <https://arxiv.org/abs/1711.06025>`_."""
 
     def __init__(self,
-                 head=dict(type='RelationHead', in_channels=64),
+                 head: Dict = dict(type='RelationHead', in_channels=64),
                  *args,
-                 **kwargs):
+                 **kwargs) -> None:
         self.head_cfg = copy.deepcopy(head)
-        super(RelationNetClassifier, self).__init__(head=head, *args, **kwargs)
+        super().__init__(head=head, *args, **kwargs)

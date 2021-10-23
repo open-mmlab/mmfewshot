@@ -1,7 +1,11 @@
-from torch.utils.data import DataLoader
+from typing import Dict, Iterator
+
+from torch.utils.data import DataLoader, Sampler
+
+from .dataset_wrappers import NWayKShotDataset
 
 
-class NwayKshotDataloader(object):
+class NWayKShotDataloader:
     """A dataloader wrapper.
 
     It Create a iterator to generate query and support
@@ -10,9 +14,9 @@ class NwayKshotDataloader(object):
     (num_support_ways * num_support_shots) respectively.
 
     Args:
-        query_data_loader (nn.DataLoader): DataLoader of query dataset
-        support_dataset (list[:obj:`NwayKshotDataset`]): Support datasets.
-        support_sampler (:obj:`Sampler`): Sampler for support dataloader.
+        query_data_loader (DataLoader): DataLoader of query dataset
+        support_dataset (:obj:`NWayKShotDataset`): Support datasets.
+        support_sampler (Sampler): Sampler for support dataloader.
         num_workers (int): Num workers for support dataloader.
         support_collate_fn (callable): Collate function for support dataloader.
         pin_memory (bool): Pin memory for both support and query dataloader.
@@ -24,15 +28,15 @@ class NwayKshotDataloader(object):
     """
 
     def __init__(self,
-                 query_data_loader,
-                 support_dataset,
-                 support_sampler,
-                 num_workers,
-                 support_collate_fn,
-                 pin_memory,
-                 worker_init_fn,
-                 shuffle_support_dataset=False,
-                 **kwargs):
+                 query_data_loader: DataLoader,
+                 support_dataset: NWayKShotDataset,
+                 support_sampler: Sampler,
+                 num_workers: int,
+                 support_collate_fn: callable,
+                 pin_memory: bool,
+                 worker_init_fn: callable,
+                 shuffle_support_dataset: bool = False,
+                 **kwargs) -> None:
         self.dataset = query_data_loader.dataset
         self.query_data_loader = query_data_loader
         self.support_dataset = support_dataset
@@ -62,9 +66,8 @@ class NwayKshotDataloader(object):
             worker_init_fn=self.worker_init_fn,
             **self.kwargs)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         if self.shuffle_support_dataset:
-            # TODO: synchronize seeds across all rank
             # generate different support batch indexes for each epoch
             self.support_dataset.shuffle_support()
             # initialize support dataloader with batch_size 1
@@ -84,17 +87,17 @@ class NwayKshotDataloader(object):
         self.support_iter = iter(self.support_data_loader)
         return self
 
-    def __next__(self):
+    def __next__(self) -> Dict:
         # call query and support iterator
         query_data = self.query_iter.next()
         support_data = self.support_iter.next()
         return {'query_data': query_data, 'support_data': support_data}
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.query_data_loader)
 
 
-class TwoBranchDataloader(object):
+class TwoBranchDataloader:
     """A dataloader wrapper.
 
     It Create a iterator to iterate two different dataloader simultaneously.
@@ -102,21 +105,22 @@ class TwoBranchDataloader(object):
     the length of dataloader is decided by main dataset.
 
     Args:
-        main_data_loader (nn.DataLoader): DataLoader of main dataset.
-        auxiliary_data_loader (nn.DataLoader): DataLoader of auxiliary dataset.
+        main_data_loader (DataLoader): DataLoader of main dataset.
+        auxiliary_data_loader (DataLoader): DataLoader of auxiliary dataset.
     """
 
-    def __init__(self, main_data_loader, auxiliary_data_loader):
+    def __init__(self, main_data_loader: DataLoader,
+                 auxiliary_data_loader: DataLoader) -> None:
         self.dataset = main_data_loader.dataset
         self.main_data_loader = main_data_loader
         self.auxiliary_data_loader = auxiliary_data_loader
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         self.main_iter = iter(self.main_data_loader)
         self.auxiliary_iter = iter(self.auxiliary_data_loader)
         return self
 
-    def __next__(self):
+    def __next__(self) -> Dict:
         # The iterator actually has infinite length, which can't
         # be used in epoch based training.
         try:
@@ -131,5 +135,5 @@ class TwoBranchDataloader(object):
             auxiliary_data = next(self.auxiliary_iter)
         return {'main_data': main_data, 'auxiliary_data': auxiliary_data}
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.main_data_loader)

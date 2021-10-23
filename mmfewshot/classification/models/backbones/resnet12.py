@@ -1,13 +1,16 @@
+from typing import Optional, Tuple
+
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcls.models.builder import BACKBONES
+from torch import Tensor
 
 from .utils import DropBlock
 
 # This part of code is modified from https://github.com/kjunelee/MetaOptNet
 
 
-def conv3x3(in_channels, out_channels, stride=1):
+def conv3x3(in_channels: int, out_channels: int, stride: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding."""
     return nn.Conv2d(
         in_channels,
@@ -22,14 +25,14 @@ class BasicBlock(nn.Module):
     expansion = 1
 
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride=1,
-                 downsample=None,
-                 drop_rate=0.0,
-                 drop_block=False,
-                 block_size=1):
-        super(BasicBlock, self).__init__()
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int = 1,
+                 downsample: Optional[nn.Module] = None,
+                 drop_rate: float = 0.0,
+                 drop_block: bool = False,
+                 block_size: int = 1) -> None:
+        super().__init__()
         self.conv1 = conv3x3(in_channels, out_channels)
         self.norm1 = nn.BatchNorm2d(out_channels)
         self.relu = nn.LeakyReLU(0.1)
@@ -46,7 +49,7 @@ class BasicBlock(nn.Module):
         self.block_size = block_size
         self.DropBlock = DropBlock(block_size=self.block_size)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         num_batches_tracked = int(self.norm1.num_batches_tracked.cpu().data)
         identity = x
 
@@ -87,7 +90,7 @@ class ResNet12(nn.Module):
     """ResNet12.
 
     Args:
-        block (:class:`BasicBlock`): Block to build layers.
+        block (nn.Module): Block to build layers. Default: :class:`BasicBlock`.
         with_avgpool (bool): Whether to average pool the features.
             Default: True.
         pool_size (tuple(int,int)): The output shape of average pooling layer.
@@ -99,14 +102,14 @@ class ResNet12(nn.Module):
     """
 
     def __init__(self,
-                 block=BasicBlock,
-                 with_avgpool=True,
-                 pool_size=(1, 1),
-                 flatten=True,
-                 drop_rate=0.0,
-                 drop_block_size=5):
+                 block: nn.Module = BasicBlock,
+                 with_avgpool: bool = True,
+                 pool_size: Tuple[int, int] = (1, 1),
+                 flatten: bool = True,
+                 drop_rate: float = 0.0,
+                 drop_block_size: int = 5) -> None:
         self.in_channels = 3
-        super(ResNet12, self).__init__()
+        super().__init__()
 
         self.layer1 = self._make_layer(
             block, 64, stride=2, drop_rate=drop_rate)
@@ -134,12 +137,12 @@ class ResNet12(nn.Module):
         self.num_batches_tracked = 0
 
     def _make_layer(self,
-                    block,
-                    out_channels,
-                    stride=1,
-                    drop_rate=0.0,
-                    drop_block=False,
-                    block_size=1):
+                    block: nn.Module,
+                    out_channels: int,
+                    stride: int = 1,
+                    drop_rate: float = 0.0,
+                    drop_block: bool = False,
+                    block_size: int = 1) -> nn.Sequential:
         downsample = None
         if stride != 1 or self.in_channels != out_channels * block.expansion:
             downsample = nn.Sequential(
@@ -160,7 +163,7 @@ class ResNet12(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def init_weights(self):
+    def init_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(
@@ -169,7 +172,7 @@ class ResNet12(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)

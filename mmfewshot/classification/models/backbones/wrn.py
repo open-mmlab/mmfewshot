@@ -1,13 +1,20 @@
 # This code is modified from https://github.com/nupurkmr9/S2M2_fewshot
 
+from typing import Tuple, Union
+
 import torch.nn as nn
 from mmcls.models.builder import BACKBONES
+from torch import Tensor
 
 
 class WRNBlock(nn.Module):
 
-    def __init__(self, in_channels, out_channels, stride, drop_rate=0.0):
-        super(WRNBlock, self).__init__()
+    def __init__(self,
+                 in_channels: int,
+                 out_channels: int,
+                 stride: int,
+                 drop_rate: float = 0.0) -> None:
+        super().__init__()
         self.norm1 = nn.BatchNorm2d(in_channels)
         self.relu1 = nn.ReLU()
         self.conv1 = nn.Conv2d(
@@ -38,7 +45,7 @@ class WRNBlock(nn.Module):
                     stride=stride,
                     bias=True))
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         out = self.norm1(x)
         out = self.relu1(out)
         out = self.conv1(out)
@@ -68,15 +75,18 @@ class WideResNet(nn.Module):
             Default: (1, 1).
     """
 
-    def __init__(self,
-                 depth,
-                 widen_factor=1,
-                 stride=1,
-                 drop_rate=0.0,
-                 flatten=True,
-                 with_avgpool=True,
-                 pool_size=(1, 1)):
-        super(WideResNet, self).__init__()
+    def __init__(
+        self,
+        depth: int,
+        widen_factor: int = 1,
+        stride: int = 1,
+        drop_rate: float = 0.0,
+        flatten: bool = True,
+        with_avgpool: bool = True,
+        pool_size: Tuple[int, int] = (1, 1)
+    ) -> None:  # noqa: E125
+
+        super().__init__()
         num_channels = [
             16, 16 * widen_factor, 32 * widen_factor, 64 * widen_factor
         ]
@@ -107,8 +117,9 @@ class WideResNet(nn.Module):
             self.avgpool = nn.AdaptiveAvgPool2d(pool_size)
 
     @staticmethod
-    def _make_layer(num_layers, in_channels, out_channels, block, stride,
-                    drop_rate):
+    def _make_layer(num_layers: Union[int, float], in_channels: int,
+                    out_channels: int, block: nn.Module, stride: int,
+                    drop_rate: float) -> nn.Sequential:
         layers = []
         for i in range(int(num_layers)):
             layers.append(
@@ -116,7 +127,7 @@ class WideResNet(nn.Module):
                       i == 0 and stride or 1, drop_rate))
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         x = self.conv1(x)
         x = self.layer1(x)
         x = self.layer2(x)
@@ -129,7 +140,7 @@ class WideResNet(nn.Module):
             x = x.view(x.size(0), -1)
         return x
 
-    def init_weights(self):
+    def init_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(
@@ -142,15 +153,18 @@ class WideResNet(nn.Module):
 @BACKBONES.register_module()
 class WRN28x10(WideResNet):
 
-    def __init__(self,
-                 depth=28,
-                 widen_factor=10,
-                 stride=1,
-                 drop_rate=0.5,
-                 flatten=True,
-                 with_avgpool=True,
-                 pool_size=(1, 1)):
-        super(WRN28x10, self).__init__(
+    def __init__(
+        self,
+        depth: int = 28,
+        widen_factor: int = 10,
+        stride: int = 1,
+        drop_rate: float = 0.5,
+        flatten: bool = True,
+        with_avgpool: bool = True,
+        pool_size: Tuple[int, int] = (1, 1)
+    ) -> None:  # noqa: E125
+
+        super().__init__(
             depth=depth,
             widen_factor=widen_factor,
             stride=stride,

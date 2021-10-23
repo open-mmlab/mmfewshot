@@ -1,7 +1,10 @@
+from typing import Dict, List, Optional, Tuple, Union
+
 import torch
 from mmcv.runner import auto_fp16
 from mmdet.models.builder import DETECTORS
 from mmdet.models.detectors import TwoStageDetector
+from torch import Tensor
 
 
 @DETECTORS.register_module()
@@ -9,20 +12,17 @@ class MPSR(TwoStageDetector):
     """Implementation of `MPSR. <https://arxiv.org/abs/2007.09384>`_.
 
     Args:
-        rpn_select_levels (list[int] | None): Specify the corresponding
+        rpn_select_levels (list[int]): Specify the corresponding
             level of fpn features for each scale of image. The selected
-            features will be fed into rpn head. Default: None.
-        roi_select_levels (list[int] | None): Specific which level of fpn
+            features will be fed into rpn head.
+        roi_select_levels (list[int]): Specific which level of fpn
             features to be selected for each scale of image. The selected
-            features will be fed into roi head. Default: None.
+            features will be fed into roi head.
     """
 
-    def __init__(self,
-                 rpn_select_levels=None,
-                 roi_select_levels=None,
-                 *args,
-                 **kwargs):
-        super(MPSR, self).__init__(*args, **kwargs)
+    def __init__(self, rpn_select_levels: List[int],
+                 roi_select_levels: List[int], *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         assert rpn_select_levels, 'rpn_select_levels can not be None.'
         assert roi_select_levels, 'roi_select_levels can not be None.'
         assert len(rpn_select_levels) == len(roi_select_levels), \
@@ -32,7 +32,9 @@ class MPSR(TwoStageDetector):
         self.num_fpn_levels = max(
             max(rpn_select_levels), max(roi_select_levels)) + 1
 
-    def extract_auxiliary_feat(self, auxiliary_data_list):
+    def extract_auxiliary_feat(
+            self, auxiliary_data_list: List[Dict]
+    ) -> Tuple[List[Tensor], List[Tensor]]:
         """Extract and select features from data list at multiple scale.
 
         Args:
@@ -68,7 +70,8 @@ class MPSR(TwoStageDetector):
             roi_feats.append(feats[self.roi_select_levels[scale]])
         return rpn_feats, roi_feats
 
-    def forward_train(self, main_data, auxiliary_data_list, **kwargs):
+    def forward_train(self, main_data: Dict, auxiliary_data_list: List[Dict],
+                      **kwargs) -> Dict:
         """
         Args:
             main_data (dict): In most cases, dict of main data contains:
@@ -116,12 +119,12 @@ class MPSR(TwoStageDetector):
 
     @auto_fp16(apply_to=('img', ))
     def forward(self,
-                main_data=None,
-                auxiliary_data=None,
-                img=None,
-                img_metas=None,
-                return_loss=True,
-                **kwargs):
+                main_data: Dict = None,
+                auxiliary_data: Dict = None,
+                img: List[Tensor] = None,
+                img_metas: List[Dict] = None,
+                return_loss: bool = True,
+                **kwargs) -> Dict:
         """Calls either :func:`forward_train` or :func:`forward_test` depending
         on whether ``return_loss`` is ``True``.
 
@@ -165,7 +168,7 @@ class MPSR(TwoStageDetector):
         else:
             return self.forward_test(img, img_metas, **kwargs)
 
-    def train_step(self, data, optimizer):
+    def train_step(self, data: Dict, optimizer: Union[object, Dict]) -> Dict:
         """The iteration step during training.
 
         This method defines an iteration step during training, except for the
@@ -202,7 +205,9 @@ class MPSR(TwoStageDetector):
 
         return outputs
 
-    def val_step(self, data, optimizer):
+    def val_step(self,
+                 data: Dict,
+                 optimizer: Optional[Union[object, Dict]] = None) -> Dict:
         """The iteration step during validation.
 
         This method shares the same signature as :func:`train_step`, but used

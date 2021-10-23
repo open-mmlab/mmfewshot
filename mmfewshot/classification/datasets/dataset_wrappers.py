@@ -1,13 +1,17 @@
+from __future__ import annotations
 import os.path as osp
+from typing import Dict, List, Mapping, Optional, Tuple
 
 import numpy as np
+from torch import Tensor
+from torch.utils.data import Dataset
 
 from mmfewshot.utils import local_numpy_seed
 from .builder import DATASETS
 
 
 @DATASETS.register_module()
-class EpisodicDataset(object):
+class EpisodicDataset:
     """A wrapper of episodic dataset.
 
     Args:
@@ -24,12 +28,12 @@ class EpisodicDataset(object):
     """
 
     def __init__(self,
-                 dataset,
-                 num_episodes,
-                 num_ways,
-                 num_shots,
-                 num_queries,
-                 episodes_seed=None):
+                 dataset: Dataset,
+                 num_episodes: int,
+                 num_ways: int,
+                 num_shots: int,
+                 num_queries: int,
+                 episodes_seed: Optional[int] = None) -> None:
         self.dataset = dataset
         self.num_ways = num_ways
         self.num_shots = num_shots
@@ -38,11 +42,11 @@ class EpisodicDataset(object):
         self._len = len(self.dataset)
         self.CLASSES = dataset.CLASSES
         self.episodes_seed = episodes_seed
-        self.episode_idxs, self.episode_class_ids = \
-            self.generate_episodic_idxs()
+        self.episode_idxes, self.episode_class_ids = \
+            self.generate_episodic_idxes()
 
-    def generate_episodic_idxs(self):
-        episode_idxs, episode_class_ids = [], []
+    def generate_episodic_idxes(self) -> Tuple[List[Mapping], List[List[int]]]:
+        episode_idxes, episode_class_ids = [], []
         class_ids = [i for i in range(len(self.CLASSES))]
         with local_numpy_seed(self.episodes_seed):
             for _ in range(self.num_episodes):
@@ -56,13 +60,13 @@ class EpisodicDataset(object):
                         sampled_cls[i], self.num_shots + self.num_queries)
                     episodic_support_idx += shots[:self.num_shots]
                     episodic_query_idx += shots[self.num_shots:]
-                episode_idxs.append({
+                episode_idxes.append({
                     'support': episodic_support_idx,
                     'query': episodic_query_idx
                 })
-        return episode_idxs, episode_class_ids
+        return episode_idxes, episode_class_ids
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Dict:
         """Return a episode data at the same time.
 
         For `EpisodicDataset`, this function would return num_ways *
@@ -71,18 +75,18 @@ class EpisodicDataset(object):
 
         return {
             'support_data':
-            [self.dataset[i] for i in self.episode_idxs[idx]['support']],
+            [self.dataset[i] for i in self.episode_idxes[idx]['support']],
             'query_data':
-            [self.dataset[i] for i in self.episode_idxs[idx]['query']]
+            [self.dataset[i] for i in self.episode_idxes[idx]['query']]
         }
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.num_episodes
 
-    def evaluate(self, *args, **kwargs):
+    def evaluate(self, *args, **kwargs) -> List:
         return self.dataset.evaluate(*args, **kwargs)
 
-    def get_episode_class_ids(self, idx):
+    def get_episode_class_ids(self, idx: int) -> List[int]:
         return self.episode_class_ids[idx]
 
 
@@ -97,26 +101,26 @@ class MetaTestDataset(EpisodicDataset):
       whole test set to extract features from the fixed backbone, which
       can accelerate meta testing.
     - In `support` or `query` mode, the dataset will fetch images
-      according to the `episode_idxs` with the same `task_id`. Therefore,
+      according to the `episode_idxes` with the same `task_id`. Therefore,
       the support and query dataset must be set to the same `task_id` in
       each test task.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(MetaTestDataset, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self._mode = 'test_set'
         self._task_id = 0
         self._with_cache_feats = False
 
-    def with_cache_feats(self):
+    def with_cache_feats(self) -> bool:
         return self._with_cache_feats
 
-    def set_task_id(self, task_id):
+    def set_task_id(self, task_id: int) -> None:
         """Query and support dataset use same task id to make sure fetch data
         from same episode."""
         self._task_id = task_id
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Dict:
         """Return data according to mode.
 
         For mode `test_set`, this function would return single image as regular
@@ -130,9 +134,9 @@ class MetaTestDataset(EpisodicDataset):
         if self._mode == 'test_set':
             idx = idx
         elif self._mode == 'support':
-            idx = self.episode_idxs[self._task_id]['support'][idx]
+            idx = self.episode_idxes[self._task_id]['support'][idx]
         elif self._mode == 'query':
-            idx = self.episode_idxs[self._task_id]['query'][idx]
+            idx = self.episode_idxes[self._task_id]['query'][idx]
 
         if self._with_cache_feats:
             return {
@@ -142,22 +146,22 @@ class MetaTestDataset(EpisodicDataset):
         else:
             return self.dataset[idx]
 
-    def get_task_class_ids(self):
+    def get_task_class_ids(self) -> List[int]:
         return self.get_episode_class_ids(self._task_id)
 
-    def test_set(self):
+    def test_set(self) -> MetaTestDataset:
         self._mode = 'test_set'
         return self
 
-    def support(self):
+    def support(self) -> MetaTestDataset:
         self._mode = 'support'
         return self
 
-    def query(self):
+    def query(self) -> MetaTestDataset:
         self._mode = 'query'
         return self
 
-    def __len__(self):
+    def __len__(self) -> int:
         if self._mode == 'test_set':
             return len(self.dataset)
         elif self._mode == 'support':
@@ -165,7 +169,7 @@ class MetaTestDataset(EpisodicDataset):
         elif self._mode == 'query':
             return self.num_ways * self.num_queries
 
-    def cache_feats(self, feats, img_metas):
+    def cache_feats(self, feats: Tensor, img_metas: Dict) -> None:
         """Cache extracted feats into dataset."""
         idx_map = {
             osp.join(data_info['img_prefix'],

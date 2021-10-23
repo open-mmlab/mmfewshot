@@ -1,3 +1,5 @@
+from typing import Dict, Optional, Tuple
+
 import torch
 import torch.nn as nn
 from mmcv.runner import force_fp32
@@ -5,6 +7,7 @@ from mmdet.core import multi_apply
 from mmdet.models.builder import HEADS
 from mmdet.models.losses import accuracy
 from mmdet.models.roi_heads import ConvFCBBoxHead
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -15,13 +18,16 @@ class TwoBranchBBoxHead(ConvFCBBoxHead):
         auxiliary_loss_weight (float): Weight of auxiliary loss Default: 0.1.
     """
 
-    def __init__(self, auxiliary_loss_weight=0.1, *args, **kwargs):
-        super(TwoBranchBBoxHead, self).__init__(*args, **kwargs)
+    def __init__(self,
+                 auxiliary_loss_weight: float = 0.1,
+                 *args,
+                 **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.auxiliary_avg_pooling = nn.AdaptiveAvgPool2d(self.roi_feat_size)
         assert auxiliary_loss_weight >= 0
         self.auxiliary_loss_weight = auxiliary_loss_weight
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
         """Forward function for main data."""
         # shared part
         if self.num_shared_convs > 0:
@@ -64,7 +70,7 @@ class TwoBranchBBoxHead(ConvFCBBoxHead):
         bbox_pred = self.fc_reg(x_reg) if self.with_reg else None
         return cls_score, bbox_pred
 
-    def forward_auxiliary_single(self, x):
+    def forward_auxiliary_single(self, x: Tensor) -> Tuple[Tensor, ]:
         """Forward function for auxiliary of single scale."""
         x = self.auxiliary_avg_pooling(x)
         # shared part
@@ -97,7 +103,7 @@ class TwoBranchBBoxHead(ConvFCBBoxHead):
         cls_score = self.fc_cls(x_cls) if self.with_cls else None
         return cls_score,
 
-    def forward_auxiliary(self, x):
+    def forward_auxiliary(self, x: Tuple[Tensor]) -> Tuple[Tensor]:
         """Forward auxiliary features at multiple scales.
 
         Args:
@@ -105,17 +111,17 @@ class TwoBranchBBoxHead(ConvFCBBoxHead):
                 is a 4D-tensor.
 
         Returns:
-            list[Tensor]: Classification scores for all scale levels, each is
+            tuple[Tensor]: Classification scores for all scale levels, each is
                 a 4D-tensor, the channels number is num_anchors * num_classes.
         """
         return multi_apply(self.forward_auxiliary_single, x)
 
     @force_fp32(apply_to=('cls_score'))
     def auxiliary_loss(self,
-                       cls_score,
-                       labels,
-                       label_weights,
-                       reduction_override=None):
+                       cls_score: Tensor,
+                       labels: Tensor,
+                       label_weights: Tensor,
+                       reduction_override: Optional[str] = None) -> Dict:
         """Compute loss for auxiliary features.
 
         Args:

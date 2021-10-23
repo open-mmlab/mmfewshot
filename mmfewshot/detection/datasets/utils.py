@@ -7,13 +7,13 @@ import numpy as np
 class NumpyEncoder(json.JSONEncoder):
     """Save numpy array obj to json."""
 
-    def default(self, obj):
+    def default(self, obj: object) -> object:
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
 
-def get_copy_dataset_type(dataset_type):
+def get_copy_dataset_type(dataset_type: str) -> str:
     """Return corresponding copy dataset type."""
     if dataset_type in ['FewShotVOCDataset', 'FewShotVOCDefaultDataset']:
         copy_dataset_type = 'FewShotVOCCopyDataset'

@@ -1,6 +1,9 @@
+from typing import Tuple
+
 from mmcv.cnn import build_conv_layer
 from mmdet.models import ResNet
 from mmdet.models.builder import BACKBONES
+from torch import Tensor
 
 
 @BACKBONES.register_module()
@@ -13,8 +16,8 @@ class ResNetWithMetaConv(ResNet):
     additional channel.
     """
 
-    def __init__(self, **kwargs):
-        super(ResNetWithMetaConv, self).__init__(**kwargs)
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.meta_conv = build_conv_layer(
             self.conv_cfg,
             4,
@@ -24,7 +27,7 @@ class ResNetWithMetaConv(ResNet):
             padding=3,
             bias=False)
 
-    def forward(self, x, use_meta_conv=False):
+    def forward(self, x: Tensor, use_meta_conv: bool = False) -> Tuple[Tensor]:
         """Forward function.
 
         Args:

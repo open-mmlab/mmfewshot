@@ -1,10 +1,13 @@
 import copy
+from typing import Dict, List, Optional, Tuple
 
 import torch
 from mmcv.runner import force_fp32
+from mmcv.utils import ConfigDict
 from mmdet.core import bbox2roi, images_to_levels, multi_apply
 from mmdet.models import RPNHead
 from mmdet.models.builder import HEADS, build_roi_extractor
+from torch import Tensor
 
 from mmfewshot.detection.models.utils import build_aggregator
 
@@ -21,9 +24,9 @@ class AttentionRPNHead(RPNHead):
     """
 
     def __init__(self,
-                 num_support_ways,
-                 num_support_shots,
-                 aggregation_layer=dict(
+                 num_support_ways: int,
+                 num_support_shots: int,
+                 aggregation_layer: Dict = dict(
                      type='AggregationLayer',
                      aggregator_cfgs=[
                          dict(
@@ -31,14 +34,14 @@ class AttentionRPNHead(RPNHead):
                              in_channels=1024,
                              with_fc=False)
                      ]),
-                 roi_extractor=dict(
+                 roi_extractor: Dict = dict(
                      type='SingleRoIExtractor',
                      roi_layer=dict(
                          type='RoIAlign', output_size=14, sampling_ratio=0),
                      out_channels=1024,
                      featmap_strides=[16]),
-                 **kwargs):
-        super(AttentionRPNHead, self).__init__(**kwargs)
+                 **kwargs) -> None:
+        super().__init__(**kwargs)
         self.num_support_ways = num_support_ways
         self.num_support_shots = num_support_shots
         assert roi_extractor is not None, \
@@ -50,7 +53,7 @@ class AttentionRPNHead(RPNHead):
         self.roi_extractor = \
             build_roi_extractor(copy.deepcopy(roi_extractor))
 
-    def extract_roi_feat(self, feats, rois):
+    def extract_roi_feat(self, feats: List[Tensor], rois: Tensor) -> Tensor:
         """Forward function.
 
         Args:
@@ -63,14 +66,14 @@ class AttentionRPNHead(RPNHead):
         return self.roi_extractor(feats, rois)
 
     def forward_train(self,
-                      query_feats,
-                      support_feats,
-                      query_gt_bboxes,
-                      query_img_metas,
-                      support_gt_bboxes,
-                      query_gt_bboxes_ignore=None,
-                      proposal_cfg=None,
-                      **kwargs):
+                      query_feats: List[Tensor],
+                      support_feats: List[Tensor],
+                      query_gt_bboxes: List[Tensor],
+                      query_img_metas: List[Dict],
+                      support_gt_bboxes: List[Tensor],
+                      query_gt_bboxes_ignore: Optional[List[Tensor]] = None,
+                      proposal_cfg: Optional[ConfigDict] = None,
+                      **kwargs) -> Tuple[Dict, List[Tensor]]:
         """Forward function in training phase.
 
         Args:
@@ -89,8 +92,9 @@ class AttentionRPNHead(RPNHead):
                 support image, each item with shape (num_gts, 4).
             query_gt_bboxes_ignore (list[Tensor]): List of ground truth bboxes
                 to be ignored of query image with shape (num_ignored_gts, 4).
-            proposal_cfg (:obj:`mmcv.Config`): Test / postprocessing
-                configuration. if None, test_cfg would be used.
+                Default: None.
+            proposal_cfg (:obj:`ConfigDict`): Test / postprocessing
+                configuration. if None, test_cfg would be used. Default: None.
 
         Returns:
             tuple: loss components and proposals of each image.
@@ -150,13 +154,13 @@ class AttentionRPNHead(RPNHead):
 
     @force_fp32(apply_to=('cls_scores', 'bbox_preds'))
     def loss(self,
-             cls_scores,
-             bbox_preds,
-             gt_bboxes,
-             img_metas,
-             gt_labels=None,
-             gt_bboxes_ignore=None,
-             pair_flags=None):
+             cls_scores: List[Tensor],
+             bbox_preds: List[Tensor],
+             gt_bboxes: List[Tensor],
+             img_metas: List[Dict],
+             gt_labels: Optional[List[Tensor]] = None,
+             gt_bboxes_ignore: Optional[List[Tensor]] = None,
+             pair_flags: Optional[List[bool]] = None) -> Dict:
         """Compute losses of rpn head.
 
         Args:
@@ -166,16 +170,17 @@ class AttentionRPNHead(RPNHead):
                 level with shape (N, num_anchors * 4, H, W)
             gt_bboxes (list[Tensor]): Ground truth bboxes for each image with
                 shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
-            gt_labels (list[Tensor]): Class indices corresponding to each box
             img_metas (list[dict]): list of image info dict where each dict
                 has: `img_shape`, `scale_factor`, `flip`, and may also contain
                 `filename`, `ori_shape`, `pad_shape`, and `img_norm_cfg`.
                 For details on the values of these keys see
                 :class:`mmdet.datasets.pipelines.Collect`.
+            gt_labels (list[Tensor]): Class indices corresponding to each box.
+                Default: None.
             gt_bboxes_ignore (None | list[Tensor]): Specify which bounding
                 boxes can be ignored when computing the loss. Default: None
             pair_flags (list[bool]): Indicate predicted result is from positive
-                pair or negative pair with shape (N).
+                pair or negative pair with shape (N). Default: None.
 
         Returns:
             dict[str, Tensor]: A dictionary of loss components.
@@ -232,10 +237,10 @@ class AttentionRPNHead(RPNHead):
         return dict(loss_rpn_cls=losses_cls, loss_rpn_bbox=losses_bbox)
 
     def simple_test(self,
-                    query_feats,
-                    support_feat,
-                    query_img_metas,
-                    rescale=False):
+                    query_feats: List[Tensor],
+                    support_feat: Tensor,
+                    query_img_metas: List[Dict],
+                    rescale: bool = False) -> List[Tensor]:
         """Test function without test time augmentation.
 
         Args:
@@ -247,15 +252,15 @@ class AttentionRPNHead(RPNHead):
                 also contain `filename`, `ori_shape`, `pad_shape`, and
                 `img_norm_cfg`. For details on the values of these keys see
                 :class:`mmdet.datasets.pipelines.Collect`.
-            rescale (bool, optional): Whether to rescale the results.
-                Defaults to False.
+            rescale (bool): Whether to rescale the results.
+                Default: False.
 
         Returns:
-            list[np.ndarray]: proposals
+            List[Tensor]: Proposals of each image, each item has shape (n, 5),
+                where 5 represent (tl_x, tl_y, br_x, br_y, score).
         """
         feats = self.aggregation_layer(
             query_feat=query_feats[0], support_feat=support_feat)
-        # get origin input shape to onnx dynamic input shape
         proposal_list = self.simple_test_rpn(feats, query_img_metas)
         if rescale:
             for proposals, meta in zip(proposal_list, query_img_metas):

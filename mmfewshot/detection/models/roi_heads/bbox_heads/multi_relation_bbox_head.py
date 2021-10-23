@@ -1,3 +1,5 @@
+from typing import Dict, Optional, Sequence, Tuple, Union
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -5,6 +7,7 @@ from mmcv.runner import force_fp32
 from mmdet.models.builder import HEADS
 from mmdet.models.losses import accuracy
 from mmdet.models.roi_heads import BBoxHead
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -23,12 +26,12 @@ class MultiRelationBBoxHead(BBoxHead):
     """
 
     def __init__(self,
-                 patch_relation=True,
-                 local_correlation=True,
-                 global_relation=True,
+                 patch_relation: bool = True,
+                 local_correlation: bool = True,
+                 global_relation: bool = True,
                  *args,
-                 **kwargs):
-        super(MultiRelationBBoxHead, self).__init__(*args, **kwargs)
+                 **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         # remove unused parameters inherited from BBoxHead
         if hasattr(self, 'fc_cls'):
             del self.fc_cls
@@ -91,7 +94,8 @@ class MultiRelationBBoxHead(BBoxHead):
                 nn.ReLU(inplace=True))
             self.global_relation_fc_cls = nn.Linear(self.in_channels, 2)
 
-    def forward(self, query_feat, support_feat):
+    def forward(self, query_feat: Tensor,
+                support_feat: Tensor) -> Tuple[Tensor, Tensor]:
         """Forward function.
 
         Args:
@@ -153,17 +157,19 @@ class MultiRelationBBoxHead(BBoxHead):
         return cls_score_all, bbox_pred_all
 
     @force_fp32(apply_to=('cls_scores', 'bbox_preds'))
-    def loss(self,
-             cls_scores,
-             bbox_preds,
-             rois,
-             labels,
-             label_weights,
-             bbox_targets,
-             bbox_weights,
-             num_pos_pair_samples,
-             reduction_override=None,
-             sample_fractions=(1, 2, 1)):
+    def loss(
+        self,
+        cls_scores: Tensor,
+        bbox_preds: Tensor,
+        rois: Tensor,
+        labels: Tensor,
+        label_weights: Tensor,
+        bbox_targets: Tensor,
+        bbox_weights: Tensor,
+        num_pos_pair_samples: int,
+        reduction_override: Optional[str] = None,
+        sample_fractions: Sequence[Union[int, float]] = (1, 2, 1)
+    ) -> Dict:
         """Compute losses of the head.
 
         Args:
@@ -183,7 +189,7 @@ class MultiRelationBBoxHead(BBoxHead):
             reduction_override (str | None): The reduction method used to
                 override the original reduction method of the loss.
                 Options are "none", "mean" and "sum". Default: None.
-            sample_fractions (list[int | float] | tuple[int | float]):
+            sample_fractions (Sequence[int | float]):
                 Fractions of positive samples, negative samples from positive
                 pair, negative samples from negative pair. Default: (1, 2, 1).
 

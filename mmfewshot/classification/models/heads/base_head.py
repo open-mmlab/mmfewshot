@@ -1,8 +1,10 @@
 from abc import ABCMeta, abstractmethod
+from typing import Dict, Tuple
 
 from mmcls.models.builder import HEADS, build_loss
 from mmcls.models.losses import Accuracy
 from mmcv.runner import BaseModule
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -17,10 +19,10 @@ class FewShotBaseHead(BaseModule, metaclass=ABCMeta):
     """
 
     def __init__(self,
-                 loss=dict(type='CrossEntropyLoss', loss_weight=1.0),
-                 topk=(1, ),
-                 cal_acc=False):
-        super(FewShotBaseHead, self).__init__()
+                 loss: Dict = dict(type='CrossEntropyLoss', loss_weight=1.0),
+                 topk: Tuple[int] = (1, ),
+                 cal_acc: bool = False) -> None:
+        super().__init__()
         assert isinstance(loss, dict)
         assert isinstance(topk, (int, tuple))
         if isinstance(topk, int):
@@ -33,10 +35,7 @@ class FewShotBaseHead(BaseModule, metaclass=ABCMeta):
         self.compute_accuracy = Accuracy(topk=self.topk)
         self.cal_acc = cal_acc
 
-    def init_weights(self):
-        pass
-
-    def loss(self, cls_score, gt_label):
+    def loss(self, cls_score: Tensor, gt_label: Tensor) -> Dict:
         """Calculate loss.
 
         Args:
@@ -44,7 +43,7 @@ class FewShotBaseHead(BaseModule, metaclass=ABCMeta):
             gt_label (Tensor): The learning target of the prediction.
 
         Returns:
-            Tensor: The calculated loss.
+            Dict: The calculated loss.
         """
         num_samples = len(cls_score)
         losses = dict()
@@ -64,17 +63,14 @@ class FewShotBaseHead(BaseModule, metaclass=ABCMeta):
     @abstractmethod
     def forward_train(self, **kwargs):
         """Forward training data."""
-        pass
 
     @abstractmethod
     def forward_support(self, x, gt_label, **kwargs):
         """Forward support data in meta testing."""
-        pass
 
     @abstractmethod
     def forward_query(self, x, **kwargs):
         """Forward query data in meta testing."""
-        pass
 
     @abstractmethod
     def before_forward_support(self):
@@ -83,7 +79,6 @@ class FewShotBaseHead(BaseModule, metaclass=ABCMeta):
         This function will be called before model forward support data during
         meta testing.
         """
-        pass
 
     @abstractmethod
     def before_forward_query(self):
@@ -92,4 +87,3 @@ class FewShotBaseHead(BaseModule, metaclass=ABCMeta):
         This function will be called before model forward query data during
         meta testing.
         """
-        pass

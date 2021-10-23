@@ -1,10 +1,14 @@
 import copy
 from abc import abstractmethod
+from typing import Dict, List, Optional, Union
 
 from mmcv.runner import auto_fp16
+from mmcv.utils import ConfigDict
 from mmdet.models.builder import (DETECTORS, build_backbone, build_head,
                                   build_neck)
 from mmdet.models.detectors import BaseDetector
+from torch import Tensor
+from typing_extensions import Literal
 
 
 @DETECTORS.register_module()
@@ -29,23 +33,23 @@ class QuerySupportDetector(BaseDetector):
         train_cfg (dict | None): Training config. Useless in CenterNet,
             but we keep this variable for SingleStageDetector. Default: None.
         test_cfg (dict | None): Testing config of CenterNet. Default: None.
-        pretrained (str, optional): model pretrained path. Default: None.
-        init_cfg (dict or list[dict], optional): Initialization config dict.
+        pretrained (str | None): model pretrained path. Default: None.
+        init_cfg (dict | list[dict] | None): Initialization config dict.
             Default: None
     """
 
     def __init__(self,
-                 backbone,
-                 neck=None,
-                 support_backbone=None,
-                 support_neck=None,
-                 rpn_head=None,
-                 roi_head=None,
-                 train_cfg=None,
-                 test_cfg=None,
-                 pretrained=None,
-                 init_cfg=None):
-        super(QuerySupportDetector, self).__init__(init_cfg)
+                 backbone: ConfigDict,
+                 neck: Optional[ConfigDict] = None,
+                 support_backbone: Optional[ConfigDict] = None,
+                 support_neck: Optional[ConfigDict] = None,
+                 rpn_head: Optional[ConfigDict] = None,
+                 roi_head: Optional[ConfigDict] = None,
+                 train_cfg: Optional[ConfigDict] = None,
+                 test_cfg: Optional[ConfigDict] = None,
+                 pretrained: Optional[ConfigDict] = None,
+                 init_cfg: Optional[ConfigDict] = None) -> None:
+        super().__init__(init_cfg)
         backbone.pretrained = pretrained
         self.backbone = build_backbone(backbone)
         self.neck = build_neck(neck) if neck is not None else None
@@ -83,7 +87,7 @@ class QuerySupportDetector(BaseDetector):
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
 
-    def extract_query_feat(self, img):
+    def extract_query_feat(self, img: Tensor) -> List[Tensor]:
         """Extract features of query data.
 
         Args:
@@ -99,7 +103,7 @@ class QuerySupportDetector(BaseDetector):
             feats = self.neck(feats)
         return feats
 
-    def extract_feat(self, img):
+    def extract_feat(self, img: Tensor) -> List[Tensor]:
         """Extract features of query data.
 
         Args:
@@ -112,18 +116,18 @@ class QuerySupportDetector(BaseDetector):
         return self.extract_query_feat(img)
 
     @abstractmethod
-    def extract_support_feat(self, img):
+    def extract_support_feat(self, img: Tensor):
         """Extract features of support data."""
         raise NotImplementedError
 
     @auto_fp16(apply_to=('img', ))
     def forward(self,
-                query_data=None,
-                support_data=None,
-                img=None,
-                img_metas=None,
-                mode='train',
-                **kwargs):
+                query_data: Optional[Dict] = None,
+                support_data: Optional[Dict] = None,
+                img: Optional[List[Tensor]] = None,
+                img_metas: Optional[List[Dict]] = None,
+                mode: Literal['train', 'model_init', 'test'] = 'train',
+                **kwargs) -> Dict:
         """Calls one of (:func:`forward_train`, :func:`forward_test` and
         :func:`forward_model_init`) according to the `mode`. The inputs
         of forward function would change with the `mode`.
@@ -170,7 +174,7 @@ class QuerySupportDetector(BaseDetector):
                 f'invalid forward mode {mode}, '
                 f'only support `train`, `model_init` and `test` now')
 
-    def train_step(self, data, optimizer):
+    def train_step(self, data: Dict, optimizer: Union[object, Dict]) -> Dict:
         """The iteration step during training.
 
         This method defines an iteration step during training, except for the
@@ -210,7 +214,9 @@ class QuerySupportDetector(BaseDetector):
 
         return outputs
 
-    def val_step(self, data, optimizer=None):
+    def val_step(self,
+                 data: Dict,
+                 optimizer: Optional[Union[object, Dict]] = None) -> Dict:
         """The iteration step during validation.
 
         This method shares the same signature as :func:`train_step`, but used
@@ -230,10 +236,10 @@ class QuerySupportDetector(BaseDetector):
         return outputs
 
     def forward_train(self,
-                      query_data,
-                      support_data,
-                      proposals=None,
-                      **kwargs):
+                      query_data: Dict,
+                      support_data: Dict,
+                      proposals: Optional[List] = None,
+                      **kwargs) -> Dict:
         """
         Args:
             query_data (dict): In most cases, dict of query data contains:

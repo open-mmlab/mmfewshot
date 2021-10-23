@@ -1,7 +1,12 @@
+from typing import Dict, List, Optional, Sequence, Tuple, Union
+
+import numpy as np
 import torch
+from mmcv.utils import ConfigDict
 from mmdet.core import bbox2result, bbox2roi
 from mmdet.models.builder import HEADS
 from mmdet.models.roi_heads import StandardRoIHead
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -11,31 +16,31 @@ class MultiRelationRoIHead(StandardRoIHead):
     Args:
         num_support_ways (int): Number of sampled classes (pos + neg).
         num_support_shots (int): Number of shot for each classes.
-        sample_fractions (list[int | float] | tuple[int | float]):
+        sample_fractions (Sequence[int | float]):
             Fractions of positive samples, negative samples from positive
             pair, negative samples from negative pair. Default: (1, 2, 1).
     """
 
     def __init__(self,
-                 num_support_ways=2,
-                 num_support_shots=5,
-                 sample_fractions=(1, 2, 1),
+                 num_support_ways: int = 2,
+                 num_support_shots: int = 5,
+                 sample_fractions: Sequence[Union[float, int]] = (1, 2, 1),
                  **kwargs):
-        super(MultiRelationRoIHead, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.num_support_ways = num_support_ways
         self.num_support_shots = num_support_shots
         self.sample_fractions = sample_fractions
 
     def forward_train(self,
-                      query_feats,
-                      support_feats,
-                      proposals,
-                      query_img_metas,
-                      query_gt_bboxes,
-                      query_gt_labels,
-                      support_gt_bboxes,
-                      query_gt_bboxes_ignore=None,
-                      **kwargs):
+                      query_feats: List[Tensor],
+                      support_feats: List[Tensor],
+                      proposals: List[Tensor],
+                      query_img_metas: List[Dict],
+                      query_gt_bboxes: List[Tensor],
+                      query_gt_labels: List[Tensor],
+                      support_gt_bboxes: List[Tensor],
+                      query_gt_bboxes_ignore: Optional[List[Tensor]] = None,
+                      **kwargs) -> Dict:
         """All arguments excepted proposals are passed in tuple of (query,
         support).
 
@@ -121,7 +126,7 @@ class MultiRelationRoIHead(StandardRoIHead):
 
         return losses
 
-    def extract_roi_feat(self, feats, rois):
+    def extract_roi_feat(self, feats: List[Tensor], rois: Tensor) -> Tensor:
         """Extract BBOX feature function used in both training and testing.
 
         Args:
@@ -138,7 +143,8 @@ class MultiRelationRoIHead(StandardRoIHead):
             roi_feats = self.shared_head(roi_feats)
         return roi_feats
 
-    def _bbox_forward(self, query_roi_feats, support_roi_feats):
+    def _bbox_forward(self, query_roi_feats: Tensor,
+                      support_roi_feats: Tensor) -> Dict:
         """Box head forward function used in both training and testing.
 
         Args:
@@ -161,9 +167,12 @@ class MultiRelationRoIHead(StandardRoIHead):
             cls_score=torch.cat(cls_score), bbox_pred=torch.cat(bbox_pred))
         return bbox_results
 
-    def _bbox_forward_train(self, batch_size, query_feats, support_feats,
-                            sampling_results, query_gt_bboxes, query_gt_labels,
-                            support_gt_bboxes):
+    def _bbox_forward_train(self, batch_size: int, query_feats: List[Tensor],
+                            support_feats: List[Tensor],
+                            sampling_results: object,
+                            query_gt_bboxes: List[Tensor],
+                            query_gt_labels: List[Tensor],
+                            support_gt_bboxes: List[Tensor]) -> Dict:
         """Forward function and calculate loss for bbox head in training.
 
         Args:
@@ -238,11 +247,11 @@ class MultiRelationRoIHead(StandardRoIHead):
         return bbox_results
 
     def simple_test(self,
-                    query_feats,
-                    support_feat,
-                    proposals,
-                    query_img_metas,
-                    rescale=False):
+                    query_feats: List[Tensor],
+                    support_feat: Tensor,
+                    proposals: List[Tensor],
+                    query_img_metas: List[Dict],
+                    rescale: bool = False) -> List[List[np.ndarray]]:
         """Test without augmentation.
 
         Args:
@@ -257,8 +266,7 @@ class MultiRelationRoIHead(StandardRoIHead):
                 :class:`mmdet.datasets.pipelines.Collect`.
             proposals (Tensor or list[Tensor]): Region proposals.
                 Default: None.
-            rescale (bool, optional): Whether to rescale the results.
-                Defaults to False.
+            rescale (bool): Whether to rescale the results. Default: False.
 
         Returns:
             list[list[np.ndarray]]: BBox results of each image and classes.
@@ -281,13 +289,14 @@ class MultiRelationRoIHead(StandardRoIHead):
 
         return bbox_results
 
-    def simple_test_bboxes(self,
-                           query_feats,
-                           support_feat,
-                           query_img_metas,
-                           proposals,
-                           rcnn_test_cfg,
-                           rescale=False):
+    def simple_test_bboxes(
+            self,
+            query_feats: List[Tensor],
+            support_feat: Tensor,
+            query_img_metas: List[Dict],
+            proposals: List[Tensor],
+            rcnn_test_cfg: ConfigDict,
+            rescale: bool = False) -> Tuple[List[Tensor], List[Tensor]]:
         """Test only det bboxes without augmentation.
 
         Args:
@@ -299,7 +308,7 @@ class MultiRelationRoIHead(StandardRoIHead):
                 contain `filename`, `ori_shape`, `pad_shape`, and
                 `img_norm_cfg`. For details on the values of these keys see
                 :class:`mmdet.datasets.pipelines.Collect`.
-            proposals (Tensor | list[Tensor]): Region proposals.
+            proposals (list[Tensor]): Region proposals.
             rcnn_test_cfg (obj:`ConfigDict`): `test_cfg` of R-CNN.
             rescale (bool): If True, return boxes in original image space.
                 Default: False.

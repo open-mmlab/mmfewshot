@@ -1,11 +1,18 @@
+import torch.nn as nn
 from mmcv.parallel.scatter_gather import scatter_kwargs
-from torch.nn import Module
 
 
-class DeviceWrapper(Module):
-    """The DeviceWrapper module that supports DataContainer.
+class MetaTestParallel(nn.Module):
+    """The MetaTestParallel module that supports DataContainer.
 
-    DeviceWrapper has two main differences with PyTorch DataParallel:
+    Note that each task is tested on a single GPU. Thus the data and model
+    on different GPU should be independent. :obj:`MMDistributedDataParallel`
+    always automatically synchronizes the grad in different GPUs when doing
+    the loss backward, which can not meet the requirements. Thus we simply
+    copy the module and wrap it with an :obj:`MetaTestParallel`, which will
+    send data to the device model.
+
+    MetaTestParallel has two main differences with PyTorch DataParallel:
 
         - It supports a custom type :class:`DataContainer` which allows
           more flexible control of input data during both GPU and CPU
@@ -18,8 +25,8 @@ class DeviceWrapper(Module):
         dim (int): Dimension used to scatter the data. Defaults to 0.
     """
 
-    def __init__(self, module, dim=0):
-        super(DeviceWrapper, self).__init__()
+    def __init__(self, module: nn.Module, dim: int = 0) -> None:
+        super().__init__()
         self.dim = dim
         self.module = module
         self.device = self.module.device
@@ -44,21 +51,21 @@ class DeviceWrapper(Module):
     def scatter(self, inputs, kwargs, device_ids):
         return scatter_kwargs(inputs, kwargs, device_ids, dim=self.dim)
 
-    def before_meta_test(self, *inputs, **kwargs):
+    def before_meta_test(self, *inputs, **kwargs) -> None:
         inputs, kwargs = self.scatter(inputs, kwargs, self.device_id)
         if not inputs and not kwargs:
             inputs = ((), )
             kwargs = ({}, )
         return self.module.before_meta_test(*inputs[0], **kwargs[0])
 
-    def before_forward_support(self, *inputs, **kwargs):
+    def before_forward_support(self, *inputs, **kwargs) -> None:
         inputs, kwargs = self.scatter(inputs, kwargs, self.device_id)
         if not inputs and not kwargs:
             inputs = ((), )
             kwargs = ({}, )
         return self.module.before_forward_support(*inputs[0], **kwargs[0])
 
-    def before_forward_query(self, *inputs, **kwargs):
+    def before_forward_query(self, *inputs, **kwargs) -> None:
         inputs, kwargs = self.scatter(inputs, kwargs, self.device_id)
         if not inputs and not kwargs:
             inputs = ((), )

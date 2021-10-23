@@ -1,4 +1,5 @@
 import copy
+from typing import Dict, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -6,6 +7,7 @@ import torch.nn.functional as F
 from mmcv.runner import force_fp32
 from mmdet.models.builder import HEADS, build_loss
 from mmdet.models.roi_heads import ConvFCBBoxHead
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -24,20 +26,20 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
     """
 
     def __init__(self,
-                 mlp_head_channels=128,
-                 with_weight_decay=False,
-                 loss_contrast=dict(
+                 mlp_head_channels: int = 128,
+                 with_weight_decay: bool = False,
+                 loss_contrast: Dict = dict(
                      type='SupervisedContrastiveLoss',
                      temperature=0.1,
                      iou_threshold=0.5,
                      loss_weight=1.0,
                      reweight_type='none'),
-                 scale=20,
-                 learnable_scale=False,
-                 eps=1e-5,
+                 scale: int = 20,
+                 learnable_scale: bool = False,
+                 eps: float = 1e-5,
                  *args,
-                 **kwargs):
-        super(ContrastiveBBoxHead, self).__init__(*args, **kwargs)
+                 **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         # override the fc_cls in :obj:`ConvFCBBoxHead`
         if self.with_cls:
             self.fc_cls = nn.Linear(
@@ -61,7 +63,7 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
             nn.Linear(self.fc_out_channels, mlp_head_channels))
         self.contrast_loss = build_loss(copy.deepcopy(loss_contrast))
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
         """Forward function.
 
         Args:
@@ -136,7 +138,7 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
 
         return cls_score, bbox_pred, contrast_feat
 
-    def set_decay_rate(self, decay_rate):
+    def set_decay_rate(self, decay_rate: float) -> None:
         """Contrast loss weight decay hook will set the `decay_rate` according
         to iterations.
 
@@ -147,10 +149,10 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
 
     @force_fp32(apply_to=('contrast_feat'))
     def loss_contrast(self,
-                      contrast_feat,
-                      proposal_ious,
-                      labels,
-                      reduction_override=None):
+                      contrast_feat: Tensor,
+                      proposal_ious: Tensor,
+                      labels: Tensor,
+                      reduction_override: Optional[str] = None) -> Dict:
         """Loss for contract.
 
         Args:
@@ -159,12 +161,12 @@ class ContrastiveBBoxHead(ConvFCBBoxHead):
             proposal_ious (tensor): IoU between proposal and ground truth
                 corresponding to each BBox features with shape (N).
             labels (tensor): Labels for each BBox features with shape (N).
-            reduction_override (str, optional): The reduction method used to
+            reduction_override (str | None): The reduction method used to
                 override the original reduction method of the loss. Options
                 are "none", "mean" and "sum". Default: None.
 
         Returns:
-            Tensor: The calculated loss.
+            Dict: The calculated loss.
         """
 
         losses = dict()

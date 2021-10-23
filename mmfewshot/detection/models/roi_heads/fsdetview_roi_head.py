@@ -1,5 +1,8 @@
+from typing import Dict, Optional
+
 import torch
 from mmdet.models.builder import HEADS
+from torch import Tensor
 
 from .meta_rcnn_roi_head import MetaRCNNRoIHead
 
@@ -13,11 +16,13 @@ class FSDetViewRoIHead(MetaRCNNRoIHead):
             Default: None.
     """
 
-    def __init__(self, aggregation_layer=None, **kwargs):
-        super(FSDetViewRoIHead, self).__init__(
-            aggregation_layer=aggregation_layer, **kwargs)
+    def __init__(self,
+                 aggregation_layer: Optional[Dict] = None,
+                 **kwargs) -> None:
+        super().__init__(aggregation_layer=aggregation_layer, **kwargs)
 
-    def _bbox_forward(self, query_roi_feats, support_roi_feats):
+    def _bbox_forward(self, query_roi_feats: Tensor,
+                      support_roi_feats: Tensor) -> Dict:
         """Box head forward function used in both training and testing.
 
         Args:

@@ -1,18 +1,19 @@
 import copy
 from functools import partial
+from typing import Dict, Optional
 
 from mmcls.datasets import ClassBalancedDataset, ConcatDataset, RepeatDataset
 from mmcls.datasets.builder import DATASETS, DistributedSampler, worker_init_fn
 from mmcv.runner import get_dist_info
 from mmcv.utils import build_from_cfg
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from mmfewshot.utils import DistributedInfiniteSampler, InfiniteSampler
 from mmfewshot.utils import multi_pipeline_collate_fn as collate
 from .dataset_wrappers import EpisodicDataset, MetaTestDataset
 
 
-def build_dataset(cfg, default_args=None):
+def build_dataset(cfg: Dict, default_args: Optional[Dict] = None) -> Dataset:
     if isinstance(cfg, (list, tuple)):
         dataset = ConcatDataset([build_dataset(c, default_args) for c in cfg])
     elif cfg['type'] == 'RepeatDataset':
@@ -42,17 +43,17 @@ def build_dataset(cfg, default_args=None):
     return dataset
 
 
-def build_dataloader(dataset,
-                     samples_per_gpu,
-                     workers_per_gpu,
-                     num_gpus=1,
-                     dist=True,
-                     shuffle=True,
-                     round_up=True,
-                     seed=None,
-                     pin_memory=False,
-                     use_infinite_sampler=False,
-                     **kwargs):
+def build_dataloader(dataset: Dataset,
+                     samples_per_gpu: int,
+                     workers_per_gpu: int,
+                     num_gpus: int = 1,
+                     dist: bool = True,
+                     shuffle: bool = True,
+                     round_up: bool = True,
+                     seed: Optional[int] = None,
+                     pin_memory: bool = False,
+                     use_infinite_sampler: bool = False,
+                     **kwargs) -> DataLoader:
     """Build PyTorch DataLoader.
 
     In distributed training, each GPU/process has a dataloader.
@@ -116,7 +117,8 @@ def build_dataloader(dataset,
     return data_loader
 
 
-def build_meta_test_dataloader(dataset, meta_test_cfg, **kwargs):
+def build_meta_test_dataloader(dataset: Dataset, meta_test_cfg: Dict,
+                               **kwargs) -> DataLoader:
     """Build PyTorch DataLoader.
 
     In distributed training, each GPU/process has a dataloader.

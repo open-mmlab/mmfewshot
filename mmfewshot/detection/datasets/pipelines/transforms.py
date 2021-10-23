@@ -1,5 +1,6 @@
 import copy
 import math
+from typing import Dict, List, Tuple
 
 import mmcv
 import numpy as np
@@ -10,7 +11,7 @@ from mmdet.datasets.pipelines import (Normalize, Pad, RandomCrop, RandomFlip,
 
 # TODO: Simplify pipelines by decoupling operation.
 @PIPELINES.register_module()
-class CropResizeInstance(object):
+class CropResizeInstance:
     """Crop and resize instance according to bbox form image.
 
     Args:
@@ -19,13 +20,17 @@ class CropResizeInstance(object):
             Default: (320, 320).
     """
 
-    def __init__(self, num_context_pixels=16, target_size=(320, 320)):
+    def __init__(
+        self,
+        num_context_pixels: int = 16,
+        target_size: Tuple[int] = (320, 320)
+    ) -> None:
         assert isinstance(num_context_pixels, int)
         assert len(target_size) == 2, 'target_size'
         self.num_context_pixels = num_context_pixels
         self.target_size = target_size
 
-    def __call__(self, results):
+    def __call__(self, results: Dict) -> Dict:
         """Call function to flip bounding boxes, masks, semantic segmentation
         maps.
 
@@ -160,14 +165,14 @@ class CropResizeInstance(object):
 
         return results
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__class__.__name__ + \
                f'(num_context_pixels={self.num_context_pixels},' \
                f' target_size={self.target_size})'
 
 
 @PIPELINES.register_module()
-class GenerateMask(object):
+class GenerateMask:
     """Resize support image and generate a mask.
 
     Args:
@@ -175,16 +180,16 @@ class GenerateMask(object):
             Default: (224, 224).
     """
 
-    def __init__(self, target_size=(224, 224)):
+    def __init__(self, target_size: Tuple[int] = (224, 224)) -> None:
         self.target_size = target_size
 
-    def _resize_bboxes(self, results):
+    def _resize_bboxes(self, results: Dict) -> None:
         """Resize bounding boxes with ``results['scale_factor']``."""
         for key in results.get('bbox_fields', []):
             bboxes = results[key] * results['scale_factor']
             results[key] = bboxes
 
-    def _resize_img(self, results):
+    def _resize_img(self, results: Dict) -> None:
         """Resize images with ``results['scale']``."""
         for key in results.get('img_fields', ['img']):
             img, w_scale, h_scale = mmcv.imresize(
@@ -200,7 +205,7 @@ class GenerateMask(object):
             results['pad_shape'] = img.shape
             results['scale_factor'] = scale_factor
 
-    def _generate_mask(self, results):
+    def _generate_mask(self, results: Dict) -> Dict:
         mask = np.zeros(self.target_size, dtype=np.float32)
         gt_bboxes = results['gt_bboxes'][0]
         mask[int(gt_bboxes[1]):int(gt_bboxes[3]),
@@ -210,7 +215,7 @@ class GenerateMask(object):
 
         return results
 
-    def __call__(self, results):
+    def __call__(self, results: Dict) -> Dict:
         """Call function to flip bounding boxes, masks, semantic segmentation
         maps.
 
@@ -226,14 +231,14 @@ class GenerateMask(object):
 
         return results
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__class__.__name__ + \
                f'(num_context_pixels={self.num_context_pixels},' \
                f' target_size={self.target_size})'
 
 
 @PIPELINES.register_module()
-class CropInstance(object):
+class CropInstance:
     """Crop single instance according to bboxe to form an image.
 
     Args:
@@ -242,11 +247,11 @@ class CropInstance(object):
             Default: 0.
     """
 
-    def __init__(self, context_ratio=0):
+    def __init__(self, context_ratio: float = 0) -> None:
         assert context_ratio > 0
         self.context_ratio = context_ratio
 
-    def __call__(self, results):
+    def __call__(self, results: Dict) -> Dict:
         """Crop instance according to bbox form image, the padding region
         outside the image will be set to zero.
 
@@ -285,7 +290,7 @@ class CropInstance(object):
         results['img'] = crop_img
         return results
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__class__.__name__ + f'(context_ratio={self.context_ratio}'
 
 
@@ -298,13 +303,14 @@ class ResizeToMultiScale(Resize):
         multi_img_scales (list[tuple(int)]): Multiple scales to resize.
     """
 
-    def __init__(self, multi_scales, *args, **kwargs):
+    def __init__(self, multi_scales: List[Tuple[int]], *args,
+                 **kwargs) -> None:
         super(ResizeToMultiScale, self).__init__(*args, **kwargs)
         assert isinstance(multi_scales, list)
         assert len(multi_scales) > 1
         self.multi_scales = multi_scales
 
-    def __call__(self, results):
+    def __call__(self, results: Dict) -> List[Dict]:
         """Resize images, bounding boxes, masks, semantic segmentation map with
         multiple scales and return a list of results at multiple scales.
 
@@ -327,7 +333,7 @@ class ResizeToMultiScale(Resize):
             results_list.append(results_)
         return results_list
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         repr_str = self.__class__.__name__
         repr_str += f'(multi_img_scales={self.multi_img_scales}, '
         repr_str += f'ratio_range={self.ratio_range}, '
@@ -355,16 +361,16 @@ class MultiImageRandomCrop(RandomCrop):
 
     Args:
         multi_crop_sizes (list[tuple(int)]): Crop size of each scales.
-        allow_negative_crop (bool, optional): Whether to allow a crop that does
-            not contain any bbox area. Default False.
-        bbox_clip_border (bool, optional): Whether clip the objects outside
-            the border of the image. Defaults to True.
+        allow_negative_crop (bool): Whether to allow a crop that does
+            not contain any bbox area. Default: False.
+        bbox_clip_border (bool): Whether clip the objects outside
+            the border of the image. Default: True.
     """
 
     def __init__(self,
-                 multi_crop_sizes,
-                 allow_negative_crop=False,
-                 bbox_clip_border=True):
+                 multi_crop_sizes: List[Tuple[int]],
+                 allow_negative_crop: bool = False,
+                 bbox_clip_border: bool = True) -> None:
         assert isinstance(multi_crop_sizes, list)
         assert len(multi_crop_sizes) > 1
         self.multi_crop_sizes = multi_crop_sizes
@@ -380,7 +386,7 @@ class MultiImageRandomCrop(RandomCrop):
             'gt_bboxes_ignore': 'gt_masks_ignore'
         }
 
-    def __call__(self, results_list):
+    def __call__(self, results_list: List[Dict]) -> List[Dict]:
         """Randomly crop image, bounding boxes, masks, semantic segmentation
         maps of each results in `results_list`.
 
@@ -398,7 +404,7 @@ class MultiImageRandomCrop(RandomCrop):
             self._crop_data(results, crop_size, self.allow_negative_crop)
         return results_list
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         repr_str = self.__class__.__name__
         repr_str += f'(multi_crop_sizes={self.multi_crop_sizes}, '
         repr_str += f'allow_negative_crop={self.allow_negative_crop}, '
@@ -409,7 +415,7 @@ class MultiImageRandomCrop(RandomCrop):
 @PIPELINES.register_module()
 class MultiImageRandomFlip(RandomFlip):
 
-    def __call__(self, results_list):
+    def __call__(self, results_list: List[Dict]) -> List[Dict]:
         """Random Flip image of each results in `results_list`.
 
         Args:
@@ -428,7 +434,7 @@ class MultiImageRandomFlip(RandomFlip):
 @PIPELINES.register_module()
 class MultiImageNormalize(Normalize):
 
-    def __call__(self, results_list):
+    def __call__(self, results_list: List[Dict]) -> List[Dict]:
         """Normalize image of each results in `results_list`.
 
         Args:
@@ -447,7 +453,7 @@ class MultiImageNormalize(Normalize):
 @PIPELINES.register_module()
 class MultiImagePad(Pad):
 
-    def __call__(self, results_list):
+    def __call__(self, results_list: List[Dict]) -> List[Dict]:
         """Pad images, masks, semantic segmentation maps of each results in
         `results_list`.
 

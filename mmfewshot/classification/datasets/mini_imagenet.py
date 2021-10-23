@@ -1,15 +1,17 @@
 import os
 import os.path as osp
+from typing import List, Optional, Sequence, Union
 
 import mmcv
 import numpy as np
 from mmcls.datasets.builder import DATASETS
+from typing_extensions import Literal
 
-from .few_shot_custom import FewShotCustomDataset
+from .few_shot_base import FewShotBaseDataset
 
 
 @DATASETS.register_module()
-class MiniImageNetDataset(FewShotCustomDataset):
+class MiniImageNetDataset(FewShotBaseDataset):
     """MiniImageNet dataset for few shot classification.
 
     Args:
@@ -51,16 +53,23 @@ class MiniImageNetDataset(FewShotCustomDataset):
         'n02110063', 'n02219486', 'n02116738', 'n04149813', 'n03544143'
     ]
 
-    def __init__(self, subset='train', file_format='JPEG', *args, **kwargs):
+    def __init__(self,
+                 subset: Literal['train', 'test', 'val'] = 'train',
+                 file_format: str = 'JPEG',
+                 *args,
+                 **kwargs):
         if isinstance(subset, str):
             subset = [subset]
         for subset_ in subset:
             assert subset_ in ['train', 'test', 'val']
         self.subset = subset
         self.file_format = file_format
-        super(MiniImageNetDataset, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-    def get_classes(self, classes=None):
+    def get_classes(
+            self,
+            classes: Optional[Union[Sequence[str],
+                                    str]] = None) -> Sequence[str]:
         """Get class names of current dataset.
 
         Args:
@@ -99,7 +108,7 @@ class MiniImageNetDataset(FewShotCustomDataset):
             raise ValueError(f'Unsupported type {type(classes)} of classes.')
         return class_names
 
-    def load_annotations(self):
+    def load_annotations(self) -> List:
         """Load annotation according to the classes subset."""
         img_file_list = {
             class_name: sorted(

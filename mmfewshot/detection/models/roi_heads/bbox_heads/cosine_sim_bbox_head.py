@@ -1,7 +1,10 @@
+from typing import Tuple
+
 import torch
 import torch.nn as nn
 from mmdet.models.builder import HEADS
 from mmdet.models.roi_heads import ConvFCBBoxHead
+from torch import Tensor
 
 
 @HEADS.register_module()
@@ -19,12 +22,12 @@ class CosineSimBBoxHead(ConvFCBBoxHead):
     """
 
     def __init__(self,
-                 scale=20,
-                 learnable_scale=False,
-                 eps=1e-5,
+                 scale: int = 20,
+                 learnable_scale: bool = False,
+                 eps: float = 1e-5,
                  *args,
-                 **kwargs):
-        super(CosineSimBBoxHead, self).__init__(*args, **kwargs)
+                 **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         # override the fc_cls in :obj:`ConvFCBBoxHead`
         if self.with_cls:
             self.fc_cls = nn.Linear(
@@ -37,7 +40,7 @@ class CosineSimBBoxHead(ConvFCBBoxHead):
             self.scale = scale
         self.eps = eps
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
         """Forward function.
 
         Args:

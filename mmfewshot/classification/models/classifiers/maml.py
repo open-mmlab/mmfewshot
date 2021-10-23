@@ -1,6 +1,10 @@
+from typing import Dict, List, Optional, Union
+
 import numpy as np
 import torch
 from mmcls.models.builder import CLASSIFIERS
+from torch import Tensor
+from typing_extensions import Literal
 
 from mmfewshot.classification.datasets import label_wrapper
 from mmfewshot.classification.models.utils import convert_maml_module
@@ -18,23 +22,23 @@ class MAMLClassifier(FewShotBaseClassifier):
     """
 
     def __init__(self,
-                 num_inner_steps=5,
-                 inner_lr=0.01,
-                 first_order=False,
+                 num_inner_steps: int = 5,
+                 inner_lr: float = 0.01,
+                 first_order: bool = False,
                  *args,
-                 **kwargs):
-        super(MAMLClassifier, self).__init__(*args, **kwargs)
+                 **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.num_inner_steps = num_inner_steps
         self.inner_lr = inner_lr
         self.first_order = first_order
         convert_maml_module(self)
 
     def forward(self,
-                img=None,
-                support_data=None,
-                query_data=None,
-                mode='train',
-                **kwargs):
+                img: Optional[Tensor] = None,
+                support_data: Optional[Dict] = None,
+                query_data: Optional[Dict] = None,
+                mode: Literal['train', 'query', 'support'] = 'train',
+                **kwargs) -> Union[Dict, List]:
         """Calls one of (:func:`forward_train`, :func:`forward_query`,
         :func:`forward_support` and :func:`extract_feat`) according to
         the `mode`. The inputs of forward function would change with the
@@ -65,15 +69,15 @@ class MAMLClassifier(FewShotBaseClassifier):
             return self.forward_train(
                 support_data=support_data, query_data=query_data, **kwargs)
         elif mode == 'query':
-            assert (img is not None)
+            assert img is not None
             return self.forward_query(img=img, **kwargs)
         elif mode == 'support':
-            assert (img is not None)
+            assert img is not None
             return self.forward_support(img=img, **kwargs)
         else:
             raise ValueError()
 
-    def train_step(self, data, optimizer):
+    def train_step(self, data: Dict, optimizer: torch.optim.Optimizer) -> Dict:
         """The iteration step during training.
 
         This method defines an iteration step during training, except for the
@@ -84,7 +88,7 @@ class MAMLClassifier(FewShotBaseClassifier):
 
         Args:
             data (dict): The output of dataloader.
-            optimizer (:obj:`torch.optim.Optimizer` | dict): The optimizer of
+            optimizer (:obj:`torch.optim.Optimizer`): The optimizer of
                 runner is passed to ``train_step()``. This argument is unused
                 and reserved.
 
@@ -109,7 +113,7 @@ class MAMLClassifier(FewShotBaseClassifier):
 
         return outputs
 
-    def val_step(self, data, optimizer):
+    def val_step(self, data: Dict, optimizer: torch.optim.Optimizer) -> Dict:
         """The iteration step during validation.
 
         This method shares the same signature as :func:`train_step`, but used
@@ -126,7 +130,8 @@ class MAMLClassifier(FewShotBaseClassifier):
 
         return outputs
 
-    def forward_train(self, support_data, query_data, **kwargs):
+    def forward_train(self, support_data: Dict, query_data: Dict,
+                      **kwargs) -> Dict:
         """Forward computation during training.
 
         Args:
@@ -153,11 +158,11 @@ class MAMLClassifier(FewShotBaseClassifier):
             weight.fast = None
         return loss
 
-    def forward_support(self, img, gt_label, **kwargs):
+    def forward_support(self, img: Tensor, gt_label: Tensor, **kwargs) -> Dict:
         """Forward support data in meta testing.
 
         Args:
-            img (Tensor | None): With shape (N, C, H, W). Default: None.
+            img (Tensor): With shape (N, C, H, W).
             gt_label (Tensor): It should be of shape (N, 1) encoding the
                 ground-truth label of input images.
 
@@ -167,7 +172,7 @@ class MAMLClassifier(FewShotBaseClassifier):
         self.fast_adapt(self.meta_test_cfg['support']['num_inner_steps'], img,
                         gt_label)
 
-    def forward_query(self, img, **kwargs):
+    def forward_query(self, img: Tensor, **kwargs) -> List:
         """Forward query data in meta testing.
 
         Args:
@@ -176,11 +181,11 @@ class MAMLClassifier(FewShotBaseClassifier):
         Returns:
             list[np.ndarray]: A list of predicted results.
         """
-        assert (img is not None)
+        assert img is not None
         x = self.extract_feat(img)
         return self.head.forward_query(x)
 
-    def fast_adapt(self, num_steps, img, labels):
+    def fast_adapt(self, num_steps: int, img: Tensor, labels: Tensor) -> None:
         """Forward and update fast weight with input images and labels.
 
         Args:
@@ -191,7 +196,7 @@ class MAMLClassifier(FewShotBaseClassifier):
         fast_parameters = list(self.parameters())
         for weight in self.parameters():
             weight.fast = None
-        for step in range(num_steps):
+        for _ in range(num_steps):
             feats = self.extract_feat(img)
             inner_loss = self.head.forward_train(feats, labels)['loss']
             grads = torch.autograd.grad(
@@ -206,7 +211,7 @@ class MAMLClassifier(FewShotBaseClassifier):
                     weight.fast = weight.fast - self.inner_lr * grads[k]
                 fast_parameters.append(weight.fast)
 
-    def before_meta_test(self, meta_test_cfg, **kwargs):
+    def before_meta_test(self, meta_test_cfg, **kwargs) -> None:
         """Used in meta testing.
 
         This function will be called before the meta testing.
@@ -214,7 +219,7 @@ class MAMLClassifier(FewShotBaseClassifier):
         self.meta_test_cfg = meta_test_cfg
         self.zero_grad()
 
-    def before_forward_support(self, **kwargs):
+    def before_forward_support(self, **kwargs) -> None:
         """Used in meta testing.
 
         This function will be called before model forward support data during
@@ -225,7 +230,7 @@ class MAMLClassifier(FewShotBaseClassifier):
         self.backbone.train()
         self.head.train()
 
-    def before_forward_query(self, **kwargs):
+    def before_forward_query(self, **kwargs) -> None:
         """Used in meta testing.
 
         This function will be called before model forward query data during
