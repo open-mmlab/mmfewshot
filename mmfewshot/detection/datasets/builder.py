@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 import os.path as osp
 from functools import partial
@@ -23,8 +24,9 @@ from .utils import get_copy_dataset_type
 
 def build_dataset(cfg: ConfigDict,
                   default_args: Dict = None,
-                  rank: int = None,
-                  timestamp: str = None) -> Dataset:
+                  rank: Optional[int] = None,
+                  work_dir: Optional[str] = None,
+                  timestamp: Optional[str] = None) -> Dataset:
     # If save_dataset is set to True, dataset will be saved into json.
     save_dataset = cfg.pop('save_dataset', False)
 
@@ -43,12 +45,15 @@ def build_dataset(cfg: ConfigDict,
     elif cfg['type'] == 'QueryAwareDataset':
         query_dataset = build_dataset(cfg['dataset'], default_args)
         if cfg.get('support_dataset', None) is not None:
+            # if `copy_from_query_dataset` is True, copy and update config
+            # from query_dataset and copy `data_infos` by using copy dataset
+            # to avoid reproducing random sampling.
             if cfg['support_dataset'].pop('copy_from_query_dataset', False):
                 support_dataset_cfg = copy.deepcopy(cfg['dataset'])
                 support_dataset_cfg.update(cfg['support_dataset'])
                 support_dataset_cfg['type'] = get_copy_dataset_type(
                     cfg['dataset']['type'])
-                support_dataset_cfg.ann_cfg = [
+                support_dataset_cfg['ann_cfg'] = [
                     dict(data_infos=copy.deepcopy(query_dataset.data_infos))
                 ]
                 cfg['support_dataset'] = support_dataset_cfg
@@ -66,12 +71,15 @@ def build_dataset(cfg: ConfigDict,
     elif cfg['type'] == 'NWayKShotDataset':
         query_dataset = build_dataset(cfg['dataset'], default_args)
         if cfg.get('support_dataset', None) is not None:
+            # if `copy_from_query_dataset` is True, copy and update config
+            # from query_dataset and copy `data_infos` by using copy dataset
+            # to avoid reproducing random sampling.
             if cfg['support_dataset'].pop('copy_from_query_dataset', False):
                 support_dataset_cfg = copy.deepcopy(cfg['dataset'])
                 support_dataset_cfg.update(cfg['support_dataset'])
                 support_dataset_cfg['type'] = get_copy_dataset_type(
                     cfg['dataset']['type'])
-                support_dataset_cfg.ann_cfg = [
+                support_dataset_cfg['ann_cfg'] = [
                     dict(data_infos=copy.deepcopy(query_dataset.data_infos))
                 ]
                 cfg['support_dataset'] = support_dataset_cfg
@@ -88,7 +96,7 @@ def build_dataset(cfg: ConfigDict,
             one_support_shot_per_image=cfg.get('one_support_shot_per_image',
                                                False),
             num_used_support_shots=cfg.get('num_used_support_shots', None),
-            shuffle_support=cfg.get('use_shuffle_support', False),
+            shuffle_support=cfg.get('shuffle_support', False),
             repeat_times=cfg.get('repeat_times', 1),
         )
     elif cfg['type'] == 'TwoBranchDataset':
@@ -101,7 +109,7 @@ def build_dataset(cfg: ConfigDict,
             auxiliary_dataset_cfg.update(cfg['auxiliary_dataset'])
             auxiliary_dataset_cfg['type'] = get_copy_dataset_type(
                 cfg['dataset']['type'])
-            auxiliary_dataset_cfg.ann_cfg = [
+            auxiliary_dataset_cfg['ann_cfg'] = [
                 dict(data_infos=copy.deepcopy(main_dataset.data_infos))
             ]
             cfg['auxiliary_dataset'] = auxiliary_dataset_cfg
@@ -114,9 +122,9 @@ def build_dataset(cfg: ConfigDict,
     else:
         dataset = build_from_cfg(cfg, DATASETS, default_args)
 
+    # save dataset for the reproducibility
     if rank == 0 and save_dataset:
-        save_dataset_path = osp.join(cfg.work_dir,
-                                     f'{timestamp}_saved_data.json')
+        save_dataset_path = osp.join(work_dir, f'{timestamp}_saved_data.json')
         if hasattr(dataset, 'save_data_infos'):
             dataset.save_data_infos(save_dataset_path)
         else:
@@ -178,6 +186,9 @@ def build_dataloader(dataset: Dataset,
         seed=seed) if seed is not None else None
     if isinstance(dataset, QueryAwareDataset):
         from mmfewshot.utils import multi_pipeline_collate_fn
+        # `QueryAwareDataset` will return a list of DataContainer
+        # `multi_pipeline_collate_fn` are designed to handle
+        # the data with list[list[DataContainer]]
         data_loader = DataLoader(
             dataset,
             batch_size=batch_size,
@@ -191,6 +202,9 @@ def build_dataloader(dataset: Dataset,
     elif isinstance(dataset, NWayKShotDataset):
         from .dataloader_wrappers import NWayKShotDataloader
         from mmfewshot.utils import multi_pipeline_collate_fn
+        # `NWayKShotDataset` will return a list of DataContainer
+        # `multi_pipeline_collate_fn` are designed to handle
+        # the data with list[list[DataContainer]]
 
         # initialize query dataloader
         query_data_loader = DataLoader(
@@ -233,6 +247,10 @@ def build_dataloader(dataset: Dataset,
     elif isinstance(dataset, TwoBranchDataset):
         from .dataloader_wrappers import TwoBranchDataloader
         from mmfewshot.utils import multi_pipeline_collate_fn
+        # `TwoBranchDataset` will return a list of DataContainer
+        # `multi_pipeline_collate_fn` are designed to handle
+        # the data with list[list[DataContainer]]
+
         # initialize main dataloader
         main_data_loader = DataLoader(
             dataset,
@@ -330,13 +348,18 @@ def build_sampler(
 
     rank, world_size = get_dist_info()
     if dist:
-        # DistributedGroupSampler will definitely shuffle the data to satisfy
-        # that images on each GPU are in the same group
+        # Infinite sampler will return a infinite stream of index. But,
+        # the length of infinite sampler is set to the actual length of
+        # dataset, thus the length of dataloader is still determined
+        # by the dataset.
+
         if shuffle:
             if use_infinite_sampler:
                 sampler = DistributedInfiniteGroupSampler(
                     dataset, samples_per_gpu, world_size, rank, seed=seed)
             else:
+                # DistributedGroupSampler will definitely shuffle the data to
+                # satisfy that images on each GPU are in the same group
                 sampler = DistributedGroupSampler(
                     dataset, samples_per_gpu, world_size, rank, seed=seed)
         else:

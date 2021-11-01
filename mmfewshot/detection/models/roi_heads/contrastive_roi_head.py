@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict, List
 
 import torch
@@ -35,7 +36,8 @@ class ContrastiveRoIHead(StandardRoIHead):
             contrast_feat=contrast_feat)
         return bbox_results
 
-    def _bbox_forward_train(self, x: List[Tensor], sampling_results: object,
+    def _bbox_forward_train(self, x: List[Tensor],
+                            sampling_results: List[object],
                             gt_bboxes: List[Tensor], gt_labels: List[Tensor],
                             img_metas: List[Dict]) -> Dict:
         """Forward function and calculate loss for box head in training phase.
@@ -43,7 +45,7 @@ class ContrastiveRoIHead(StandardRoIHead):
         Args:
             x (list[Tensor]): Features from the upstream network,
                 each is a 4D-tensor.
-            sampling_results (obj:`SamplingResult`): Sampling result.
+            sampling_results (list[obj:`SamplingResult`]): Sampling result.
             gt_bboxes (list[Tensor]): Ground truth bboxes for each image with
                 shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
             gt_labels (list[Tensor]): class indices corresponding to each box.

@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from abc import abstractmethod
 from typing import Dict, List, Optional, Union
@@ -240,7 +241,8 @@ class QuerySupportDetector(BaseDetector):
                       support_data: Dict,
                       proposals: Optional[List] = None,
                       **kwargs) -> Dict:
-        """
+        """Forward function for training.
+
         Args:
             query_data (dict): In most cases, dict of query data contains:
                 `img`, `img_metas`, `gt_bboxes`, `gt_labels`,
@@ -311,19 +313,12 @@ class QuerySupportDetector(BaseDetector):
 
         return losses
 
-    def forward_dummy(self, img):
-        """Used for computing network flops.
-
-        See `mmdetection/tools/analysis_tools/get_flops.py`
-        """
-        raise NotImplementedError
-
-    def simple_test(self, img, img_metas, proposals=None, rescale=False):
+    def simple_test(self,
+                    img: Tensor,
+                    img_metas: List[Dict],
+                    proposals: Optional[List[Tensor]] = None,
+                    rescale: bool = False):
         """Test without augmentation."""
-        raise NotImplementedError
-
-    async def async_simple_test(self, **kwargs):
-        """Async test without augmentation."""
         raise NotImplementedError
 
     def aug_test(self, **kwargs):
@@ -332,10 +327,10 @@ class QuerySupportDetector(BaseDetector):
 
     @abstractmethod
     def forward_model_init(self,
-                           img,
-                           img_metas,
-                           gt_bboxes=None,
-                           gt_labels=None,
+                           img: Tensor,
+                           img_metas: List[Dict],
+                           gt_bboxes: List[Tensor] = None,
+                           gt_labels: List[Tensor] = None,
                            **kwargs):
         """extract and save support features for model initialization."""
         raise NotImplementedError

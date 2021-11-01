@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict, Optional
 
 import torch
@@ -9,7 +10,7 @@ from .meta_rcnn_roi_head import MetaRCNNRoIHead
 
 @HEADS.register_module()
 class FSDetViewRoIHead(MetaRCNNRoIHead):
-    """Roi head for `FSDetView <https://arxiv.org/abs/1908.01998>`_.
+    """Roi head for `FSDetView <https://arxiv.org/abs/2007.12107>`_.
 
     Args:
         aggregation_layer (dict): Config of `aggregation_layer`.

@@ -1,9 +1,11 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
-from typing import Optional
+from typing import Dict, List, Optional
 
 import torch
 from mmcv.utils import ConfigDict
 from mmdet.models.builder import DETECTORS
+from torch import Tensor
 
 from .query_support_detector import QuerySupportDetector
 
@@ -83,10 +85,10 @@ class MetaRCNN(QuerySupportDetector):
         return feats
 
     def forward_model_init(self,
-                           img,
-                           img_metas,
-                           gt_bboxes=None,
-                           gt_labels=None,
+                           img: Tensor,
+                           img_metas: List[Dict],
+                           gt_bboxes: List[Tensor] = None,
+                           gt_labels: List[Tensor] = None,
                            **kwargs):
         """extract and save support features for model initialization.
 
@@ -134,7 +136,11 @@ class MetaRCNN(QuerySupportDetector):
         for k in self._forward_saved_support_dict.keys():
             self._forward_saved_support_dict[k].clear()
 
-    def simple_test(self, img, img_metas, proposals=None, rescale=False):
+    def simple_test(self,
+                    img: Tensor,
+                    img_metas: List[Dict],
+                    proposals: Optional[List[Tensor]] = None,
+                    rescale: bool = False):
         """Test without augmentation.
 
         Args:

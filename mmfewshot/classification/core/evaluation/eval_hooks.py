@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import os
 import os.path as osp
 import warnings
@@ -45,9 +46,6 @@ class MetaTestEvalHook(Hook):
                  save_best: bool = True,
                  key_indicator: str = 'accuracy_mean',
                  **eval_kwargs) -> None:
-        warnings.warn(
-            'DeprecationWarning: EvalHook and DistEvalHook in mmcls will be '
-            'deprecated, please install mmcv through master branch.')
         if test_set_dataloader is None:
             dataloaders = [support_dataloader, query_dataloader]
         else:
@@ -73,7 +71,6 @@ class MetaTestEvalHook(Hook):
         self.meta_test_cfg = meta_test_cfg
         assert confidence_interval in Z_SCORE.keys()
         self.confidence_interval = confidence_interval
-        self.fix_backbone = self.meta_test_cfg.get('fix_backbone', False)
         self.save_best = save_best
         self.best_score = 0.0
         self.key_indicator = key_indicator

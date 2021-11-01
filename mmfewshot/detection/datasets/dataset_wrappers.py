@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 import json
 import warnings
@@ -11,7 +12,14 @@ from .few_shot_base import FewShotBaseDataset
 
 @DATASETS.register_module()
 class QueryAwareDataset:
-    """A wrapper of query-aware dataset.
+    """A wrapper of QueryAwareDataset.
+
+    Building QueryAwareDataset requires query and support dataset.
+    Every call of `__getitem__` will firstly sample a query image and its
+    annotations. Then it will use the query annotations to sample a batch
+    of positive and negative support images and annotations. The positive
+    images share same classes with query, while the annotations of negative
+    images don't have any category from query.
 
     Args:
         query_dataset (:obj:`FewShotBaseDataset`):
@@ -192,7 +200,7 @@ class QueryAwareDataset:
             idx: int,
             class_id: int,
             allow_same_image: bool = False) -> List[Tuple[int]]:
-        """Generate positive support indexes by class id.
+        """Generate support indexes according to the class id.
 
         Args:
             idx (int): Index of query data.
@@ -325,7 +333,7 @@ class NWayKShotDataset(object):
         self.data_infos_by_class = {i: [] for i in range(len(self.CLASSES))}
         self.prepare_support_shots()
         self.repeat_times = repeat_times
-        # Disable the groupsampler, because in few shot setting,
+        # Disable the group sampler, because in few shot setting,
         # one group may only has two or three images.
         if hasattr(query_dataset, 'flag'):
             self.flag = np.zeros(
@@ -364,7 +372,6 @@ class NWayKShotDataset(object):
         # Support shots are simply loaded in order of data infos
         # until the number met the setting. When `one_support_shot_per_image`
         # is true, only one annotation will be sampled for each image.
-        # TODO: more way to random select support shots
         for idx in range(len(self.support_dataset)):
             labels = self.support_dataset.get_ann_info(idx)['labels']
             for gt_idx, gt in enumerate(labels):
@@ -385,8 +392,8 @@ class NWayKShotDataset(object):
         """Generate new batch indexes."""
         if not self.shuffle_support_:
             return
-        if self._mode == 'query':
-            raise ValueError('not support data type')
+        if self._mode != 'support':
+            raise ValueError('this is not the support dataset.')
         self.batch_index = self.generate_index(len(self.batch_index))
 
     def convert_query_to_support(self, support_dataset_len: int) -> None:
@@ -499,8 +506,9 @@ class TwoBranchDataset:
         self.auxiliary_dataset = auxiliary_dataset
         self.CLASSES = self.main_dataset.CLASSES
         if reweight_dataset:
-            # reweight the dataset to be consistent with the original
-            # implementation of MPSR
+            # Reweight the VOC dataset to be consistent with the original
+            # implementation of MPSR. For more details, please refer to
+            # https://github.com/jiaxi-wu/MPSR/blob/master/maskrcnn_benchmark/data/datasets/voc.py#L137
             self.main_idx_map = self.reweight_dataset(
                 self.main_dataset,
                 ['VOC2007', 'VOC2012'],
@@ -509,7 +517,7 @@ class TwoBranchDataset:
                 self.auxiliary_dataset, ['VOC'])
         else:
             self.main_idx_map = list(range(len(self.main_dataset)))
-            self.auxiliary_idx_map = list(range(len(self.main_dataset)))
+            self.auxiliary_idx_map = list(range(len(self.auxiliary_dataset)))
         self._main_len = len(self.main_idx_map)
         self._auxiliary_len = len(self.auxiliary_idx_map)
         self._set_group_flag()
@@ -556,8 +564,8 @@ class TwoBranchDataset:
     def reweight_dataset(dataset: FewShotBaseDataset,
                          group_prefix: Sequence[str],
                          repeat_length: int = 100) -> List:
-        """Reweight the dataset to be consistent with the original
-        implementation of MPSR."""
+        """Reweight the dataset."""
+
         groups = [[] for _ in range(len(group_prefix))]
         for i in range(len(dataset)):
             filename = dataset.data_infos[i]['filename']
@@ -567,6 +575,9 @@ class TwoBranchDataset:
                     break
                 assert j < len(group_prefix) - 1
 
+        # Reweight the dataset to be consistent with the original
+        # implementation of MPSR. For more details, please refer to
+        # https://github.com/jiaxi-wu/MPSR/blob/master/maskrcnn_benchmark/data/datasets/voc.py#L137
         reweight_idx_map = []
         for g in groups:
             if len(g) < 50:

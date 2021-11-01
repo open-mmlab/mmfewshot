@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Sequence
 
 from mmcv.parallel import is_module_wrapper

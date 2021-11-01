@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from typing import Dict, List, Optional, Tuple
 
@@ -56,13 +57,13 @@ class TwoBranchRPNHead(RPNHead):
         b, _, h, w = cls_feat.size()
         cls_feat = cls_feat.view(b * self.num_anchors, self.mid_channels, h, w)
         rpn_cls_score = self.rpn_cls(cls_feat).view(-1, self.num_anchors, h, w)
-        return rpn_cls_score,
+        return rpn_cls_score,  # return a tuple for multi_apply
 
-    def forward_auxiliary(self, feats: Tuple[Tensor]) -> List[Tensor]:
+    def forward_auxiliary(self, feats: List[Tensor]) -> List[Tensor]:
         """Forward auxiliary features at multiple scales.
 
         Args:
-            feats (tuple[Tensor]): List of features at multiple scales, each
+            feats (list[Tensor]): List of features at multiple scales, each
                 is a 4D-tensor.
 
         Returns:
@@ -71,52 +72,13 @@ class TwoBranchRPNHead(RPNHead):
         """
         return multi_apply(self.forward_auxiliary_single, feats)
 
-    def forward_auxiliary_train(self, feats: Tuple[Tensor]) -> Tuple[Dict, ]:
-        """Forward function and calculate loss for auxiliary data in training.
-
-        Args:
-            feats (tuple[Tensor]): List of features at multiple scales, each
-                is a 4D-tensor.
-
-        Returns:
-            tuple[dict[str, Tensor]]: A dictionary of loss components.
-        """
-        outs, = self.forward_auxiliary(feats)
-        return outs,
-
-    def auxiliary_loss_single(self, cls_score: Tensor, labels: Tensor,
-                              label_weights: Tensor,
-                              num_total_samples: int) -> Tuple[Dict, ]:
-        """Compute loss of a single scale level.
-
-        Args:
-            cls_score (Tensor): Box scores for each scale level
-                Has shape (N, num_anchors * num_classes, H, W).
-            labels (Tensor): Labels of each anchors with shape
-                (N, num_total_anchors).
-            label_weights (Tensor): Label weights of each anchor with shape
-                (N, num_total_anchors)
-            num_total_samples (int): The number of positive anchors.
-
-        Returns:
-            tuple[dict[str, Tensor]]: A dictionary of loss components.
-        """
-        # classification loss only
-        labels = labels.flatten()
-        label_weights = label_weights.flatten()
-        cls_score = cls_score.permute(0, 2, 3,
-                                      1).reshape(-1, self.cls_out_channels)
-        losses_cls = self.loss_cls(
-            cls_score, labels, label_weights, avg_factor=num_total_samples)
-        return losses_cls,
-
     def forward_train(self,
                       x: List[Tensor],
                       auxiliary_rpn_feats: List[Tensor],
                       img_metas: List[Dict],
-                      gt_bboxes: Tensor,
-                      gt_labels: Optional[Tensor] = None,
-                      gt_bboxes_ignore: Optional[Tensor] = None,
+                      gt_bboxes: List[Tensor],
+                      gt_labels: Optional[List[Tensor]] = None,
+                      gt_bboxes_ignore: Optional[List[Tensor]] = None,
                       proposal_cfg: Optional[ConfigDict] = None,
                       **kwargs) -> Tuple[Dict, List[Tensor]]:
         """
@@ -127,11 +89,11 @@ class TwoBranchRPNHead(RPNHead):
                 from FPN, each item with shape (N, C, H, W).
             img_metas (list[dict]): Meta information of each image, e.g.,
                 image size, scaling factor, etc.
-            gt_bboxes (Tensor): Ground truth bboxes of the image,
+            gt_bboxes (list[Tensor]): Ground truth bboxes of the image,
                 shape (num_gts, 4).
-            gt_labels (Tensor): Ground truth labels of each box,
+            gt_labels (list[Tensor]): Ground truth labels of each box,
                 shape (num_gts,). Default: None.
-            gt_bboxes_ignore (Tensor): Ground truth bboxes to be
+            gt_bboxes_ignore (list[Tensor]): Ground truth bboxes to be
                 ignored, shape (num_ignored_gts, 4). Default: None.
             proposal_cfg (ConfigDict): Test / postprocessing configuration,
                 if None, test_cfg would be used. Default: None.
@@ -142,8 +104,7 @@ class TwoBranchRPNHead(RPNHead):
                 proposal_list (List[Tensor]): Proposals of each image.
         """
         outs = self(x)
-        auxiliary_cls_scores = self.forward_auxiliary_train(
-            auxiliary_rpn_feats)
+        auxiliary_cls_scores = self.forward_auxiliary(auxiliary_rpn_feats)
         loss_inputs = outs + (gt_bboxes, gt_labels, img_metas,
                               gt_bboxes_ignore) + auxiliary_cls_scores
         losses = self.loss(*loss_inputs)
@@ -187,7 +148,7 @@ class TwoBranchRPNHead(RPNHead):
             bbox_targets,
             bbox_weights,
             avg_factor=num_total_samples)
-        return loss_bbox,
+        return loss_bbox,  # return a tuple for multi_apply
 
     def loss_cls_single(self, cls_score: Tensor, labels: Tensor,
                         label_weights: Tensor,
@@ -216,7 +177,7 @@ class TwoBranchRPNHead(RPNHead):
         loss_cls = self.loss_cls(
             cls_score, labels, label_weights, avg_factor=num_total_samples)
 
-        return loss_cls,
+        return loss_cls,  # return a tuple for multi_apply
 
     @force_fp32(apply_to=('cls_scores', 'bbox_preds', 'auxiliary_cls_scores'))
     def loss(self,
@@ -314,9 +275,9 @@ class TwoBranchRPNHead(RPNHead):
         )
 
         return dict(
-            rpn_loss_cls=losses_cls,
-            rpn_loss_cls_auxiliary=losses_cls_auxiliary,
-            rpn_loss_bbox=losses_bbox)
+            loss_rpn_cls=losses_cls,
+            loss_rpn_cls_auxiliary=losses_cls_auxiliary,
+            loss_rpn_bbox=losses_bbox)
 
     def _get_bboxes_single(self,
                            cls_scores: List[Tensor],
@@ -375,7 +336,7 @@ class TwoBranchRPNHead(RPNHead):
             rpn_bbox_pred = rpn_bbox_pred.permute(1, 2, 0).reshape(-1, 4)
             anchors = mlvl_anchors[idx]
 
-            if cfg.nms_pre > 0 and scores.shape[0] > cfg.nms_pre:
+            if 0 < cfg.nms_pre < scores.shape[0]:
                 # sort is faster than topk
                 # _, topk_inds = scores.topk(cfg.nms_pre)
                 ranked_scores, rank_inds = scores.sort(descending=True)

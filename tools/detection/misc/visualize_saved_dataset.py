@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 """Visualized instances of saved dataset.
 
 Example:
@@ -19,18 +20,20 @@ except ():
     raise ImportError('please install cv2 mutually')
 
 
-class Visualizer(object):
+class Visualizer:
     """Visualize instances of saved dataset.
 
     Args:
         src (str): Path to saved dataset.
         out_dir (str): Saving directory for output image. Default: ''.
-        classes (list[str]): Classes of saved dataset. Default: [].
+        classes (list[str]): Classes of saved dataset. Default: None.
         img_prefix (str): Prefix for images path. Default: ''.
     """
 
-    def __init__(self, src, out_dir='', classes=[], img_prefix=''):
+    def __init__(self, src, out_dir='', classes=None, img_prefix=''):
 
+        if classes is None:
+            classes = []
         self.CLASSES = classes
         self.img_prefix = img_prefix
         self.ann_file = src

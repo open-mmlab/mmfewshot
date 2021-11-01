@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import math
 from typing import Dict, List
 
@@ -73,7 +74,7 @@ class NegMarginHead(ClsHead):
         """Forward support data in meta testing."""
         return self.forward_train(x, gt_label, **kwargs)
 
-    def forward_query(self, x: Tensor) -> List:
+    def forward_query(self, x: Tensor, **kwargs) -> List:
         """Forward query data in meta testing."""
         if self.metric_type == 'cosine':
             similarity = F.linear(F.normalize(x), F.normalize(self.weight))

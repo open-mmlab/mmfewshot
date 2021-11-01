@@ -1,33 +1,45 @@
-"""Modified the classifier of base model for novel class fine-tuning.
+# Copyright (c) OpenMMLab. All rights reserved.
+"""Reshape the classification and regression layer for novel classes.
 
-Initialize the classifier with the checkpoint in base training for
-novel class fine-tuning. For more details, It would initialize a
-classifier head with total (num_base_classes + num_novel_classes)
-classes, for classes that inherit from the base training,
-the weight would be load from the corresponding base training
-checkpoint. For novel classes, the weight would be randomly initialized.
-Temporally, we only use this script in FSCE and TFA with --method randinit.
+The bbox head from base training only supports `num_base_classes` prediction,
+while in few shot fine-tuning it need to handle (`num_base_classes` +
+`num_novel_classes`) classes. Thus, the layer related to number of classes
+need to be reshaped.
+
+The original implementation provides three ways to reshape the bbox head:
+
+    - `combine`: combine two bbox heads from different models, for example,
+        one model is trained with base classes data and another one is
+        trained with novel classes data only.
+    - `remove`: remove the final layer of the base model and the weights of
+        the removed layer can't load from the base model checkpoint and
+        will use random initialized weights for few shot fine-tuning.
+    - `random_init`: create a random initialized layer (`num_base_classes` +
+        `num_novel_classes`) and copy the weights of base classes from the
+        base model.
+
+Temporally, we only use this script in FSCE and TFA with `random_init`.
 This part of code is modified from
 https://github.com/ucbdrive/few-shot-object-detection/.
 
 Example:
     # VOC base model
-    python3 -m tools.models.checkpoint_surgery \
-        --src1 work_dirs/voc_split1_base_training/latest.pth \
-        --method randinit \
-        --save-dir work_dirs/voc_split1_base_training
+    python3 -m tools.models.initialize_bbox_head \
+        --src1 work_dirs/tfa_r101_fpn_voc-split1_base-training/latest.pth \
+        --method random_init \
+        --save-dir work_dirs/tfa_r101_fpn_voc-split1_base-training
     # COCO base model
-    python3 -m tools.models.checkpoint_surgery \
-        --src1 work_dirs/coco_base_training/latest.pth \
-        --method randinit \
+    python3 -m tools.models.initialize_bbox_head \
+        --src1 work_dirs/tfa_r101_fpn_coco_base-training/latest.pth \
+        --method random_init \
         --coco \
-        --save-dir work_dirs/coco_base_training
+        --save-dir work_dirs/tfa_r101_fpn_coco_base-training
 """
-
 import argparse
 import os
 
 import torch
+from mmcv.runner.utils import set_random_seed
 
 # COCO config
 COCO_NOVEL_CLASSES = [
@@ -99,12 +111,11 @@ def parse_args():
         '--save-dir', type=str, default=None, help='Save directory')
     parser.add_argument(
         '--method',
-        choices=['combine', 'remove', 'randinit'],
+        choices=['combine', 'remove', 'random_init'],
         required=True,
-        help='Surgery method. combine = '
-        'combine checkpoints. remove = for fine-tuning on '
-        'novel dataset, remove the final layer of the '
-        'base detector. randinit = randomly initialize '
+        help='Reshape method. combine = combine bbox heads from different '
+        'checkpoints. remove = for fine-tuning on novel dataset, remove the '
+        'final layer of the base detector. random_init = randomly initialize '
         'novel weights.')
     parser.add_argument(
         '--param-name',
@@ -115,8 +126,9 @@ def parse_args():
     parser.add_argument(
         '--tar-name',
         type=str,
-        default='model_reset',
+        default='base_model',
         help='Name of the new checkpoint')
+    parser.add_argument('--seed', type=int, default=0, help='Random seed')
     # Dataset
     parser.add_argument('--coco', action='store_true', help='For COCO models')
     parser.add_argument('--lvis', action='store_true', help='For LVIS models')
@@ -227,8 +239,9 @@ def reset_checkpoint(checkpoint):
 
 def main():
     args = parse_args()
+    set_random_seed(args.seed)
     checkpoint = torch.load(args.src1)
-    save_name = args.tar_name + f'_{args.method}.pth'
+    save_name = args.tar_name + f'_{args.method}_bbox_head.pth'
     save_dir = args.save_dir \
         if args.save_dir != '' else os.path.dirname(args.src1)
     save_path = os.path.join(save_dir, save_name)
@@ -257,7 +270,7 @@ def main():
                                 checkpoint2, args)
             combine_checkpoints(param_name, False, tar_size, checkpoint,
                                 checkpoint2, args)
-    elif args.method == 'randinit':
+    elif args.method == 'random_init':
         tar_sizes = [TAR_SIZE + 1, TAR_SIZE * 4]
         for idx, (param_name,
                   tar_size) in enumerate(zip(args.param_name, tar_sizes)):

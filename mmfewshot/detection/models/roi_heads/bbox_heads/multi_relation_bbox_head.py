@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict, Optional, Sequence, Tuple, Union
 
 import torch
@@ -182,7 +183,7 @@ class MultiRelationBBoxHead(BBoxHead):
             label_weights (Tensor): Label weights of proposals with shape
                 (num_proposals).
             bbox_targets (Tensor): BBox regression targets of each proposal
-                wight with shape (num_proposals, num_classes * 4).
+                weight with shape (num_proposals, num_classes * 4).
             bbox_weights (Tensor): BBox regression loss weights of each
                 proposal with shape (num_proposals, num_classes * 4).
             num_pos_pair_samples (int): Number of samples from positive pairs.
@@ -199,8 +200,10 @@ class MultiRelationBBoxHead(BBoxHead):
         losses = dict()
         # fg bg sampling
         num_instances = labels.size(0)
-        fg_samples_inds = (labels == 0).nonzero().squeeze(-1)
-        bg_samples_inds = (labels == 1).nonzero().squeeze(-1)
+        fg_samples_inds = torch.nonzero(
+            labels == 0, as_tuple=False).squeeze(-1)
+        bg_samples_inds = torch.nonzero(
+            labels == 1, as_tuple=False).squeeze(-1)
 
         bg_cls_scores = cls_scores[bg_samples_inds, :]
 

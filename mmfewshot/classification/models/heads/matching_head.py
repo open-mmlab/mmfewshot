@@ -1,3 +1,5 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+import warnings
 from typing import Dict, List
 
 import torch
@@ -29,6 +31,8 @@ class MatchingHead(FewShotBaseHead):
                  **kwargs) -> None:
         super().__init__(loss=loss, *args, **kwargs)
         self.temperature = temperature
+
+        # used in meta testing
         self.support_feats = []
         self.support_labels = []
         self.class_ids = None
@@ -101,3 +105,8 @@ class MatchingHead(FewShotBaseHead):
         self.support_feats = torch.cat(self.support_feats, dim=0)
         self.support_labels = torch.cat(self.support_labels, dim=0)
         self.class_ids, _ = torch.unique(self.support_labels).sort()
+        if max(self.class_ids) + 1 != len(self.class_ids):
+            warnings.warn(f'the max class id is {max(self.class_ids)}, while '
+                          f'the number of different number of classes is '
+                          f'{len(self.class_ids)}, it will cause label '
+                          f'mismatch problem.')

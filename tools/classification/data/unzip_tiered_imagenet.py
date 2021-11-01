@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 """Unzip tiered imagenet dataset from pickle file."""
 
 import os

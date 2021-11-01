@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from collections.abc import Mapping, Sequence
 
 import torch
@@ -8,9 +9,10 @@ from torch.utils.data.dataloader import default_collate
 
 def multi_pipeline_collate_fn(batch, samples_per_gpu: int = 1):
     """Puts each data field into a tensor/DataContainer with outer dimension
-    batch size. This is mainly used in query_support dataloader. The main
-    difference with the :func:`collate_fn`  in mmcv is it can process
-    list[list[DataContainer]].
+    batch size. This is designed to support the case that the
+    :func:`__getitem__` of dataset return more than one images, such as
+    query_support dataloader. The main difference with the :func:`collate_fn`
+    in mmcv is it can process list[list[DataContainer]].
 
     Extend default_collate to add support for
     :type:`~mmcv.parallel.DataContainer`. There are 3 cases:

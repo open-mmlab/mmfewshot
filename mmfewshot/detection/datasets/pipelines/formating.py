@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict, List
 
 from mmcv.parallel import DataContainer as DC
@@ -6,7 +7,7 @@ from mmdet.datasets.pipelines import Collect, DefaultFormatBundle
 
 
 @PIPELINES.register_module()
-class MultiScaleFormatBundle(DefaultFormatBundle):
+class MultiImageFormatBundle(DefaultFormatBundle):
 
     def __call__(self, results_list: List[Dict]) -> List[Dict]:
         """Transform and format common fields of each results in
@@ -26,7 +27,7 @@ class MultiScaleFormatBundle(DefaultFormatBundle):
 
 
 @PIPELINES.register_module()
-class MultiScaleCollect(Collect):
+class MultiImageCollect(Collect):
 
     def __call__(self, results_list: List[Dict]) -> Dict:
         """Collect all keys of each results in `results_list`.

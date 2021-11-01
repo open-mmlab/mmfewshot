@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from __future__ import annotations
 import os.path as osp
 from typing import Dict, List, Mapping, Optional, Tuple
@@ -13,6 +14,13 @@ from .builder import DATASETS
 @DATASETS.register_module()
 class EpisodicDataset:
     """A wrapper of episodic dataset.
+
+    It will generate a list of support and query images indexes for each
+    episode (support + query images). Every call of `__getitem__` will fetch
+    and return (`num_ways` * `num_shots`) support images and (`num_ways` *
+    `num_queries`) query images according to the generated images indexes.
+    Note that all the episode indexes are generated at once using a specific
+    random seed to ensure the reproducibility for same dataset.
 
     Args:
         dataset (:obj:`Dataset`): The dataset to be wrapped.
@@ -41,6 +49,8 @@ class EpisodicDataset:
         self.num_episodes = num_episodes
         self._len = len(self.dataset)
         self.CLASSES = dataset.CLASSES
+        # using same episodes seed can generate same episodes for same dataset
+        # it is designed for the reproducibility of meta train or meta test
         self.episodes_seed = episodes_seed
         self.episode_idxes, self.episode_class_ids = \
             self.generate_episodic_idxes()
@@ -48,6 +58,8 @@ class EpisodicDataset:
     def generate_episodic_idxes(self) -> Tuple[List[Mapping], List[List[int]]]:
         episode_idxes, episode_class_ids = [], []
         class_ids = [i for i in range(len(self.CLASSES))]
+        # using same episodes seed can generate same episodes for same dataset
+        # it is designed for the reproducibility of meta train or meta test
         with local_numpy_seed(self.episodes_seed):
             for _ in range(self.num_episodes):
                 np.random.shuffle(class_ids)
@@ -92,10 +104,12 @@ class EpisodicDataset:
 
 @DATASETS.register_module()
 class MetaTestDataset(EpisodicDataset):
-    """A wrapper of the episodic dataset.
+    """A wrapper of the episodic dataset for meta testing.
 
     During meta test, the `MetaTestDataset` will be copied and converted into
-    three mode: `test_set`, `support`, and `test`.
+    three mode: `test_set`, `support`, and `test`. Each mode of dataset will
+    be used in different dataloader, but they share the same episode and image
+    information.
 
     - In `test_set` mode, the dataset will fetch all images from the
       whole test set to extract features from the fixed backbone, which
@@ -176,7 +190,7 @@ class MetaTestDataset(EpisodicDataset):
                      data_info['img_info']['filename']): idx
             for idx, data_info in enumerate(self.dataset.data_infos)
         }
-
+        # use filename as unique id
         for feat, img_meta in zip(feats, img_metas):
             idx = idx_map[img_meta['filename']]
             self.dataset.data_infos[idx]['feats'] = feat

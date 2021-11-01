@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import torch.nn as nn
 from mmcv.parallel.scatter_gather import scatter_kwargs
 
@@ -17,7 +18,7 @@ class MetaTestParallel(nn.Module):
         - It supports a custom type :class:`DataContainer` which allows
           more flexible control of input data during both GPU and CPU
           inference.
-        - It implement two more APIs ``before_meta_test()``,
+        - It implement three more APIs ``before_meta_test()``,
           ``before_forward_support()`` and ``before_forward_query()``.
 
     Args:

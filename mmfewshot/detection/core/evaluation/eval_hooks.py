@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import os.path as osp
 import sys
 
@@ -34,9 +35,14 @@ class QuerySupportEvalHook(BaseEvalHook):
         """perform evaluation and save checkpoint."""
         if not self._should_evaluate(runner):
             return
-        # extract support template features
+        # In meta-learning based detectors, model forward use `mode` to
+        # identified the 'train', 'val' and 'model_init' stages instead
+        # of `return_loss` in mmdet. Thus, `single_gpu_test` should be
+        # imported from mmfewshot.
         from mmfewshot.detection.apis import \
             (single_gpu_model_init, single_gpu_test)
+        # `single_gpu_model_init` extracts features from
+        # `model_init_dataloader` for model initialization with single gpu.
         single_gpu_model_init(runner.model, self.model_init_dataloader)
         results = single_gpu_test(runner.model, self.dataloader, show=False)
         runner.log_buffer.output['eval_iter_num'] = len(self.dataloader)
@@ -46,9 +52,15 @@ class QuerySupportEvalHook(BaseEvalHook):
 
 
 class QuerySupportDistEvalHook(BaseDistEvalHook):
-    """Distributed evaluation hook for query support data pipeline, this hook
-    will first traverse `model_init_dataloader` to extract support features for
-    model initialization and then evaluate the data from `val_dataloader`.
+    """Distributed evaluation hook for query support data pipeline.
+
+    This hook will first traverse `model_init_dataloader` to extract support
+    features for model initialization and then evaluate the data from
+    `val_dataloader`.
+
+    Noted that `model_init_dataloader` should NOT use distributed sampler
+    to make all the models on different gpus get same data results
+    in same initialized models.
 
     Args:
         model_init_dataloader (DataLoader): A PyTorch dataloader of
@@ -86,9 +98,15 @@ class QuerySupportDistEvalHook(BaseDistEvalHook):
         if tmpdir is None:
             tmpdir = osp.join(runner.work_dir, '.eval_hook')
 
-        # extract support template features
+        # In meta-learning based detectors, model forward use `mode` to
+        # identified the 'train', 'val' and 'model_init' stages instead
+        # of `return_loss` in mmdet. Thus, `multi_gpu_test` should be
+        # imported from mmfewshot.
         from mmfewshot.detection.apis import \
             (multi_gpu_model_init, multi_gpu_test)
+        # Noted that `model_init_dataloader` should NOT use distributed sample
+        # to make all the models on different gpus get same data results
+        # in same initialized models.
         multi_gpu_model_init(runner.model, self.model_init_dataloader)
 
         results = multi_gpu_test(

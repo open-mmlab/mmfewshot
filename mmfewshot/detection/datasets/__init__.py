@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from .builder import build_dataloader, build_dataset
 from .coco import COCO_SPLIT, FewShotCocoDataset
 from .dataloader_wrappers import NWayKShotDataloader

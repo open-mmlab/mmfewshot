@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -140,8 +141,10 @@ class AttentionRPNDetector(QuerySupportDetector):
         """process the saved support features for model initialization."""
         self.inference_support_dict.clear()
         gt_labels = torch.cat(self._forward_saved_support_dict['gt_labels'])
+        # used for attention rpn head
         res4_roi_feats = torch.cat(
             self._forward_saved_support_dict['res4_roi_feats'])
+        # used for multi relation head
         res5_roi_feats = torch.cat(
             self._forward_saved_support_dict['res5_roi_feats'])
         class_ids = set(gt_labels.data.tolist())

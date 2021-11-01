@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from .test import (Z_SCORE, multi_gpu_meta_test, single_gpu_meta_test,
                    test_single_task)
 from .train import train_model

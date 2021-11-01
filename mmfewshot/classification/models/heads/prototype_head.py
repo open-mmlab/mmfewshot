@@ -1,3 +1,5 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+import warnings
 from typing import Dict, List
 
 import torch
@@ -18,8 +20,10 @@ class PrototypeHead(FewShotBaseHead):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        # used in meta testing
         self.support_feats = []
         self.support_labels = []
+        self.class_ids = None
         self.prototype_feats = None
 
     def forward_train(self, support_feats: Tensor, support_labels: Tensor,
@@ -73,6 +77,7 @@ class PrototypeHead(FewShotBaseHead):
         self.support_feats.clear()
         self.support_labels.clear()
         self.prototype_feats = None
+        self.class_ids = None
 
     def before_forward_query(self) -> None:
         """Used in meta testing.
@@ -82,9 +87,14 @@ class PrototypeHead(FewShotBaseHead):
         """
         feats = torch.cat(self.support_feats, dim=0)
         labels = torch.cat(self.support_labels, dim=0)
-        class_ids, _ = torch.unique(labels).sort()
+        self.class_ids, _ = torch.unique(labels).sort()
         prototype_feats = [
             feats[labels == class_id].mean(0, keepdim=True)
-            for class_id in class_ids
+            for class_id in self.class_ids
         ]
         self.prototype_feats = torch.cat(prototype_feats, dim=0)
+        if max(self.class_ids) + 1 != len(self.class_ids):
+            warnings.warn(f'the max class id is {max(self.class_ids)}, while '
+                          f'the number of different number of classes is '
+                          f'{len(self.class_ids)}, it will cause label '
+                          f'mismatch problem.')

@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict
 
 from mmcls.models.builder import CLASSIFIERS
@@ -13,13 +14,17 @@ class NegMarginClassifier(FinetuneBaseClassifier):
                  head: Dict = dict(
                      type='NegMarginHead',
                      metric_type='cosine',
+                     num_classes=100,
+                     in_channels=1600,
                      margin=-0.02,
-                     scale=30.0),
+                     temperature=30.0),
                  meta_test_head: Dict = dict(
                      type='NegMarginHead',
                      metric_type='cosine',
+                     num_classes=5,
+                     in_channels=1600,
                      margin=0.0,
-                     scale=5.0),
+                     temperature=5.0),
                  *args,
                  **kwargs) -> None:
         super().__init__(

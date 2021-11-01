@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 """Modified from https://github.com/wyharveychen/CloserLookFewShot and
 https://github.com/RL-VIG/LibFewShot.
 
@@ -93,8 +94,8 @@ class BatchNorm2dWithFastWeight(nn.BatchNorm2d):
     def forward(self, x: Tensor) -> Tensor:
         # batch_norm momentum hack: follow hack of Kate
         # Rakelly in pytorch-maml/src/layers.py
-        running_mean = torch.zeros(x.data.size()[1]).cuda()
-        running_var = torch.ones(x.data.size()[1]).cuda()
+        running_mean = torch.zeros(x.data.size()[1]).to(x.device)
+        running_var = torch.ones(x.data.size()[1]).to(x.device)
         if self.weight.fast is not None and self.bias.fast is not None:
             out = F.batch_norm(
                 x,

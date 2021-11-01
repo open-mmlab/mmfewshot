@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from .collate import multi_pipeline_collate_fn
 from .infinite_sampler import (DistributedInfiniteGroupSampler,
                                DistributedInfiniteSampler,

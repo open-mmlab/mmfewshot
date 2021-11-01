@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import os
 import os.path as osp
@@ -5,18 +6,18 @@ import time
 
 import mmcv
 import torch
+from mmcls.apis import set_random_seed
 from mmcls.models import build_classifier
-from mmcls.utils import get_root_logger
 from mmcv import DictAction
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
                          wrap_fp16_model)
 
 from mmfewshot.classification.apis import (multi_gpu_meta_test,
-                                           set_random_seed,
                                            single_gpu_meta_test)
 from mmfewshot.classification.datasets import (build_dataset,
                                                build_meta_test_dataloader)
+from mmfewshot.utils import get_root_logger
 
 
 def parse_args():
@@ -109,10 +110,11 @@ def main():
     logger = get_root_logger(log_file=log_file, log_level=cfg.log_level)
 
     # set random seeds
-    if args.seed is not None:
-        logger.info(f'Set random seed to {args.seed}, '
-                    f'deterministic: {args.deterministic}')
-        set_random_seed(args.seed, deterministic=args.deterministic)
+    if args.seed is None:
+        args.seed = 0
+    logger.info(f'Set random seed to {args.seed}, '
+                f'deterministic: {args.deterministic}')
+    set_random_seed(args.seed, deterministic=args.deterministic)
 
     dataset = build_dataset(cfg.data.test)
     meta_test_cfg = cfg.data.test.meta_test_cfg

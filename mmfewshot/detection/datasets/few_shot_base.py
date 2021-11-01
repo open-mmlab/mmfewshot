@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 import json
 import os.path as osp
@@ -363,6 +364,8 @@ class FewShotBaseDataset(CustomDataset):
         for class_name in ann_shot_filter.keys():
             num_shots = ann_shot_filter[class_name]
             instance_indexes = filter_instances[class_name]
+            if num_shots == 0:
+                continue
             # random sample from all instances
             if len(instance_indexes) > num_shots:
                 random_select = np.random.choice(

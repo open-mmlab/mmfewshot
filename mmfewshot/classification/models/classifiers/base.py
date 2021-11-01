@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from abc import abstractmethod
 from collections import OrderedDict

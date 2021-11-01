@@ -1,3 +1,5 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+import warnings
 from typing import Dict, List
 
 import torch
@@ -31,6 +33,8 @@ class MetaBaselineHead(FewShotBaseHead):
             self.temperature = nn.Parameter(torch.tensor(temperature))
         else:
             self.temperature = temperature
+
+        # used in meta testing
         self.support_feats = []
         self.support_labels = []
         self.mean_support_feats = None
@@ -105,3 +109,8 @@ class MetaBaselineHead(FewShotBaseHead):
             for class_id in self.class_ids
         ],
                                             dim=0)
+        if max(self.class_ids) + 1 != len(self.class_ids):
+            warnings.warn(f'the max class id is {max(self.class_ids)}, while '
+                          f'the number of different number of classes is '
+                          f'{len(self.class_ids)}, it will cause label '
+                          f'mismatch problem.')

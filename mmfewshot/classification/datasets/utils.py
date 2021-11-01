@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import List, Union
 
 import numpy as np
@@ -9,7 +10,8 @@ def label_wrapper(labels: Union[Tensor, np.ndarray, List],
                   class_ids: List[int]) -> Union[Tensor, np.ndarray, list]:
     """Map input labels into range of 0 to numbers of classes-1.
 
-    It is usually used in the meta testing phase.
+    It is usually used in the meta testing phase, in which the class ids are
+    random sampled and discontinuous.
 
     Args:
         labels (Tensor | np.ndarray | list): The labels to be wrapped.

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Western Digital Corporation or its affiliates.
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from typing import List, Optional
 
@@ -9,8 +9,8 @@ from mmcv.utils import ConfigDict
 from mmdet.models.builder import MODELS
 from torch import Tensor
 
-# AGGREGATORS are used for aggregate features from
-# different data pipelines in meta-learning methods.
+# AGGREGATORS are used for aggregate features from different data
+# pipelines in meta-learning methods, such as attention rpn.
 AGGREGATORS = MODELS
 
 
@@ -65,16 +65,17 @@ class DepthWiseCorrelationAggregator(BaseModule):
     Args:
         in_channels (int): Number of input features channels.
         out_channels (int): Number of output features channels.
+            Default: None.
         with_fc (bool): Use fully connected layer for aggregated features.
             If set True, `in_channels` and `out_channels` are required.
             Default: False.
         init_cfg (ConfigDict | None): Initialization config dict.
-            Default: None
+            Default: None.
     """
 
     def __init__(self,
                  in_channels: int,
-                 out_channels: int,
+                 out_channels: Optional[int] = None,
                  with_fc: bool = False,
                  init_cfg: Optional[ConfigDict] = None) -> None:
         super().__init__(init_cfg=init_cfg)
@@ -95,7 +96,7 @@ class DepthWiseCorrelationAggregator(BaseModule):
         Args:
             query_feat (Tensor): Input query features with shape (N, C, H, W).
             support_feat (Tensor): Input support features with shape
-                (1, C, 1, 1).
+                (1, C, H, W).
 
         Returns:
             Tensor: When `with_fc` is True, the aggregate feature is with
@@ -103,14 +104,15 @@ class DepthWiseCorrelationAggregator(BaseModule):
         """
         assert query_feat.size(1) == support_feat.size(1), \
             'mismatch channel number between query and support features.'
-        assert support_feat.size(0) == 1, \
-            'first dimension of support features larger than 1'
+
         feat = F.conv2d(
             query_feat,
             support_feat.permute(1, 0, 2, 3),
             groups=self.in_channels)
         if self.with_fc:
-            feat = self.fc(feat.squeeze())
+            assert feat.size(2) == 1 and feat.size(3) == 1, \
+                'fc layer requires the features with shape (N, C, 1, 1)'
+            feat = self.fc(feat.squeeze(3).squeeze(2))
             feat = self.norm(feat)
             feat = self.relu(feat)
         return feat
@@ -121,8 +123,8 @@ class DifferenceAggregator(BaseModule):
     """Difference aggregator.
 
     Args:
-        in_channels (int): Number of input features channels.
-        out_channels (int): Number of output features channels.
+        in_channels (int): Number of input features channels. Default: None.
+        out_channels (int): Number of output features channels. Default: None.
         with_fc (bool): Use fully connected layer for aggregated features.
             If set True, `in_channels` and `out_channels` are required.
             Default: False.
@@ -131,8 +133,8 @@ class DifferenceAggregator(BaseModule):
     """
 
     def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
+                 in_channels: Optional[int] = None,
+                 out_channels: Optional[int] = None,
                  with_fc: bool = False,
                  init_cfg: Optional[ConfigDict] = None) -> None:
         super().__init__(init_cfg=init_cfg)
@@ -158,11 +160,11 @@ class DifferenceAggregator(BaseModule):
         """
         assert query_feat.size(1) == support_feat.size(1), \
             'mismatch channel number between query and support features.'
-        assert support_feat.size(0) == 1, \
-            'first dimension of support features larger than 1'
         feat = query_feat - support_feat
         if self.with_fc:
-            feat = self.fc(feat.squeeze())
+            assert feat.size(2) == 1 and feat.size(3) == 1, \
+                'fc layer requires the features with shape (N, C, 1, 1)'
+            feat = self.fc(feat.squeeze(3).squeeze(2))
             feat = self.norm(feat)
             feat = self.relu(feat)
         return feat
@@ -173,8 +175,8 @@ class DotProductAggregator(BaseModule):
     """Dot product aggregator.
 
     Args:
-        in_channels (int): Number of input features channels.
-        out_channels (int): Number of output features channels.
+        in_channels (int): Number of input features channels. Default: None.
+        out_channels (int): Number of output features channels. Default: None.
         with_fc (bool): Use fully connected layer for aggregated features.
             If set True, `in_channels` and `out_channels` are required.
             Default: False.
@@ -183,8 +185,8 @@ class DotProductAggregator(BaseModule):
     """
 
     def __init__(self,
-                 in_channels: int,
-                 out_channels: int,
+                 in_channels: Optional[int] = None,
+                 out_channels: Optional[int] = None,
                  with_fc: bool = False,
                  init_cfg: Optional[ConfigDict] = None) -> None:
         super().__init__(init_cfg=init_cfg)
@@ -208,11 +210,13 @@ class DotProductAggregator(BaseModule):
             Tensor: When `with_fc` is True, the aggregate feature is with
                 shape (N, C), otherwise, its shape is (N, C, H, W).
         """
-        assert query_feat.size(1) == support_feat.size(1), \
+        assert query_feat.size()[1:] == support_feat.size()[1:], \
             'mismatch channel number between query and support features.'
         feat = query_feat.mul(support_feat)
         if self.with_fc:
-            feat = self.fc(feat.squeeze())
+            assert feat.size(2) == 1 and feat.size(3) == 1, \
+                'fc layer requires the features with shape (N, C, 1, 1)'
+            feat = self.fc(feat.squeeze(3).squeeze(2))
             feat = self.norm(feat)
             feat = self.relu(feat)
         return feat

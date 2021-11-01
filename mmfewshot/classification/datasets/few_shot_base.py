@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from abc import ABCMeta, abstractmethod
 from typing import Dict, List, Mapping, Optional, Sequence, Union

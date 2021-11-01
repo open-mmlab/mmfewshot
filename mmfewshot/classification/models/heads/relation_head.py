@@ -1,4 +1,6 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import math
+import warnings
 from typing import Dict, List, Tuple
 
 import torch
@@ -43,10 +45,11 @@ class RelationHead(FewShotBaseHead):
         self.loss_type = loss['type']
         self.init_layer()
         self.init_weights()
-
+        # used in meta testing
         self.support_feats = []
         self.support_labels = []
         self.prototype_feats = None
+        self.class_ids = None
 
     def init_layer(self) -> None:
         self.layer1 = nn.Sequential(
@@ -182,6 +185,7 @@ class RelationHead(FewShotBaseHead):
         self.support_feats.clear()
         self.support_labels.clear()
         self.prototype_feats = None
+        self.class_ids = None
 
     def before_forward_query(self) -> None:
         """Used in meta testing.
@@ -191,9 +195,14 @@ class RelationHead(FewShotBaseHead):
         """
         feats = torch.cat(self.support_feats, dim=0)
         labels = torch.cat(self.support_labels, dim=0)
-        class_ids, _ = torch.unique(labels).sort()
+        self.class_ids, _ = torch.unique(labels).sort()
         prototype_feats = [
             feats[labels == class_id].mean(0, keepdim=True)
-            for class_id in class_ids
+            for class_id in self.class_ids
         ]
         self.prototype_feats = torch.cat(prototype_feats, dim=0)
+        if max(self.class_ids) + 1 != len(self.class_ids):
+            warnings.warn(f'the max class id is {max(self.class_ids)}, while '
+                          f'the number of different number of classes is '
+                          f'{len(self.class_ids)}, it will cause label '
+                          f'mismatch problem.')

@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Optional, Tuple
 
 import torch.nn as nn
@@ -8,6 +9,10 @@ from torch import Tensor
 from .utils import DropBlock
 
 # This part of code is modified from https://github.com/kjunelee/MetaOptNet
+# It was designed following the practice of the following papers:
+# TADAM: Task dependent adaptive metric for improved few-shot learning
+# (Oreshkin et al., in NIPS 2018) and A Simple Neural Attentive Meta-Learner
+# (Mishra et al., in ICLR 2018).
 
 
 def conv3x3(in_channels: int, out_channels: int, stride: int = 1) -> nn.Conv2d:

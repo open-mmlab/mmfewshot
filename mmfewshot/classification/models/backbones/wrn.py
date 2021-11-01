@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 # This code is modified from https://github.com/nupurkmr9/S2M2_fewshot
 
 from typing import Tuple, Union
@@ -123,8 +124,8 @@ class WideResNet(nn.Module):
         layers = []
         for i in range(int(num_layers)):
             layers.append(
-                block(i == 0 and in_channels or out_channels, out_channels,
-                      i == 0 and stride or 1, drop_rate))
+                block(in_channels if i == 0 else out_channels, out_channels,
+                      stride if i == 0 else 1, drop_rate))
         return nn.Sequential(*layers)
 
     def forward(self, x: Tensor) -> Tensor:

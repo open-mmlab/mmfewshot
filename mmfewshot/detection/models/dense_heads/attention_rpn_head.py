@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from typing import Dict, List, Optional, Tuple
 
@@ -73,7 +74,7 @@ class AttentionRPNHead(RPNHead):
                       support_gt_bboxes: List[Tensor],
                       query_gt_bboxes_ignore: Optional[List[Tensor]] = None,
                       proposal_cfg: Optional[ConfigDict] = None,
-                      **kwargs) -> Tuple[Dict, List[Tensor]]:
+                      **kwargs) -> Tuple[Dict, List[Tuple]]:
         """Forward function in training phase.
 
         Args:
@@ -105,8 +106,12 @@ class AttentionRPNHead(RPNHead):
         query_feat = query_feats[0]
         support_rois = bbox2roi([bboxes for bboxes in support_gt_bboxes])
         support_roi_feats = self.extract_roi_feat(support_feats, support_rois)
-        # Support features are placed in follow order:
-        # [pos, neg, ..., pos, neg] * batch size
+        # support features are placed in follow order:
+        # [pos * num_support_shots,
+        #  neg * num_support_shots * (num_support_ways - 1 )] * batch size
+
+        # get the average features:
+        # [pos_avg, neg_avg * (num_support_ways - 1 )] * batch size
         avg_support_feats = [
             support_roi_feats[i * self.num_support_shots:(i + 1) *
                               self.num_support_shots].mean([0, 2, 3],
@@ -114,14 +119,14 @@ class AttentionRPNHead(RPNHead):
             for i in range(
                 support_roi_feats.size(0) // self.num_support_shots)
         ]
-        # Concat all positive pair
+        # Concat all positive pair features
         pos_pair_feats = [
             self.aggregation_layer(
                 query_feat=query_feat[i].unsqueeze(0),
                 support_feat=avg_support_feats[i * self.num_support_ways])[0]
             for i in range(query_feat.size(0))
         ]
-        # Concat all negative pair
+        # Concat all negative pair features
         neg_pair_feats = [
             self.aggregation_layer(
                 query_feat=query_feat[i].unsqueeze(0),
@@ -132,16 +137,24 @@ class AttentionRPNHead(RPNHead):
         ]
 
         batch_size = len(query_img_metas)
-        # pair_flags will set all the gt_label to bg classes in losses
-        pair_flags = [1 for _ in range(batch_size)]
+        # input features for losses: [pos_pair_feats, neg_pair_feats]
+        # pair_flags are used to set all the gt_label from negative pairs to
+        # bg classes in losses. True means positive pairs and False means
+        # negative pairs
+
+        # add positive pairs
+        pair_flags = [True for _ in range(batch_size)]
         repeat_query_img_metas = copy.deepcopy(query_img_metas)
         repeat_query_gt_bboxes = copy.deepcopy(query_gt_bboxes)
+        # repeat the query_img_metas and query_gt_bboxes to match
+        # the order of positive and negative pairs
         for i in range(batch_size):
             repeat_query_img_metas.extend([query_img_metas[i]] *
                                           (self.num_support_ways - 1))
             repeat_query_gt_bboxes.extend([query_gt_bboxes[i]] *
                                           (self.num_support_ways - 1))
-            pair_flags.extend([0] * (self.num_support_ways - 1))
+            # add negative pairs
+            pair_flags.extend([False] * (self.num_support_ways - 1))
         outs = self([torch.cat(pos_pair_feats + neg_pair_feats)])
         loss_inputs = outs + (repeat_query_gt_bboxes, repeat_query_img_metas)
         losses = self.loss(
@@ -205,17 +218,19 @@ class AttentionRPNHead(RPNHead):
             return None
         (labels_list, label_weights_list, bbox_targets_list, bbox_weights_list,
          num_total_pos, num_total_neg) = cls_reg_targets
-        # flip neg support labels
-        neg_idx = [f == 0 for f in pair_flags]
-        flip_neg_index = []
+        # get the indexes of negative pairs
+        neg_idxes = [not f for f in pair_flags]
+        num_pos_from_neg_pairs = 0
+        # all the gt_labels in negative pairs will be set to background
         for lvl in range(len(labels_list)):
-            flip_neg_index += (labels_list[lvl][neg_idx] == 0)
-            labels_list[lvl][neg_idx] = 1
-            bbox_weights_list[lvl][neg_idx] = 0
-        num_total_samples = (
-            num_total_pos + num_total_neg if self.sampling else num_total_pos -
-            flip_neg_index.sum())
-
+            num_pos_from_neg_pairs += (
+                labels_list[lvl][neg_idxes] == 0).sum().item()
+            labels_list[lvl][neg_idxes] = 1
+            bbox_weights_list[lvl][neg_idxes] = 0
+        if self.sampling:
+            num_total_samples = num_total_pos + num_total_neg
+        else:
+            num_total_samples = num_total_pos - num_pos_from_neg_pairs
         # anchor number of multi levels
         num_level_anchors = [anchors.size(0) for anchors in anchor_list[0]]
         # concat all level anchors and flags to a single Tensor

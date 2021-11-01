@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import os
 import os.path as osp
 from typing import Dict, List, Optional, Sequence, Union
@@ -229,7 +230,7 @@ class CUBDataset(FewShotBaseDataset):
             Options: ['train', 'val', 'test']. Default: 'train'.
     """
 
-    resource = 'http://www.vision.caltech.edu/visipedia-data/CUB-200-2011/'
+    resource = 'http://www.vision.caltech.edu/visipedia/CUB-200-2011.html'
     ALL_CLASSES = ALL_CLASSES
 
     def __init__(self,
@@ -273,9 +274,10 @@ class CUBDataset(FewShotBaseDataset):
             if self.classes_id_seed is not None:
                 with local_numpy_seed(self.classes_id_seed):
                     np.random.shuffle(classes_ids)
-            # number of train classes: 100
-            # number of val classes: 50
-            # number of test classes: 50
+            # 100 train classes / 50 val classes / 50 test classes.
+            # we follow the class splits used in Baseline++.
+            # More details please refer to,
+            # https://github.com/wyharveychen/CloserLookFewShot/blob/master/filelists/CUB/write_CUB_filelist.py
             class_names = []
             for subset_ in self.subset:
                 if subset_ == 'train':

@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 import math
 from typing import Dict, List, Tuple
@@ -159,7 +160,7 @@ class CropResizeInstance:
         t_x2 = int(t_x2 * square_scale)
         t_y2 = int(t_y2 * square_scale)
         results['img'] = square
-        results['img_shape'] = img.shape
+        results['img_shape'] = square.shape
         results['gt_bboxes'] = np.array([[t_x1, t_y1, t_x2,
                                           t_y2]]).astype(np.float32)
 
@@ -212,7 +213,7 @@ class GenerateMask:
              int(gt_bboxes[0]):int(gt_bboxes[2])] = 1
         results['img'] = np.concatenate(
             [results['img'], np.expand_dims(mask, axis=2)], axis=2)
-
+        results['img_shape'] = results['img'].shape
         return results
 
     def __call__(self, results: Dict) -> Dict:
@@ -288,6 +289,7 @@ class CropInstance:
             [[x_shift, y_shift, x2 - x1 + x_shift,
               y2 - y1 + y_shift]]).astype(np.float32)
         results['img'] = crop_img
+        results['img_shape'] = crop_img.shape
         return results
 
     def __repr__(self) -> str:

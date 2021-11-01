@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict, Union
 
 import torch
@@ -64,6 +65,10 @@ def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
 
+    # Infinite sampler will return a infinite stream of index. It can NOT
+    # be used in `EpochBasedRunner`, because the `EpochBasedRunner` will
+    # enumerate the dataloader forever. Thus, `InfiniteEpochBasedRunner`
+    # is designed to handle dataloader with infinite sampler.
     if cfg.use_infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
         cfg.runner['type'] = 'InfiniteEpochBasedRunner'
     runner = build_runner(

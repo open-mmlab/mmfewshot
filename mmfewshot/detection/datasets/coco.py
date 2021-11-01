@@ -1,15 +1,16 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import itertools
 import logging
 import os.path as osp
-import tempfile
 from collections import OrderedDict
-from typing import Dict, List, Optional, Sequence, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Union
 
 import mmcv
 import numpy as np
 from mmcv.utils import print_log
 from mmdet.datasets.api_wrappers import COCO, COCOeval
 from mmdet.datasets.builder import DATASETS
+from mmdet.datasets.coco import CocoDataset
 from terminaltables import AsciiTable
 
 from .few_shot_base import FewShotBaseDataset
@@ -50,7 +51,7 @@ COCO_SPLIT = dict(
 
 
 @DATASETS.register_module()
-class FewShotCocoDataset(FewShotBaseDataset):
+class FewShotCocoDataset(FewShotBaseDataset, CocoDataset):
     """COCO dataset for few shot detection.
 
     Args:
@@ -94,7 +95,9 @@ class FewShotCocoDataset(FewShotBaseDataset):
         self.SPLIT = COCO_SPLIT
         assert classes is not None, f'{self.dataset_name}: classes in ' \
                                     f'`FewShotCocoDataset` can not be None.'
-        # configure ann_shot_filter by num_novel_shots and num_base_shots
+        # `ann_shot_filter` will be used to filter out excess annotations
+        # for few shot setting. It can be configured manually or generated
+        # by the `num_novel_shots` and `num_base_shots`
         self.num_novel_shots = num_novel_shots
         self.num_base_shots = num_base_shots
         self.min_bbox_area = min_bbox_area
@@ -103,7 +106,7 @@ class FewShotCocoDataset(FewShotBaseDataset):
             if num_novel_shots is not None or num_base_shots is not None:
                 ann_shot_filter = self._create_ann_shot_filter()
         else:
-            assert num_novel_shots is not None or num_base_shots is not None, \
+            assert num_novel_shots is None and num_base_shots is None, \
                 f'{self.dataset_name}: can not config ann_shot_filter and ' \
                 f'num_novel_shots/num_base_shots at the same time.'
 
@@ -122,6 +125,10 @@ class FewShotCocoDataset(FewShotBaseDataset):
 
     def get_classes(self, classes: Union[str, Sequence[str]]) -> List[str]:
         """Get class names.
+
+        It supports to load pre-defined classes splits.
+        The pre-defined classes splits are:
+        ['ALL_CLASSES', 'NOVEL_CLASSES', 'BASE_CLASSES']
 
         Args:
             classes (str | Sequence[str]): Classes for model training and
@@ -153,7 +160,11 @@ class FewShotCocoDataset(FewShotBaseDataset):
         return class_names
 
     def _create_ann_shot_filter(self) -> Dict:
-        """generate ann_shot_filter by novel and base classes."""
+        """Generate `ann_shot_filter` for novel and base classes.
+
+        Returns:
+            dict[str, int]: The number of shots to keep for each class.
+        """
         ann_shot_filter = {}
         if self.num_novel_shots is not None:
             for class_name in self.SPLIT['NOVEL_CLASSES']:
@@ -197,10 +208,18 @@ class FewShotCocoDataset(FewShotBaseDataset):
         """
         self.coco = COCO(ann_file)
         # to keep the label order equal to the order in CLASSES
-        for i, class_name in enumerate(self.CLASSES):
-            cat_id = self.coco.get_cat_ids(cat_names=[class_name])[0]
-            self.cat_ids.append(cat_id)
-            self.cat2label[cat_id] = i
+        if len(self.cat_ids) == 0:
+            for i, class_name in enumerate(self.CLASSES):
+                cat_id = self.coco.get_cat_ids(cat_names=[class_name])[0]
+                self.cat_ids.append(cat_id)
+                self.cat2label[cat_id] = i
+        else:
+            # check categories id consistency between different files
+            for i, class_name in enumerate(self.CLASSES):
+                cat_id = self.coco.get_cat_ids(cat_names=[class_name])[0]
+                assert self.cat2label[cat_id] == i, \
+                    'please make sure all the json files use same ' \
+                    'categories id for same class'
         self.img_ids = self.coco.get_img_ids()
 
         data_infos = []
@@ -209,6 +228,7 @@ class FewShotCocoDataset(FewShotBaseDataset):
             info = self.coco.load_imgs([i])[0]
             info['filename'] = info['file_name']
             info['ann'] = self._get_ann_info(info)
+            # to support different version of coco
             if 'train2014' in info['filename']:
                 info['filename'] = 'train2014/' + info['filename']
             elif 'val2014' in info['filename']:
@@ -276,174 +296,6 @@ class FewShotCocoDataset(FewShotBaseDataset):
             valid_img_ids.append(img_info['id'])
         self.img_ids = valid_img_ids
         return valid_inds
-
-    def _parse_ann_info(self, img_info: Dict, ann_info: List[Dict]) -> Dict:
-        """Parse bbox and mask annotation.
-
-        Args:
-            img_info (dict): Image info.
-            ann_info (list[dict]): Annotation info of an image.
-
-        Returns:
-            dict: A dict containing the following keys: bboxes, bboxes_ignore,
-                labels, masks, seg_map. "masks" are raw annotations and not
-                decoded into binary masks.
-        """
-        gt_bboxes = []
-        gt_labels = []
-        gt_bboxes_ignore = []
-        for i, ann in enumerate(ann_info):
-            if ann.get('ignore', False):
-                continue
-            x1, y1, w, h = ann['bbox']
-            inter_w = max(0, min(x1 + w, img_info['width']) - max(x1, 0))
-            inter_h = max(0, min(y1 + h, img_info['height']) - max(y1, 0))
-            if inter_w * inter_h == 0:
-                continue
-            if ann['area'] <= 0 or w < 1 or h < 1:
-                continue
-            if ann['category_id'] not in self.cat_ids:
-                continue
-            bbox = [x1, y1, x1 + w, y1 + h]
-            if ann.get('iscrowd', False):
-                gt_bboxes_ignore.append(bbox)
-            else:
-                gt_bboxes.append(bbox)
-                gt_labels.append(self.cat2label[ann['category_id']])
-
-        if gt_bboxes:
-            gt_bboxes = np.array(gt_bboxes, dtype=np.float32)
-            gt_labels = np.array(gt_labels, dtype=np.int64)
-        else:
-            gt_bboxes = np.zeros((0, 4), dtype=np.float32)
-            gt_labels = np.array([], dtype=np.int64)
-
-        if gt_bboxes_ignore:
-            gt_bboxes_ignore = np.array(gt_bboxes_ignore, dtype=np.float32)
-        else:
-            gt_bboxes_ignore = np.zeros((0, 4), dtype=np.float32)
-
-        ann = dict(
-            bboxes=gt_bboxes, labels=gt_labels, bboxes_ignore=gt_bboxes_ignore)
-
-        return ann
-
-    def xyxy2xywh(self, bbox: np.ndarray) -> List[float]:
-        """Convert ``xyxy`` style bounding boxes to ``xywh`` style for COCO
-        evaluation.
-
-        Args:
-            bbox (np.ndarray): The bounding boxes, shape (4, ), in
-                ``xyxy`` order.
-
-        Returns:
-            list[float]: The converted bounding boxes, in ``xywh`` order.
-        """
-
-        _bbox = bbox.tolist()
-        return [
-            _bbox[0],
-            _bbox[1],
-            _bbox[2] - _bbox[0],
-            _bbox[3] - _bbox[1],
-        ]
-
-    def _proposal2json(self, results: List[np.ndarray]) -> List[Dict]:
-        """Convert proposal results to COCO json style."""
-        json_results = []
-        for idx in range(len(self)):
-            img_id = self.img_ids[idx]
-            bboxes = results[idx]
-            for i in range(bboxes.shape[0]):
-                data = dict()
-                data['image_id'] = img_id
-                data['bbox'] = self.xyxy2xywh(bboxes[i])
-                data['score'] = float(bboxes[i][4])
-                data['category_id'] = 1
-                json_results.append(data)
-        return json_results
-
-    def _det2json(self, results: List[np.ndarray]) -> List[Dict]:
-        """Convert detection results to COCO json style."""
-        json_results = []
-        for idx in range(len(self)):
-            img_id = self.img_ids[idx]
-            result = results[idx]
-            for label in range(len(result)):
-                bboxes = result[label]
-                for i in range(bboxes.shape[0]):
-                    data = dict()
-                    data['image_id'] = img_id
-                    data['bbox'] = self.xyxy2xywh(bboxes[i])
-                    data['score'] = float(bboxes[i][4])
-                    data['category_id'] = self.cat_ids[label]
-                    json_results.append(data)
-        return json_results
-
-    def results2json(self, results: List[Union[List, Tuple, np.ndarray]],
-                     outfile_prefix: str) -> Dict:
-        """Dump the detection results to a COCO style json file.
-
-        There are 3 types of results: proposals, bbox predictions, mask
-        predictions, and they have different data types. This method will
-        automatically recognize the type, and dump them to json files.
-
-        Args:
-            results (list[list | tuple | ndarray]): Testing results of the
-                dataset.
-            outfile_prefix (str): The filename prefix of the json files. If the
-                prefix is "somepath/xxx", the json files will be named
-                "somepath/xxx.bbox.json",
-                "somepath/xxx.proposal.json".
-
-        Returns:
-            dict[str, str]: Possible keys are "bbox", "proposal", and
-                values are corresponding filenames.
-        """
-        result_files = dict()
-        if isinstance(results[0], list):
-            json_results = self._det2json(results)
-            result_files['bbox'] = f'{outfile_prefix}.bbox.json'
-            result_files['proposal'] = f'{outfile_prefix}.bbox.json'
-            mmcv.dump(json_results, result_files['bbox'])
-        elif isinstance(results[0], np.ndarray):
-            json_results = self._proposal2json(results)
-            result_files['proposal'] = f'{outfile_prefix}.proposal.json'
-            mmcv.dump(json_results, result_files['proposal'])
-        else:
-            raise TypeError('invalid type of results')
-        return result_files
-
-    def format_results(self,
-                       results: List[Union[Tuple, np.ndarray]],
-                       jsonfile_prefix: Optional[str] = None,
-                       **kwargs) -> Tuple[Dict, object]:
-        """Format the results to json (standard format for COCO evaluation).
-
-        Args:
-            results (list[tuple | np.ndarray]): Testing results of the
-                dataset.
-            jsonfile_prefix (str | None): The prefix of json files. It includes
-                the file path and the prefix of filename, e.g., "a/b/prefix".
-                If not specified, a temp file will be created. Default: None.
-
-        Returns:
-            tuple: (result_files, tmp_dir), result_files is a dict containing
-                the json file paths, tmp_dir is the temporal directory created
-                for saving json files when jsonfile_prefix is not specified.
-        """
-        assert isinstance(results, list), 'results must be a list'
-        assert len(results) == len(self), (
-            'The length of results is not equal to the dataset len: {} != {}'.
-            format(len(results), len(self)))
-
-        if jsonfile_prefix is None:
-            tmp_dir = tempfile.TemporaryDirectory()
-            jsonfile_prefix = osp.join(tmp_dir.name, 'results')
-        else:
-            tmp_dir = None
-        result_files = self.results2json(results, jsonfile_prefix)
-        return result_files, tmp_dir
 
     def evaluate(self,
                  results: List[Sequence],
@@ -621,10 +473,7 @@ class FewShotCocoDataset(FewShotBaseDataset):
                     raise KeyError(
                         f'metric item {metric_item} is not supported')
         if split_name is not None:
-            print_log(
-                f'###################################'
-                f'\n evaluation of {split_name} class',
-                logger=logger)
+            print_log(f'\n evaluation of {split_name} class', logger=logger)
         if metric == 'proposal':
             cocoEval.params.useCats = 0
             cocoEval.evaluate()
@@ -697,12 +546,13 @@ class FewShotCocoDataset(FewShotBaseDataset):
 
 @DATASETS.register_module()
 class FewShotCocoCopyDataset(FewShotCocoDataset):
-    """Only used in evaluation of some meta-learning method.
+    """Copy other COCO few shot datasets' `data_infos` directly.
 
-    For some meta-learning methods, the random sampled support data in the
-    training phase is required for evaluation. The usage of `ann_cfg` is
-    different from :obj:`FewShotCocoDataset`. :obj:`FewShotCocoCopyDataset`
-    support to load `data_infos` of other datasets via `ann_cfg`.
+    This dataset is mainly used for model initialization in some meta-learning
+    detectors. In their cases, the support data are randomly sampled
+    during training phase and they also need to be used in model
+    initialization before evaluation. To copy the random sampling results,
+    this dataset supports to load `data_infos` of other datasets via `ann_cfg`
 
     Args:
         ann_cfg (list[dict] | dict): contain `data_infos` from other
@@ -756,7 +606,7 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
         f'{shot}SHOT': [
             dict(
                 type='ann_file',
-                ann_file=f'data/few_shot_coco_split/{shot}shot/'
+                ann_file=f'data/few_shot_ann/coco/benchmark_{shot}shot/'
                 f'full_box_{shot}shot_{class_name}_trainval.json')
             for class_name in COCO_SPLIT['ALL_CLASSES']
         ]
@@ -765,11 +615,10 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
 
     # pre-defined annotation config for model reproducibility
     DEFAULT_ANN_CONFIG = dict(
-        Benchmark=coco_benchmark,
         TFA=coco_benchmark,
         FSCE=coco_benchmark,
         Attention_RPN={
-            **coco_benchmark, 'official_10SHOT': [
+            **coco_benchmark, 'Official_10SHOT': [
                 dict(
                     type='ann_file',
                     ann_file='data/few_shot_ann/coco/attention_rpn_10shot/'

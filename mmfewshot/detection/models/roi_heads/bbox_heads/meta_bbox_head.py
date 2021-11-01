@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from typing import Dict, Optional
 
@@ -12,7 +13,7 @@ from torch import Tensor
 
 @HEADS.register_module()
 class MetaBBoxHead(BBoxHead):
-    """BBoxHead with meta classification.
+    """BBoxHead with meta classification for metarcnn and fsdetview.
 
     Args:
         num_meta_classes (int): Number of classes for meta classification.

@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from contextlib import contextmanager
 from typing import Optional
 

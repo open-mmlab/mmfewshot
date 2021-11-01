@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from typing import Dict
 
@@ -11,7 +12,7 @@ class ProtoNetClassifier(MetaMetricBaseClassifier):
     """Implementation of `ProtoNet  <https://arxiv.org/abs/1703.05175>`_."""
 
     def __init__(self,
-                 head: Dict = dict(type='PrototypicalHead'),
+                 head: Dict = dict(type='PrototypeHead'),
                  *args,
                  **kwargs) -> None:
         self.head_cfg = copy.deepcopy(head)

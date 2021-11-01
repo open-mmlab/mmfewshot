@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from typing import Dict, List, Optional, Tuple
 
@@ -12,7 +13,7 @@ from torch import Tensor
 
 @HEADS.register_module()
 class MetaRCNNRoIHead(StandardRoIHead):
-    """Roi head for `MetaRCNN <https://arxiv.org/abs/1908.01998>`_.
+    """Roi head for `MetaRCNN <https://arxiv.org/abs/1909.13032>`_.
 
     Args:
         aggregation_layer (ConfigDict): Config of `aggregation_layer`.
@@ -31,7 +32,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
                       query_feats: List[Tensor],
                       support_feats: List[Tensor],
                       proposals: List[Tensor],
-                      query_img_metas: List[Tensor],
+                      query_img_metas: List[Dict],
                       query_gt_bboxes: List[Tensor],
                       query_gt_labels: List[Tensor],
                       support_gt_labels: List[Tensor],
@@ -146,10 +147,11 @@ class MetaRCNNRoIHead(StandardRoIHead):
                 range(query_gt_labels[img_id].size(0)))
             random_query_label = query_gt_labels[img_id][random_index]
             for i in range(support_feat.size(0)):
-                # following the official code each image only sample first
-                # class for training. The official code only use the first
-                # `query_gt_labels` for sampling support class, while we
-                # random one from `query_gt_labels` instead.
+                # Following the official code, each query image only sample
+                # one support class for training. Also the official code
+                # only use the first class in `query_gt_labels` as support
+                # class, while this code use random one sampled from
+                # `query_gt_labels` instead.
                 if support_gt_labels[i] == random_query_label:
                     bbox_results = self._bbox_forward(
                         query_roi_feats[start:end],
@@ -169,6 +171,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
                     loss_bbox[key] = torch.stack(
                         loss_bbox[key]).sum() / batch_size
 
+        # meta classification loss
         if self.bbox_head.with_meta_cls_loss:
             meta_cls_score = self.bbox_head.forward_meta_cls(support_feat)
             meta_cls_labels = torch.cat(support_gt_labels)
@@ -213,7 +216,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
         out = []
         if self.with_shared_head:
             for lvl in range(len(feats)):
-                out.append(self.shared_head(feats[lvl], is_support=True))
+                out.append(self.shared_head.forward_support(feats[lvl]))
         else:
             out = feats
         return out
@@ -329,7 +332,7 @@ class MetaRCNNRoIHead(StandardRoIHead):
             bbox_preds_dict[class_id] = \
                 bbox_results['bbox_pred'][:, class_id * 4:(class_id + 1) * 4]
             # the official code use the first class background score as final
-            # background score, while we use average of all classes'
+            # background score, while this code use average of all classes'
             # background scores instead.
             if cls_scores_dict.get(num_classes, None) is None:
                 cls_scores_dict[num_classes] = \

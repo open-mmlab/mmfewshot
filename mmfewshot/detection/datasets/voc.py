@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import os.path as osp
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
@@ -97,22 +98,25 @@ class FewShotVOCDataset(FewShotBaseDataset):
             self.dataset_name = dataset_name
         self.SPLIT = VOC_SPLIT
 
-        # the index of corresponding split
-        # would be set value in `self.get_classes`
+        # the split_id would be set value in `self.get_classes`
         self.split_id = None
 
         assert classes is not None, f'{self.dataset_name}: classes in ' \
                                     f'`FewShotVOCDataset` can not be None.'
-        # configure ann_shot_filter by num_novel_shots and num_base_shots
+
         self.num_novel_shots = num_novel_shots
         self.num_base_shots = num_base_shots
         self.min_bbox_area = min_bbox_area
         self.CLASSES = self.get_classes(classes)
+        # `ann_shot_filter` will be used to filter out excess annotations
+        # for few shot setting. It can be configured manually or generated
+        # by the `num_novel_shots` and `num_base_shots`
         if ann_shot_filter is None:
+            # configure ann_shot_filter by num_novel_shots and num_base_shots
             if num_novel_shots is not None or num_base_shots is not None:
                 ann_shot_filter = self._create_ann_shot_filter()
         else:
-            assert num_novel_shots is not None or num_base_shots is not None, \
+            assert num_novel_shots is None and num_base_shots is None, \
                 f'{self.dataset_name}: can not config ann_shot_filter and ' \
                 f'num_novel_shots/num_base_shots at the same time.'
         self.coordinate_offset = coordinate_offset
@@ -127,6 +131,12 @@ class FewShotVOCDataset(FewShotBaseDataset):
     def get_classes(self, classes: Union[str, Sequence[str]]) -> List[str]:
         """Get class names.
 
+        It supports to load pre-defined classes splits.
+        The pre-defined classes splits are:
+        ['ALL_CLASSES_SPLIT1', 'ALL_CLASSES_SPLIT2', 'ALL_CLASSES_SPLIT3',
+         'BASE_CLASSES_SPLIT1', 'BASE_CLASSES_SPLIT2', 'BASE_CLASSES_SPLIT3',
+         'NOVEL_CLASSES_SPLIT1','NOVEL_CLASSES_SPLIT2','NOVEL_CLASSES_SPLIT3']
+
         Args:
             classes (str | Sequence[str]): Classes for model training and
                 provide fixed label for each class. When classes is string,
@@ -134,7 +144,7 @@ class FewShotVOCDataset(FewShotBaseDataset):
                 For example: 'NOVEL_CLASSES_SPLIT1'.
 
         Returns:
-            list[str]: list of class names.
+            list[str]: List of class names.
         """
         # configure few shot classes setting
         if isinstance(classes, str):
@@ -157,9 +167,12 @@ class FewShotVOCDataset(FewShotBaseDataset):
             raise ValueError(f'Unsupported type {type(classes)} of classes.')
         return class_names
 
-    def _create_ann_shot_filter(self) -> Dict:
-        """generate `ann_shot_filter` with `num_novel_shots` and
-        `num_base_shots`."""
+    def _create_ann_shot_filter(self) -> Dict[str, int]:
+        """Generate `ann_shot_filter` for novel and base classes.
+
+        Returns:
+            dict[str, int]: The number of shots to keep for each class.
+        """
         ann_shot_filter = {}
         if self.num_novel_shots is not None:
             for class_name in self.SPLIT[
@@ -171,7 +184,7 @@ class FewShotVOCDataset(FewShotBaseDataset):
         return ann_shot_filter
 
     def load_annotations(self, ann_cfg: List[Dict]) -> List[Dict]:
-        """support to load annotation from two type of ann_cfg.
+        """Support to load annotation from two type of ann_cfg.
 
         Args:
             ann_cfg (list[dict]): Support two type of config.
@@ -215,8 +228,11 @@ class FewShotVOCDataset(FewShotBaseDataset):
             classes: Optional[List[str]] = None) -> List[Dict]:
         """Load annotation from XML style ann_file.
 
+        It supports using image id or image path as image names
+        to load the annotation file.
+
         Args:
-            ann_file (str): Path of XML file.
+            ann_file (str): Path of annotation file.
             classes (list[str] | None): Specific classes to load form xml file.
                 If set to None, it will use classes of whole dataset.
                 Default: None.
@@ -379,7 +395,7 @@ class FewShotVOCDataset(FewShotBaseDataset):
             if min(img_info['width'], img_info['height']) < min_size:
                 continue
             if self.filter_empty_gt:
-                cat_ids = img_info['ann']['labels'].astype(np.int).tolist()
+                cat_ids = img_info['ann']['labels'].astype(np.int64).tolist()
                 if len(cat_ids) == 0:
                     continue
             if min_bbox_area is not None:
@@ -400,8 +416,8 @@ class FewShotVOCDataset(FewShotBaseDataset):
                  proposal_nums: Sequence[int] = (100, 300, 1000),
                  iou_thr: Optional[Union[float, Sequence[float]]] = 0.5,
                  class_splits: Optional[List[str]] = None) -> Dict:
-        """Evaluate the predictions results in VOC protocol, and support to
-        return evaluate results of specific categories.
+        """Evaluation in VOC protocol and summary results of different splits
+        of classes.
 
         Args:
             results (list[list | tuple]): Predictions of the model.
@@ -465,6 +481,7 @@ class FewShotVOCDataset(FewShotBaseDataset):
                 mean_aps.append(mean_ap)
                 eval_results[f'AP{int(iou_thr * 100):02d}'] = round(mean_ap, 3)
 
+                # calculate evaluate results of different class splits
                 if class_splits is not None:
                     for k in class_splits.keys():
                         aps = [
@@ -500,12 +517,13 @@ class FewShotVOCDataset(FewShotBaseDataset):
 
 @DATASETS.register_module()
 class FewShotVOCCopyDataset(FewShotVOCDataset):
-    """Only used in evaluation of some meta-learning method.
+    """Copy other VOC few shot datasets' `data_infos` directly.
 
-    For some meta-learning methods, the random sampled support data in the
-    training phase is required for evaluation. The usage of `ann_cfg` is
-    different from :obj:`FewShotVOCCopyDataset`. :obj:`FewShotVOCCopyDataset`
-    support to load `data_infos` of other datasets via `ann_cfg`.
+    This dataset is mainly used for model initialization in some meta-learning
+    detectors. In their cases, the support data are randomly sampled
+    during training phase and they also need to be used in model
+    initialization before evaluation. To copy the random sampling results,
+    this dataset supports to load `data_infos` of other datasets via `ann_cfg`
 
     Args:
         ann_cfg (list[dict] | dict): contain `data_infos` from other
@@ -543,7 +561,7 @@ class FewShotVOCCopyDataset(FewShotVOCDataset):
 
 @DATASETS.register_module()
 class FewShotVOCDefaultDataset(FewShotVOCDataset):
-    """FewShot VOC Dataset with some pre-defined annotation paths.
+    """Dataset with some pre-defined VOC annotation paths.
 
     :obj:`FewShotVOCDefaultDataset` provides pre-defined annotation files
     to ensure the reproducibility. The pre-defined annotation files provide
@@ -562,7 +580,7 @@ class FewShotVOCDefaultDataset(FewShotVOCDataset):
         f'SPLIT{split}_{shot}SHOT': [
             dict(
                 type='ann_file',
-                ann_file=f'data/few_shot_voc_split/{shot}shot/'
+                ann_file=f'data/few_shot_ann/voc/benchmark_{shot}shot/'
                 f'box_{shot}shot_{class_name}_train.txt',
                 ann_classes=[class_name])
             for class_name in VOC_SPLIT[f'ALL_CLASSES_SPLIT{split}']

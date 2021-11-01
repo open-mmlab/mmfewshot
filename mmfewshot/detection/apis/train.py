@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import copy
 import warnings
 from typing import Dict, Iterable, Optional
@@ -60,6 +61,10 @@ def train_detector(model: nn.Module,
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
 
+    # Infinite sampler will return a infinite stream of index. It can NOT
+    # be used in `EpochBasedRunner`, because the `EpochBasedRunner` will
+    # enumerate the dataloader forever. Thus, `InfiniteEpochBasedRunner`
+    # is designed to handle dataloader with infinite sampler.
     if cfg.use_infinite_sampler and cfg.runner['type'] == 'EpochBasedRunner':
         cfg.runner['type'] = 'InfiniteEpochBasedRunner'
     runner = build_runner(
@@ -109,9 +114,19 @@ def train_detector(model: nn.Module,
         eval_cfg = cfg.get('evaluation', {})
         eval_cfg['by_epoch'] = cfg.runner['type'] != 'IterBasedRunner'
 
-        # Prepare dataset for model initialization. In most cases,
-        # the dataset would be used to generate the support templates.
+        # Prepare `model_init` dataset for model initialization. In most cases,
+        # the `model_init` dataset contains support images and few shot
+        # annotations. The meta-learning based detectors will extract the
+        # features from images and save them as part of model parameters.
+        # The `model_init` dataset can be mutually configured or
+        # randomly selected during runtime.
         if cfg.data.get('model_init', None) is not None:
+            # The randomly selected few shot support during runtime can not be
+            # configured offline. In such case, the copy datasets are designed
+            # to directly copy the randomly generated support set for model
+            # initialization. The copy datasets copy the `data_infos` by
+            # passing it as argument and other arguments can be different
+            # from training dataset.
             if cfg.data.model_init.pop('copy_from_train_dataset', False):
                 if cfg.data.model_init.ann_cfg is not None:
                     warnings.warn(
@@ -128,15 +143,16 @@ def train_detector(model: nn.Module,
                 cfg.data.model_init.ann_cfg = [
                     dict(data_infos=dataset[0].get_support_data_infos())
                 ]
-            # the support data used in training phase will be saved into
-            # checkpoint, which allows model initialize with these data
-            # in testing.
+            # The `model_init` dataset will be saved into checkpoint, which
+            # allows model to be initialized with these data as default, if
+            # the config of data is not be overwritten during testing.
             cfg.checkpoint_config.meta['model_init_ann_cfg'] = \
                 cfg.data.model_init.ann_cfg
             samples_per_gpu = cfg.data.model_init.pop('samples_per_gpu', 1)
             workers_per_gpu = cfg.data.model_init.pop('workers_per_gpu', 1)
             model_init_dataset = build_dataset(cfg.data.model_init)
-            # disable `dist` to make all gpu get same data
+            # Noted that `dist` should be FALSE to make all the models on
+            # different gpus get same data results in same initialized models.
             model_init_dataloader = build_dataloader(
                 model_init_dataset,
                 samples_per_gpu=samples_per_gpu,
@@ -144,13 +160,16 @@ def train_detector(model: nn.Module,
                 dist=False,
                 shuffle=False)
 
-            # eval hook for meta-learning based query-support detector
+            # eval hook for meta-learning based query-support detector, it
+            # supports model initialization before regular evaluation.
             eval_hook = QuerySupportDistEvalHook \
                 if distributed else QuerySupportEvalHook
             runner.register_hook(
                 eval_hook(model_init_dataloader, val_dataloader, **eval_cfg),
                 priority='LOW')
         else:
+            # for the fine-tuned based methods, the evaluation is the
+            # same as mmdet.
             eval_hook = DistEvalHook if distributed else EvalHook
             runner.register_hook(
                 eval_hook(val_dataloader, **eval_cfg), priority='LOW')

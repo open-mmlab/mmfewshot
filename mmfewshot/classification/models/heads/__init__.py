@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from mmcls.models.builder import HEADS
 
 from .cosine_distance_head import CosineDistanceHead

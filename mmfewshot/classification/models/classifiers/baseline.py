@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict
 
 from mmcls.models.builder import CLASSIFIERS
@@ -17,9 +18,9 @@ class BaselineClassifier(FinetuneBaseClassifier):
 
     def __init__(self,
                  head: Dict = dict(
-                     type='LinearHead', num_classes=100, in_channels=1024),
+                     type='LinearHead', num_classes=100, in_channels=1600),
                  meta_test_head: Dict = dict(
-                     type='LinearHead', num_classes=5, in_channels=1024),
+                     type='LinearHead', num_classes=5, in_channels=1600),
                  *args,
                  **kwargs) -> None:
         super().__init__(

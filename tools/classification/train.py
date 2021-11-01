@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import copy
 import os
@@ -8,12 +9,13 @@ import mmcv
 import torch
 from mmcls import __version__
 from mmcls.models import build_classifier
-from mmcls.utils import collect_env, get_root_logger
+from mmcls.utils import collect_env
 from mmcv import Config, DictAction
 from mmcv.runner import get_dist_info, init_dist, set_random_seed
 
 from mmfewshot.classification.apis import train_model
 from mmfewshot.classification.datasets import build_dataset
+from mmfewshot.utils import get_root_logger
 
 
 def parse_args():

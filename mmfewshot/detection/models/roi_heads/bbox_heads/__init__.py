@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from .contrastive_bbox_head import ContrastiveBBoxHead
 from .cosine_sim_bbox_head import CosineSimBBoxHead
 from .meta_bbox_head import MetaBBoxHead

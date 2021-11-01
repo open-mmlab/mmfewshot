@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict, Iterator
 
 from torch.utils.data import DataLoader, Sampler
@@ -8,10 +9,9 @@ from .dataset_wrappers import NWayKShotDataset
 class NWayKShotDataloader:
     """A dataloader wrapper.
 
-    It Create a iterator to generate query and support
-    batch simultaneously. Each batch contains query data
-    and support data, and the lengths are batch_size and
-    (num_support_ways * num_support_shots) respectively.
+    It Create a iterator to generate query and support batch simultaneously.
+    Each batch contains query data and support data, and the lengths are
+    batch_size and (num_support_ways * num_support_shots) respectively.
 
     Args:
         query_data_loader (DataLoader): DataLoader of query dataset
@@ -22,21 +22,13 @@ class NWayKShotDataloader:
         pin_memory (bool): Pin memory for both support and query dataloader.
         worker_init_fn (callable): Worker init function for both
             support and query dataloader.
-        shuffle_support_dataset (bool): Shuffle support dataset to generate
-            new batch indexes. Default: False.
         kwargs: Any keyword argument to be used to initialize DataLoader.
     """
 
-    def __init__(self,
-                 query_data_loader: DataLoader,
-                 support_dataset: NWayKShotDataset,
-                 support_sampler: Sampler,
-                 num_workers: int,
-                 support_collate_fn: callable,
-                 pin_memory: bool,
-                 worker_init_fn: callable,
-                 shuffle_support_dataset: bool = False,
-                 **kwargs) -> None:
+    def __init__(self, query_data_loader: DataLoader,
+                 support_dataset: NWayKShotDataset, support_sampler: Sampler,
+                 num_workers: int, support_collate_fn: callable,
+                 pin_memory: bool, worker_init_fn: callable, **kwargs) -> None:
         self.dataset = query_data_loader.dataset
         self.query_data_loader = query_data_loader
         self.support_dataset = support_dataset
@@ -45,7 +37,7 @@ class NWayKShotDataloader:
         self.support_collate_fn = support_collate_fn
         self.pin_memory = pin_memory
         self.worker_init_fn = worker_init_fn
-        self.shuffle_support_dataset = shuffle_support_dataset
+        self.shuffle_support_dataset = support_dataset.shuffle_support_
         if self.shuffle_support_dataset:
             assert hasattr(
                 self.support_dataset, 'shuffle_support'
@@ -101,8 +93,8 @@ class TwoBranchDataloader:
     """A dataloader wrapper.
 
     It Create a iterator to iterate two different dataloader simultaneously.
-    Note that `TwoBranchDataloader` dose not support epoch based training and
-    the length of dataloader is decided by main dataset.
+    Note that `TwoBranchDataloader` dose not support `EpochBasedRunner`
+    and the length of dataloader is decided by main dataset.
 
     Args:
         main_data_loader (DataLoader): DataLoader of main dataset.
@@ -121,8 +113,9 @@ class TwoBranchDataloader:
         return self
 
     def __next__(self) -> Dict:
-        # The iterator actually has infinite length, which can't
-        # be used in epoch based training.
+        # The iterator actually has infinite length. Note that it can NOT
+        # be used in `EpochBasedRunner`, because the `EpochBasedRunner` will
+        # enumerate the dataloader forever.
         try:
             main_data = next(self.main_iter)
         except StopIteration:

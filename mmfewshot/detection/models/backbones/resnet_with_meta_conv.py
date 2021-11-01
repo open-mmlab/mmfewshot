@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from typing import Tuple
 
 from mmcv.cnn import build_conv_layer
@@ -8,7 +9,8 @@ from torch import Tensor
 
 @BACKBONES.register_module()
 class ResNetWithMetaConv(ResNet):
-    """ResNet with `meta_conv` to handle different inputs.
+    """ResNet with `meta_conv` to handle different inputs in metarcnn and
+    fsdetview.
 
     When input with shape (N, 3, H, W) from images, the network will use
     `conv1` as regular ResNet. When input with shape (N, 4, H, W) from (image +
@@ -19,7 +21,7 @@ class ResNetWithMetaConv(ResNet):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.meta_conv = build_conv_layer(
-            self.conv_cfg,
+            self.conv_cfg,  # from config of ResNet
             4,
             64,
             kernel_size=7,
@@ -29,6 +31,11 @@ class ResNetWithMetaConv(ResNet):
 
     def forward(self, x: Tensor, use_meta_conv: bool = False) -> Tuple[Tensor]:
         """Forward function.
+
+        When input with shape (N, 3, H, W) from images, the network will use
+        `conv1` as regular ResNet. When input with shape (N, 4, H, W) from
+        (image + mask) the network will replace `conv1` with `meta_conv` to
+        handle additional channel.
 
         Args:
             x (Tensor): Tensor with shape (N, 3, H, W) from images

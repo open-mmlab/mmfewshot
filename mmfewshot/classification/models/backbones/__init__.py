@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from mmcls.models.builder import BACKBONES
 
 from .conv4 import Conv4, ConvNet

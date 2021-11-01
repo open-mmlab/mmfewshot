@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import itertools
 from typing import Iterable, Iterator, Optional
 
@@ -10,7 +11,9 @@ from torch.utils.data.sampler import Sampler
 class InfiniteSampler(Sampler):
     """Return a infinite stream of index.
 
-    The implementation logic is referred to
+    The length of sampler is set to the actual length of dataset, thus the
+    length of dataloader is still determined by the dataset. The
+    implementation logic is referred to
     https://github.com/facebookresearch/detectron2/blob/main/detectron2/data/samplers/grouped_batch_sampler.py
 
     Args:
@@ -28,6 +31,7 @@ class InfiniteSampler(Sampler):
         self.shuffle = shuffle
         self.size = len(dataset)
         self.indices = self._indices()
+        self.epoch = 0
 
     def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
@@ -48,19 +52,22 @@ class InfiniteSampler(Sampler):
             yield idx
 
     def __len__(self) -> int:
-        """Length of base dataset."""
+        """Length of dataset."""
+        # The length of sampler is set to the actual length of dataset, thus
+        # the length of dataloader is still determined by the dataset.
         return self.size
 
-    def set_epoch(self, epoch):
-        """Not supported in `IterationBased` runner."""
-        raise NotImplementedError
+    def set_epoch(self, epoch: int) -> None:
+        self.epoch = epoch
 
 
 class InfiniteGroupSampler(Sampler):
-    """Similar to `InfiniteSampler` all indices in a batch should be in the
-    same group.
+    """Similar to `InfiniteSampler`, but all indices in a batch should be in
+    the same group of flag.
 
-    The implementation logic is referred to
+    The length of sampler is set to the actual length of dataset, thus the
+    length of dataloader is still determined by the dataset. The
+    implementation logic is referred to
     https://github.com/facebookresearch/detectron2/blob/main/detectron2/data/samplers/grouped_batch_sampler.py
 
     Args:
@@ -92,6 +99,7 @@ class InfiniteGroupSampler(Sampler):
 
         self.size = len(dataset)
         self.indices = self._indices_of_rank()
+        self.epoch = 0
 
     def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
@@ -119,19 +127,21 @@ class InfiniteGroupSampler(Sampler):
                 del group_buffer[:]
 
     def __len__(self) -> int:
-        """Length of base dataset."""
+        """Length of dataset."""
+        # The length of sampler is set to the actual length of dataset, thus
+        # the length of dataloader is still determined by the dataset.
         return self.size
 
-    def set_epoch(self, epoch):
-        """Not supported in `IterationBased` runner."""
-        raise NotImplementedError
+    def set_epoch(self, epoch: int) -> None:
+        self.epoch = epoch
 
 
 class DistributedInfiniteSampler(Sampler):
-    """Similar to `BatchSampler` warping a `DistributedSampler.
+    """Similar to `InfiniteSampler` but in distributed version.
 
-    It is designed for `IterationBased` runner. The implementation logic
-    is referred to
+    The length of sampler is set to the actual length of dataset, thus the
+    length of dataloader is still determined by the dataset. The
+    implementation logic is referred to
     https://github.com/facebookresearch/detectron2/blob/main/detectron2/data/samplers/grouped_batch_sampler.py
 
     Args:
@@ -161,6 +171,7 @@ class DistributedInfiniteSampler(Sampler):
         self.shuffle = shuffle
         self.size = len(dataset)
         self.indices = self._indices_of_rank()
+        self.epoch = 0
 
     def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
@@ -185,18 +196,21 @@ class DistributedInfiniteSampler(Sampler):
             yield idx
 
     def __len__(self):
-        """Length of base dataset."""
+        """return length of dataset."""
+        # The length of sampler is set to the actual length of dataset, thus
+        # the length of dataloader is still determined by the dataset.
         return self.size
 
-    def set_epoch(self, epoch):
-        """Not supported in `IterationBased` runner."""
-        raise NotImplementedError
+    def set_epoch(self, epoch: int) -> None:
+        self.epoch = epoch
 
 
 class DistributedInfiniteGroupSampler(Sampler):
-    """Similar to `InfiniteSampler` but in distributed version.
+    """Similar to `InfiniteGroupSampler` but in distributed version.
 
-    The implementation logic is referred to
+    The length of sampler is set to the actual length of dataset, thus the
+    length of dataloader is still determined by the dataset. The
+    implementation logic is referred to
     https://github.com/facebookresearch/detectron2/blob/main/detectron2/data/samplers/grouped_batch_sampler.py
 
     Args:
@@ -240,6 +254,7 @@ class DistributedInfiniteGroupSampler(Sampler):
 
         self.size = len(dataset)
         self.indices = self._indices_of_rank()
+        self.epoch = 0
 
     def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
@@ -271,9 +286,10 @@ class DistributedInfiniteGroupSampler(Sampler):
                 del group_buffer[:]
 
     def __len__(self) -> int:
-        """Length of base dataset."""
+        """return length of dataset."""
+        # The length of sampler is set to the actual length of dataset, thus
+        # the length of dataloader is still determined by the dataset.
         return self.size
 
-    def set_epoch(self, epoch):
-        """Not supported in `IterationBased` runner."""
-        raise NotImplementedError
+    def set_epoch(self, epoch: int) -> None:
+        self.epoch = epoch

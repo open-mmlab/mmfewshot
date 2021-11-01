@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -17,8 +18,10 @@ def eval_map(det_results: List[List[np.ndarray]],
              tpfp_fn: Optional[callable] = None,
              nproc: int = 4,
              use_legacy_coordinate: bool = False) -> Tuple[List, List[Dict]]:
-    """Evaluate mAP of a dataset. :func:`eval_map` in mmdetection predefine the
-    names of classes and thus not support arbitrary class splits.
+    """Evaluate mAP of a dataset.
+
+    :func:`eval_map` in mmdet predefines the names of classes and thus not
+    supports report map results of arbitrary class splits.
 
     Args:
         det_results (list[list[np.ndarray]] | list[tuple[np.ndarray]]):
