@@ -39,7 +39,7 @@ class MetaTestParallel(nn.Module):
     def forward(self, *inputs, **kwargs):
         """Override the original forward function.
 
-        The main difference lies in the CPU inference where the datas in
+        The main difference lies in the CPU inference where the data in
         :class:`DataContainers` will still be gathered.
         """
 

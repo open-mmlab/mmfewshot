@@ -1,0 +1,64 @@
+Collections:
+  - Name: Neg-Margin
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Training Techniques:
+        - SGD with Momentum
+        - Weight Decay
+      Training Resources: 1x V100 GPUs
+    Paper: https://arxiv.org/abs/1003.12060
+    README: configs/classification/neg_margin/README.md
+
+Models:
+  - Name: neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-1shot
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Epochs: 100
+      Batch Size: 64
+    In Collection: Neg-Margin
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Tiered-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-1shot.py
+  - Name: neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-5shot
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Epochs: 100
+      Batch Size: 64
+    In Collection: Neg-Margin
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Tiered-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-5shot.py
+  - Name: neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Epochs: 100
+      Batch Size: 64
+    In Collection: Neg-Margin
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Tiered-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot.py
+  - Name: neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-5shot
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Epochs: 100
+      Batch Size: 64
+    In Collection: Neg-Margin
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Tiered-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-5shot.py

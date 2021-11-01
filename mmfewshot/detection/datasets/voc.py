@@ -333,7 +333,7 @@ class FewShotVOCDataset(FewShotBaseDataset):
             # the four coordinates are reduced by 1 when the annotation
             # is parsed. Here we following detectron2, only xmin and ymin
             # will be reduced by 1 during training. The groundtruth used for
-            # evaluation or testing keep consisent with original xml
+            # evaluation or testing keep consistent with original xml
             # annotation file and the xmin and ymin of prediction results
             # will add 1 for inverse of data loading logic.
             bbox = [
@@ -441,7 +441,7 @@ class FewShotVOCDataset(FewShotBaseDataset):
         # the four coordinates are reduced by 1 when the annotation
         # is parsed. Here we following detectron2, only xmin and ymin
         # will be reduced by 1 during training. The groundtruth used for
-        # evaluation or testing keep consisent with original xml
+        # evaluation or testing keep consistent with original xml
         # annotation file and the xmin and ymin of prediction results
         # will add 1 for inverse of data loading logic.
         for i in range(len(results)):

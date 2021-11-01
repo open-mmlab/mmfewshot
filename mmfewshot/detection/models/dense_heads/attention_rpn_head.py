@@ -162,7 +162,7 @@ class AttentionRPNHead(RPNHead):
             gt_bboxes_ignore=query_gt_bboxes_ignore,
             pair_flags=pair_flags)
         proposal_list = self.get_bboxes(
-            *outs, repeat_query_img_metas, cfg=proposal_cfg)
+            *outs, img_metas=repeat_query_img_metas, cfg=proposal_cfg)
         return losses, proposal_list
 
     @force_fp32(apply_to=('cls_scores', 'bbox_preds'))

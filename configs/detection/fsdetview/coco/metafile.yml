@@ -1,0 +1,51 @@
+Collections:
+  - Name: FSDETVIEW
+    Metadata:
+      Training Data: COCO
+      Training Techniques:
+        - SGD with Momentum
+        - Weight Decay
+      Training Resources: 8x V100 GPUs
+      Batch Size: 8x4
+      Architecture:
+        - RPN
+        - ResNet
+    Paper: https://arxiv.org/abs/2007.12107
+    README: configs/detection/fsdetview/README.md
+
+Models:
+  - Name: fsdetview_r50_c4_8xb4_coco_base-training
+    In Collection: FSDETVIEW
+    Config: configs/detection/fsdetview/coco/fsdetview_r50_c4_8xb4_coco_base-training.py
+    Metadata:
+      Training Data: COCO Base Classes
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: COCO
+        Metrics:
+          base box AP: none
+    Weights: none
+  - Name: fsdetview_r50_c4_8xb4_coco_10shot-fine-tuning
+    In Collection: FSDETVIEW
+    Config: configs/detection/fsdetview/coco/fsdetview_r50_c4_8xb4_coco_10shot-fine-tuning.py
+    Metadata:
+      Training Data: COCO 10shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: COCO
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: fsdetview_r50_c4_8xb4_coco_30shot-fine-tuning
+    In Collection: FSDETVIEW
+    Config: configs/detection/fsdetview/coco/fsdetview_r50_c4_8xb4_coco_30shot-fine-tuning.py
+    Metadata:
+      Training Data: COCO 30shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: COCO
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none

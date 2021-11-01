@@ -1,0 +1,64 @@
+Collections:
+  - Name: Baseline
+    Metadata:
+      Training Data: CUB
+      Training Techniques:
+        - SGD with Momentum
+        - Weight Decay
+      Training Resources: 1x V100 GPUs
+    Paper: https://arxiv.org/abs/1904.04232
+    README: configs/classification/baseline/README.md
+
+Models:
+  - Name: baseline_conv4_1xb64_cub_5way-1shot
+    Metadata:
+      Training Data: CUB
+      Epochs: 200
+      Batch Size: 64
+    In Collection: Baseline
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/baseline/cub/baseline_conv4_1xb64_cub_5way-1shot.py
+  - Name: baseline_conv4_1xb64_cub_5way-5shot
+    Metadata:
+      Training Data: CUB
+      Epochs: 200
+      Batch Size: 64
+    In Collection: Baseline
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/baseline/cub/baseline_conv4_1xb64_cub_5way-5shot.py
+  - Name: baseline_resnet12_1xb64_cub_5way-1shot
+    Metadata:
+      Training Data: CUB
+      Epochs: 200
+      Batch Size: 64
+    In Collection: Baseline
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/baseline/cub/baseline_resnet12_1xb64_cub_5way-1shot.py
+  - Name: baseline_resnet12_1xb64_cub_5way-5shot
+    Metadata:
+      Training Data: CUB
+      Epochs: 200
+      Batch Size: 64
+    In Collection: Baseline
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/baseline/cub/baseline_resnet12_1xb64_cub_5way-5shot.py

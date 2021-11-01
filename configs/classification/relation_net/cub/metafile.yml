@@ -1,0 +1,59 @@
+Collections:
+  - Name: Relation-Net
+    Metadata:
+      Training Data: CUB
+      Training Techniques:
+        - Adam
+      Training Resources: 1x V100 GPUs
+    Paper: https://arxiv.org/abs/1711.06025
+    README: configs/classification/relation_net/README.md
+
+Models:
+  - Name: relation-net_conv4_1xb105_cub_5way-1shot
+    Metadata:
+      Training Data: CUB
+      Batch Size: 105
+    In Collection: Relation-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot.py
+  - Name: relation-net_conv4_1xb105_cub_5way-5shot
+    Metadata:
+      Training Data: CUB
+      Batch Size: 105
+    In Collection: Relation-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-5shot.py
+  - Name: relation-net_resnet12_1xb105_cub_5way-1shot
+    Metadata:
+      Training Data: CUB
+      Batch Size: 105
+    In Collection: Relation-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot.py
+  - Name: relation-net_resnet12_1xb105_cub_5way-5shot
+    Metadata:
+      Training Data: CUB
+      Batch Size: 105
+    In Collection: Relation-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-5shot.py

@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from .formating import MultiImageCollect, MultiImageFormatBundle
+from .formatting import MultiImageCollect, MultiImageFormatBundle
 from .transforms import (CropInstance, CropResizeInstance, GenerateMask,
                          MultiImageNormalize, MultiImagePad,
                          MultiImageRandomCrop, MultiImageRandomFlip,

@@ -230,8 +230,7 @@ class Visualizer:
                     else:
                         data_info['ann'][k] = data_info['ann'][k].astype(
                             np.int64)
-        assert len(
-            self.CLASSES) > 0, 'missing CLASSSES for saved dataset json.'
+        assert len(self.CLASSES) > 0, 'missing CLASSES for saved dataset json.'
         if meta_index is not None:
             data_infos.pop(meta_index)
         return data_infos

@@ -1,0 +1,123 @@
+Collections:
+  - Name: FSCE
+    Metadata:
+      Training Data: VOC
+      Training Techniques:
+        - SGD with Momentum
+        - Weight Decay
+      Training Resources: 8x V100 GPUs
+      Architecture:
+        - RPN
+        - FPN
+        - ResNet
+    Paper: https://arxiv.org/abs/2003.06957
+    README: configs/detection/fsce/README.md
+
+Models:
+  - Name: fsce_r101_fpn_voc-split1_base-training
+    In Collection: FSCE
+    Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_base-training.py
+    Metadata:
+      Training Data: VOC Split1 Base Classes
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+    Weights: none
+  - Name: fsce_r101_fpn_voc-split1_1shot-fine-tuning
+    In Collection: FSCE
+    Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_1shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 1shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: fsce_r101_fpn_voc-split1_2shot-fine-tuning
+    In Collection: FSCE
+    Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_2shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 2shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: fsce_r101_fpn_voc-split1_3shot-fine-tuning
+    In Collection: FSCE
+    Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_3shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 3shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: fsce_r101_fpn_voc-split1_5shot-fine-tuning
+    In Collection: FSCE
+    Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_5shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 5shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: fsce_r101_fpn_voc-split1_10shot-fine-tuning
+    In Collection: FSCE
+    Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_10shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 10shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: fsce_r101_fpn_contrastive-loss_voc-split1_3shot-fine-tuning
+    In Collection: FSCE
+    Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_contrastive-loss_voc-split1_3shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 3shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: fsce_r101_fpn_contrastive-loss_voc-split1_5shot-fine-tuning
+    In Collection: FSCE
+    Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_contrastive-loss_voc-split1_5shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 5shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: fsce_r101_fpn_contrastive-loss_voc-split1_10shot-fine-tuning
+    In Collection: FSCE
+    Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_contrastive-loss_voc-split1_10shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 10shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none

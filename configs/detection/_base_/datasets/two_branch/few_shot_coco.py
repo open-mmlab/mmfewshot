@@ -30,8 +30,8 @@ train_multi_pipelines = dict(
         dict(type='MultiImageNormalize', **img_norm_cfg),
         dict(type='MultiImageRandomFlip', flip_ratio=0.5),
         dict(type='MultiImagePad', size_divisor=32),
-        dict(type='MultiScaleFormatBundle'),
-        dict(type='MultiScaleCollect', keys=['img', 'gt_labels'])
+        dict(type='MultiImageFormatBundle'),
+        dict(type='MultiImageCollect', keys=['img', 'gt_labels'])
     ])
 test_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -63,8 +63,7 @@ data = dict(
             ann_cfg=[
                 dict(
                     type='ann_file',
-                    ann_file='data/few_shot_coco_split/'
-                    'annotations/trainvalno5k.json')
+                    ann_file='data/few_shot_ann/coco/annotations/train.json')
             ],
             img_prefix=data_root,
             multi_pipelines=train_multi_pipelines,
@@ -81,7 +80,7 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='data/few_shot_coco_split/annotations/5k.json')
+                ann_file='data/few_shot_ann/coco/annotations/val.json')
         ],
         img_prefix=data_root,
         pipeline=test_pipeline,
@@ -91,7 +90,7 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='data/few_shot_coco_split/annotations/5k.json')
+                ann_file='data/few_shot_ann/coco/annotations/val.json')
         ],
         img_prefix=data_root,
         pipeline=test_pipeline,

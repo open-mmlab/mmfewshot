@@ -1,0 +1,59 @@
+Collections:
+  - Name: Meta-Baseline
+    Metadata:
+      Training Data: Mini-ImageNet
+      Training Techniques:
+        - Adam
+      Training Resources: 1x V100 GPUs
+    Paper: https://arxiv.org/abs/2003.04390
+    README: configs/classification/meta_baseline/README.md
+
+Models:
+  - Name: meta-baseline_conv4_1xb100_mini-imagenet_5way-1shot
+    Metadata:
+      Training Data: Mini-ImageNet
+      Batch Size: 100
+    In Collection: Meta-Baseline
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Mini-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/meta_baseline/mini_imagenet/meta-baseline_conv4_1xb100_mini-imagenet_5way-1shot.py
+  - Name: meta-baseline_conv4_1xb100_mini-imagenet_5way-5shot
+    Metadata:
+      Training Data: Mini-ImageNet
+      Batch Size: 100
+    In Collection: Meta-Baseline
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Mini-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/meta_baseline/mini_imagenet/meta-baseline_conv4_1xb100_mini-imagenet_5way-5shot.py
+  - Name: meta-baseline_resnet12_1xb100_mini-imagenet_5way-1shot
+    Metadata:
+      Training Data: Mini-ImageNet
+      Batch Size: 100
+    In Collection: Meta-Baseline
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Mini-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/meta_baseline/mini_imagenet/meta-baseline_resnet12_1xb100_mini-imagenet_5way-1shot.py
+  - Name: meta-baseline_resnet12_1xb100_mini-imagenet_5way-5shot
+    Metadata:
+      Training Data: Mini-ImageNet
+      Batch Size: 100
+    In Collection: Meta-Baseline
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Mini-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/meta_baseline/mini_imagenet/meta-baseline_resnet12_1xb100_mini-imagenet_5way-5shot.py

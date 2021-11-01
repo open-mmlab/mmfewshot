@@ -1,0 +1,87 @@
+Collections:
+  - Name: Meta RCNN
+    Metadata:
+      Training Data: VOC
+      Training Techniques:
+        - SGD with Momentum
+        - Weight Decay
+      Training Resources: 8x V100 GPUs
+      Batch Size: 8x4
+      Architecture:
+        - RPN
+        - ResNet
+    Paper: https://arxiv.org/abs/2007.12107
+    README: configs/detection/meta_rcnn/README.md
+
+Models:
+  - Name: meta-rcnn_r101_c4_8xb4_voc-split1_base-training
+    In Collection: Meta RCNN
+    Config: configs/detection/meta_rcnn/voc/split1/meta-rcnn_r101_c4_8xb4_voc-split1_base-training.py
+    Metadata:
+      Training Data: VOC Split1 Base Classes
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+    Weights: none
+  - Name: meta-rcnn_r101_c4_8xb4_voc-split1_1shot-fine-tuning
+    In Collection: Meta RCNN
+    Config: configs/detection/meta_rcnn/voc/split1/meta-rcnn_r101_c4_8xb4_voc-split1_1shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 1shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: meta-rcnn_r101_c4_8xb4_voc-split1_2shot-fine-tuning
+    In Collection: Meta RCNN
+    Config: configs/detection/meta_rcnn/voc/split1/meta-rcnn_r101_c4_8xb4_voc-split1_2shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 2shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: meta-rcnn_r101_c4_8xb4_voc-split1_3shot-fine-tuning
+    In Collection: Meta RCNN
+    Config: configs/detection/meta_rcnn/voc/split1/meta-rcnn_r101_c4_8xb4_voc-split1_3shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 3shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: meta-rcnn_r101_c4_8xb4_voc-split1_5shot-fine-tuning
+    In Collection: Meta RCNN
+    Config: configs/detection/meta_rcnn/voc/split1/meta-rcnn_r101_c4_8xb4_voc-split1_5shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 5shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none
+  - Name: meta-rcnn_r101_c4_8xb4_voc-split1_10shot-fine-tuning
+    In Collection: Meta RCNN
+    Config: configs/detection/meta_rcnn/voc/split1/meta-rcnn_r101_c4_8xb4_voc-split1_10shot-fine-tuning.py
+    Metadata:
+      Training Data: VOC Split1 10shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: VOC Split1
+        Metrics:
+          base box AP: none
+          novel box AP: none
+    Weights: none

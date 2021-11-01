@@ -77,7 +77,7 @@ class FewShotBaseDataset(CustomDataset):
         filter_empty_gt (bool): If set true, images without bounding
             boxes of the dataset's classes will be filtered out. This option
             only works when `test_mode=False`, i.e., we never filter images
-            during tests. Default: Ture.
+            during tests. Default: True.
         min_bbox_size (int | float | None): The minimum size of bounding
             boxes in the images. If the size of a bounding box is less than
             ``min_bbox_size``, it would be added to ignored field.

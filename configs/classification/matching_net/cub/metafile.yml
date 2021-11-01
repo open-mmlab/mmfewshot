@@ -1,0 +1,59 @@
+Collections:
+  - Name: Matching-Net
+    Metadata:
+      Training Data: CUB
+      Training Techniques:
+        - Adam
+      Training Resources: 1x V100 GPUs
+    Paper: https://arxiv.org/abs/1606.04080
+    README: configs/classification/matching_net/README.md
+
+Models:
+  - Name: matching-net_conv4_1xb105_cub_5way-1shot
+    Metadata:
+      Training Data: CUB
+      Batch Size: 105
+    In Collection: Matching-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/matching_net/cub/matching-net_conv4_1xb105_cub_5way-1shot.py
+  - Name: matching-net_conv4_1xb105_cub_5way-5shot
+    Metadata:
+      Training Data: CUB
+      Batch Size: 105
+    In Collection: Matching-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/matching_net/cub/matching-net_conv4_1xb105_cub_5way-5shot.py
+  - Name: matching-net_resnet12_1xb105_cub_5way-1shot
+    Metadata:
+      Training Data: CUB
+      Batch Size: 105
+    In Collection: Matching-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/matching_net/cub/matching-net_resnet12_1xb105_cub_5way-1shot.py
+  - Name: matching-net_resnet12_1xb105_cub_5way-5shot
+    Metadata:
+      Training Data: CUB
+      Batch Size: 105
+    In Collection: Matching-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: CUB
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/matching_net/cub/matching-net_resnet12_1xb105_cub_5way-5shot.py

@@ -14,5 +14,7 @@ log_level = 'INFO'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]
-seed = 0
 use_infinite_sampler = True
+# a magical seed works well in most cases for this repo!!!
+# using different seeds might raise some issues about reproducibility
+seed = 42

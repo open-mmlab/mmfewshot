@@ -217,7 +217,7 @@ def build_dataloader(dataset: Dataset,
             pin_memory=False,
             worker_init_fn=init_fn,
             **kwargs)
-        # creat support dataset from query dataset and
+        # create support dataset from query dataset and
         # sample batch index with same length as query dataloader
         support_dataset = copy.deepcopy(dataset)
         support_dataset.convert_query_to_support(

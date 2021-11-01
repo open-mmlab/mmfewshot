@@ -1,0 +1,59 @@
+Collections:
+  - Name: MAML
+    Metadata:
+      Training Data: Mini-ImageNet
+      Training Techniques:
+        - Adam
+      Training Resources: 1x V100 GPUs
+    Paper: https://arxiv.org/abs/1703.03400
+    README: configs/classification/maml/README.md
+
+Models:
+  - Name: maml_conv4_1xb105_mini-imagenet_5way-1shot
+    Metadata:
+      Training Data: Mini-ImageNet
+      Batch Size: 105
+    In Collection: MAML
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Mini-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/maml/mini_imagenet/maml_conv4_1xb105_mini-imagenet_5way-1shot.py
+  - Name: maml_conv4_1xb105_mini-imagenet_5way-5shot
+    Metadata:
+      Training Data: Mini-ImageNet
+      Batch Size: 105
+    In Collection: MAML
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Mini-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/maml/mini_imagenet/maml_conv4_1xb105_mini-imagenet_5way-5shot.py
+  - Name: maml_resnet12_1xb105_mini-imagenet_5way-1shot
+    Metadata:
+      Training Data: Mini-ImageNet
+      Batch Size: 105
+    In Collection: MAML
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Mini-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/maml/mini_imagenet/maml_resnet12_1xb105_mini-imagenet_5way-1shot.py
+  - Name: maml_resnet12_1xb105_mini-imagenet_5way-5shot
+    Metadata:
+      Training Data: Mini-ImageNet
+      Batch Size: 105
+    In Collection: MAML
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Mini-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/maml/mini_imagenet/maml_resnet12_1xb105_mini-imagenet_5way-5shot.py

@@ -154,7 +154,7 @@ class MPSR(TwoStageDetector):
                 and may also contain `filename`, `ori_shape`, `pad_shape`,
                 and `img_norm_cfg`. For details on the values of these keys,
                 see :class:`mmdet.datasets.pipelines.Collect`. Default: None.
-            return_loss (bool): If set Ture call :func:`forward_train`,
+            return_loss (bool): If set True call :func:`forward_train`,
                 otherwise call :func:`forward_test`. Default: True.
         """
         if return_loss:

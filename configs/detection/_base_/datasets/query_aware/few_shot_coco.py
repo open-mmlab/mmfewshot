@@ -57,8 +57,7 @@ data = dict(
             ann_cfg=[
                 dict(
                     type='ann_file',
-                    ann_file='data/few_shot_coco_split/'
-                    'annotations/trainvalno5k.json')
+                    ann_file='data/few_shot_ann/coco/annotations/train.json')
             ],
             img_prefix=data_root,
             num_novel_shots=None,
@@ -73,7 +72,7 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='data/few_shot_coco_split/annotations/5k.json')
+                ann_file='data/few_shot_ann/coco/annotations/val.json')
         ],
         img_prefix=data_root,
         pipeline=test_pipeline,
@@ -83,7 +82,7 @@ data = dict(
         ann_cfg=[
             dict(
                 type='ann_file',
-                ann_file='data/few_shot_coco_split/annotations/5k.json')
+                ann_file='data/few_shot_ann/coco/annotations/val.json')
         ],
         img_prefix=data_root,
         pipeline=test_pipeline,

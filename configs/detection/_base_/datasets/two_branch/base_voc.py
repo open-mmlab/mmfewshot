@@ -30,8 +30,8 @@ train_multi_pipelines = dict(
         dict(type='MultiImageNormalize', **img_norm_cfg),
         dict(type='MultiImageRandomFlip', flip_ratio=0.5),
         dict(type='MultiImagePad', size_divisor=32),
-        dict(type='MultiScaleFormatBundle'),
-        dict(type='MultiScaleCollect', keys=['img', 'gt_labels'])
+        dict(type='MultiImageFormatBundle'),
+        dict(type='MultiImageCollect', keys=['img', 'gt_labels'])
     ])
 test_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -74,7 +74,7 @@ data = dict(
             classes=None,
             use_difficult=False,
             instance_wise=False,
-            # coordinate_offset=[-1, -1, -1, -1],
+            coordinate_offset=[-1, -1, -1, -1],
             dataset_name='main_dataset'),
         auxiliary_dataset=dict(
             copy_from_main_dataset=True,
@@ -89,7 +89,7 @@ data = dict(
         ],
         img_prefix=data_root,
         pipeline=test_pipeline,
-        # coordinate_offset=[-1, -1, -1, -1],
+        coordinate_offset=[-1, -1, -1, -1],
         classes=None),
     test=dict(
         type='FewShotVOCDataset',
@@ -101,6 +101,6 @@ data = dict(
         img_prefix=data_root,
         pipeline=test_pipeline,
         test_mode=True,
-        # coordinate_offset=[-1, -1, -1, -1],
+        coordinate_offset=[-1, -1, -1, -1],
         classes=None))
 evaluation = dict(interval=5000, metric='mAP')

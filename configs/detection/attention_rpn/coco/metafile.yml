@@ -1,0 +1,70 @@
+Collections:
+  - Name: Attention RPN
+    Metadata:
+      Training Data: COCO
+      Training Techniques:
+        - SGD with Momentum
+        - Weight Decay
+      Training Resources: 4x V100 GPUs
+      Architecture:
+        - Attention RPN
+        - ResNet
+    Paper: https://arxiv.org/abs/1908.01998
+    README: configs/detection/attention_rpn/README.md
+
+Models:
+  - Name: attention_rpn_r50_c4_coco_10shot-fine-tuning
+    In Collection: Attention RPN
+    Config: configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_10shot-fine-tuning.py
+    Metadata:
+      Training Data: COCO 10shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: COCO
+        Metrics:
+          novel box AP: none
+    Weights: none
+  - Name: attention_rpn_r50_c4_coco_30shot-fine-tuning
+    In Collection: Attention RPN
+    Config: configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_30shot-fine-tuning.py
+    Metadata:
+      Training Data: COCO 30shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: COCO
+        Metrics:
+          novel box AP: none
+    Weights: none
+  - Name: attention_rpn_r50_c4_coco_base-training
+    In Collection: Attention RPN
+    Config: configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_base-training.py
+    Metadata:
+      Training Data: COCO Base Classes
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: COCO
+        Metrics:
+          base box AP: none
+    Weights: none
+  - Name: attention_rpn_r50_c4_coco_official-10shot-fine-tuning
+    In Collection: Attention RPN
+    Config: configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-10shot-fine-tuning.py
+    Metadata:
+      Training Data: COCO 10shot
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: COCO
+        Metrics:
+          novel box AP: none
+    Weights: none
+  - Name: attention_rpn_r50_c4_coco_official-base-training
+    In Collection: Attention RPN
+    Config: configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-base-training.py
+    Metadata:
+      Training Data: COCO Base Classes
+    Results:
+      - Task: Few Shot Object Detection
+        Dataset: COCO
+        Metrics:
+          base box AP: none
+    Weights: none

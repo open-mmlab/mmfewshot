@@ -1,0 +1,59 @@
+Collections:
+  - Name: Proto-Net
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Training Techniques:
+        - Adam
+      Training Resources: 1x V100 GPUs
+    Paper: https://arxiv.org/abs/1703.05175
+    README: configs/classification/proto_net/README.md
+
+Models:
+  - Name: proto-net_conv4_1xb105_tiered-imagenet_5way-1shot
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Batch Size: 105
+    In Collection: Proto-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Tiered-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/proto_net/tiered_imagenet/proto-net_conv4_1xb105_tiered-imagenet_5way-1shot.py
+  - Name: proto-net_conv4_1xb105_tiered-imagenet_5way-5shot
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Batch Size: 105
+    In Collection: Proto-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Tiered-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/proto_net/tiered_imagenet/proto-net_conv4_1xb105_tiered-imagenet_5way-5shot.py
+  - Name: proto-net_resnet12_1xb105_tiered-imagenet_5way-1shot
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Batch Size: 105
+    In Collection: Proto-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Tiered-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/proto_net/tiered_imagenet/proto-net_resnet12_1xb105_tiered-imagenet_5way-1shot.py
+  - Name: proto-net_resnet12_1xb105_tiered-imagenet_5way-5shot
+    Metadata:
+      Training Data: Tiered-ImageNet
+      Batch Size: 105
+    In Collection: Proto-Net
+    Results:
+      - Task: Few Shot Image Classification
+        Dataset: Tiered-ImageNet
+        Metrics:
+          Accuracy: none
+    Weights: none
+    Config: configs/classification/proto_net/tiered_imagenet/proto-net_resnet12_1xb105_tiered-imagenet_5way-5shot.py
