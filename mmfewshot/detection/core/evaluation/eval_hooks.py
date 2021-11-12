@@ -104,9 +104,9 @@ class QuerySupportDistEvalHook(BaseDistEvalHook):
         # imported from mmfewshot.
         from mmfewshot.detection.apis import \
             (multi_gpu_model_init, multi_gpu_test)
-        # Noted that `model_init_dataloader` should NOT use distributed sample
-        # to make all the models on different gpus get same data results
-        # in same initialized models.
+        # Noted that `model_init_dataloader` should NOT use distributed
+        # sampler to make all the models on different gpus get same data
+        # results in the same initialized models.
         multi_gpu_model_init(runner.model, self.model_init_dataloader)
 
         results = multi_gpu_test(

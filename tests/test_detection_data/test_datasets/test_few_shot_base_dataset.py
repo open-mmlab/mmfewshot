@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from mmfewshot.detection.datasets import FewShotBaseDataset
+from mmfewshot.detection.datasets import BaseFewShotDataset
 
 
 def get_toy_data():
@@ -58,7 +58,7 @@ def get_toy_data():
     ]
 
 
-@patch('mmfewshot.detection.datasets.FewShotBaseDataset.load_annotations',
+@patch('mmfewshot.detection.datasets.BaseFewShotDataset.load_annotations',
        MagicMock(return_value=get_toy_data()))
 def test_few_shot_base_dataset():
     data_config = {
@@ -81,7 +81,7 @@ def test_few_shot_base_dataset():
         'classes': ('cat', 'dog', 'person', 'car', 'bird')
     }
 
-    dataset = FewShotBaseDataset(**data_config)
+    dataset = BaseFewShotDataset(**data_config)
     original_data_infos = copy.deepcopy(dataset.data_infos)
 
     # test prepare_train_img()

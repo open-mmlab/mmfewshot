@@ -36,18 +36,18 @@ class ConvNet(nn.Module):
 
     Args:
         depth (int): The number of `ConvBlock`.
-        pooling_layers (Sequence[int]): Indicate each block whether to use
-            max pooling.
-        padding_layers (Sequence[int]): Indicate each block whether to pad
-            in conv layer.
+        pooling_blocks (Sequence[int]): Indicate which block to use
+            2x2 max pooling.
+        padding_blocks (Sequence[int]): Indicate which block to use
+            conv layer with padding.
         flatten (bool): Whether to flatten features from (N, C, H, W)
             to (N, C*H*W). Default: True.
     """
 
     def __init__(self,
                  depth: int,
-                 pooling_layers: Sequence[int],
-                 padding_layers: Sequence[int],
+                 pooling_blocks: Sequence[int],
+                 padding_blocks: Sequence[int],
                  flatten: bool = True) -> None:
         super().__init__()
         layers = []
@@ -59,8 +59,8 @@ class ConvNet(nn.Module):
                 ConvBlock(
                     in_channels,
                     out_channels,
-                    is_pooling=(i in pooling_layers),
-                    padding=1 if i in padding_layers else 0))
+                    is_pooling=(i in pooling_blocks),
+                    padding=1 if i in padding_blocks else 0))
         self.flatten = flatten
         self.layers = nn.Sequential(*layers)
         self.init_weights()
@@ -86,13 +86,13 @@ class Conv4(ConvNet):
 
     def __init__(self,
                  depth: int = 4,
-                 pooling_layers: Sequence[int] = (0, 1, 2, 3),
-                 padding_layers: Sequence[int] = (0, 1, 2, 3),
+                 pooling_blocks: Sequence[int] = (0, 1, 2, 3),
+                 padding_blocks: Sequence[int] = (0, 1, 2, 3),
                  flatten: bool = True) -> None:
         super().__init__(
             depth=depth,
-            pooling_layers=pooling_layers,
-            padding_layers=padding_layers,
+            pooling_blocks=pooling_blocks,
+            padding_blocks=padding_blocks,
             flatten=flatten)
 
 
@@ -102,11 +102,11 @@ class Conv4NoPool(ConvNet):
 
     def __init__(self,
                  depth: int = 4,
-                 pooling_layers: Sequence[int] = (0, 1),
-                 padding_layers: Sequence[int] = (2, 3),
+                 pooling_blocks: Sequence[int] = (0, 1),
+                 padding_blocks: Sequence[int] = (2, 3),
                  flatten: bool = False) -> None:
         super().__init__(
             depth=depth,
-            pooling_layers=pooling_layers,
-            padding_layers=padding_layers,
+            pooling_blocks=pooling_blocks,
+            padding_blocks=padding_blocks,
             flatten=flatten)

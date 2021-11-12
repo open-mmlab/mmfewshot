@@ -3,12 +3,12 @@ from typing import Dict
 
 from mmcls.models.builder import CLASSIFIERS
 
-from .finetune_base import FinetuneBaseClassifier
+from .base_finetune import BaseFinetuneClassifier
 
 
 @CLASSIFIERS.register_module()
-class BaselineClassifier(FinetuneBaseClassifier):
-    """Implementation of Baseline classifier.
+class Baseline(BaseFinetuneClassifier):
+    """Implementation of `Baseline <https://arxiv.org/abs/1904.04232>`_.
 
     Args:
         head (dict): Config of classification head for training.

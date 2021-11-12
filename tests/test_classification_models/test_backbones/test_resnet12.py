@@ -32,7 +32,7 @@ def test_basicblock():
     assert x_out.shape == (1, 64, 28, 28)
 
     # 3 BasicBlock w/ downsample and drop block
-    block = BasicBlock(3, 64, 2, downsample, 0, True, 5)
+    block = BasicBlock(3, 64, 2, downsample, 0.1, True, 5)
     x = torch.randn(1, 3, 56, 56)
     x_out = block(x)
     assert x_out.shape == (1, 64, 28, 28)
@@ -65,3 +65,21 @@ def test_resnet():
     img = torch.randn(1, 3, 224, 224)
     feat = model(img)
     assert feat.shape == (1, 640, 1, 1)
+
+    # Test ResNet12 w/o flatten
+    model = ResNet12(flatten=False)
+    model.init_weights()
+    model.train()
+    img = torch.randn(1, 3, 224, 224)
+    feat = model(img)
+    assert feat.shape == (1, 640, 1, 1)
+
+
+def test_drop_block():
+    # Test ResNet12 w/o flatten
+    model = ResNet12(drop_rate=0.5)
+    model.init_weights()
+    model.train()
+    img = torch.randn(1, 3, 224, 224)
+    feat = model(img)
+    assert feat.shape == (1, 640)

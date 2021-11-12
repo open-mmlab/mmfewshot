@@ -202,7 +202,7 @@ class AttentionRPNHead(RPNHead):
         assert len(featmap_sizes) == self.anchor_generator.num_levels
 
         device = cls_scores[0].device
-
+        # get anchors and training targets
         anchor_list, valid_flag_list = self.get_anchors(
             featmap_sizes, img_metas, device=device)
         label_channels = self.cls_out_channels if self.use_sigmoid_cls else 1
@@ -218,7 +218,7 @@ class AttentionRPNHead(RPNHead):
             return None
         (labels_list, label_weights_list, bbox_targets_list, bbox_weights_list,
          num_total_pos, num_total_neg) = cls_reg_targets
-        # get the indexes of negative pairs
+        # get the indices of negative pairs
         neg_idxes = [not f for f in pair_flags]
         num_pos_from_neg_pairs = 0
         # all the gt_labels in negative pairs will be set to background
@@ -274,6 +274,7 @@ class AttentionRPNHead(RPNHead):
             List[Tensor]: Proposals of each image, each item has shape (n, 5),
                 where 5 represent (tl_x, tl_y, br_x, br_y, score).
         """
+        # fuse support and query features
         feats = self.aggregation_layer(
             query_feat=query_feats[0], support_feat=support_feat)
         proposal_list = self.simple_test_rpn(feats, query_img_metas)

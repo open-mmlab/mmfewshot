@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Sequence, Tuple, Union
 import numpy as np
 from mmdet.datasets.builder import DATASETS
 
-from .few_shot_base import FewShotBaseDataset
+from .base import BaseFewShotDataset
 
 
 @DATASETS.register_module()
@@ -22,9 +22,9 @@ class QueryAwareDataset:
     images don't have any category from query.
 
     Args:
-        query_dataset (:obj:`FewShotBaseDataset`):
+        query_dataset (:obj:`BaseFewShotDataset`):
             Query dataset to be wrapped.
-        support_dataset (:obj:`FewShotBaseDataset` | None):
+        support_dataset (:obj:`BaseFewShotDataset` | None):
             Support dataset to be wrapped. If support dataset is None,
             support dataset will copy from query dataset.
         num_support_ways (int): Number of classes for support in
@@ -36,8 +36,8 @@ class QueryAwareDataset:
     """
 
     def __init__(self,
-                 query_dataset: FewShotBaseDataset,
-                 support_dataset: Optional[FewShotBaseDataset],
+                 query_dataset: BaseFewShotDataset,
+                 support_dataset: Optional[BaseFewShotDataset],
                  num_support_ways: int,
                  num_support_shots: int,
                  repeat_times: int = 1) -> None:
@@ -55,8 +55,8 @@ class QueryAwareDataset:
         ), 'Please set `num_support_ways` smaller than the number of classes.'
         # build data index (idx, gt_idx) by class.
         self.data_infos_by_class = {i: [] for i in range(len(self.CLASSES))}
-        # counting max number of anns in one image for each class, which will
-        # decide whether sample repeated instance or not.
+        # counting max number of annotations in one image for each class,
+        # which will decide whether sample repeated instance or not.
         self.max_anns_num_one_image = [0 for _ in range(len(self.CLASSES))]
         # count image for each class annotation when novel class only
         # has one image, the positive support is allowed sampled from itself.
@@ -91,7 +91,7 @@ class QueryAwareDataset:
                               f'image, query and support will sample '
                               f'from instance of same image')
 
-        # Disable the groupsampler, because in few shot setting,
+        # Disable the group sampler, because in few shot setting,
         # one group may only has two or three images.
         if hasattr(self.query_dataset, 'flag'):
             self.flag = np.zeros(
@@ -170,7 +170,7 @@ class QueryAwareDataset:
 
     def generate_support(self, idx: int, query_class: int,
                          support_classes: List[int]) -> List[Tuple[int]]:
-        """Generate support indexes of query images.
+        """Generate support indices of query images.
 
         Args:
             idx (int): Index of query data.
@@ -200,7 +200,7 @@ class QueryAwareDataset:
             idx: int,
             class_id: int,
             allow_same_image: bool = False) -> List[Tuple[int]]:
-        """Generate support indexes according to the class id.
+        """Generate support indices according to the class id.
 
         Args:
             idx (int): Index of query data.
@@ -271,8 +271,8 @@ class NWayKShotDataset(object):
     Building NWayKShotDataset requires query and support dataset, the behavior
     of NWayKShotDataset is determined by `mode`. When dataset in 'query' mode,
     dataset will return regular image and annotations. While dataset in
-    'support' mode, dataset will build batch indexes firstly and each batch
-    index contain (num_support_ways * num_support_shots) samples. In other
+    'support' mode, dataset will build batch indices firstly and each batch
+    indices contain (num_support_ways * num_support_shots) samples. In other
     words, for support mode every call of `__getitem__` will return a batch
     of samples, therefore the outside dataloader should set batch_size to 1.
     The default `mode` of NWayKShotDataset is 'query' and by using convert
@@ -280,9 +280,9 @@ class NWayKShotDataset(object):
     'support'.
 
     Args:
-        query_dataset (:obj:`FewShotBaseDataset`):
+        query_dataset (:obj:`BaseFewShotDataset`):
             Query dataset to be wrapped.
-        support_dataset (:obj:`FewShotBaseDataset` | None):
+        support_dataset (:obj:`BaseFewShotDataset` | None):
             Support dataset to be wrapped. If support dataset is None,
             support dataset will copy from query dataset.
         num_support_ways (int): Number of classes for support in
@@ -295,15 +295,15 @@ class NWayKShotDataset(object):
             shots sampled and used for each class during training. If set to
             None, all shots in dataset will be used as support shot.
             Default: 200.
-        shuffle_support (bool): If allow generate new batch index for
+        shuffle_support (bool): If allow generate new batch indices for
             each epoch. Default: False.
         repeat_times (int): The length of repeated dataset will be `times`
             larger than the original dataset. Default: 1.
     """
 
     def __init__(self,
-                 query_dataset: FewShotBaseDataset,
-                 support_dataset: Optional[FewShotBaseDataset],
+                 query_dataset: BaseFewShotDataset,
+                 support_dataset: Optional[BaseFewShotDataset],
                  num_support_ways: int,
                  num_support_shots: int,
                  one_support_shot_per_image: bool = False,
@@ -329,7 +329,7 @@ class NWayKShotDataset(object):
             self.CLASSES
         ), 'support way can not larger than the number of classes'
         self.num_support_shots = num_support_shots
-        self.batch_index = []
+        self.batch_indices = []
         self.data_infos_by_class = {i: [] for i in range(len(self.CLASSES))}
         self.prepare_support_shots()
         self.repeat_times = repeat_times
@@ -348,7 +348,7 @@ class NWayKShotDataset(object):
             return self.query_dataset.prepare_train_img(idx, 'query')
         elif self._mode == 'support':
             # loads one batch of data in support pipeline
-            b_idx = self.batch_index[idx]
+            b_idx = self.batch_indices[idx]
             batch_data = [
                 self.support_dataset.prepare_train_img(idx, 'support',
                                                        [gt_idx])
@@ -363,21 +363,22 @@ class NWayKShotDataset(object):
         if self._mode == 'query':
             return len(self.query_dataset) * self.repeat_times
         elif self._mode == 'support':
-            return len(self.batch_index)
+            return len(self.batch_indices)
         else:
             raise ValueError(f'{self._mode}not a valid mode')
 
     def prepare_support_shots(self) -> None:
-        # create lookup table for annotations in same class
-        # Support shots are simply loaded in order of data infos
-        # until the number met the setting. When `one_support_shot_per_image`
-        # is true, only one annotation will be sampled for each image.
+        # create lookup table for annotations in same class.
         for idx in range(len(self.support_dataset)):
             labels = self.support_dataset.get_ann_info(idx)['labels']
             for gt_idx, gt in enumerate(labels):
+                # When the number of support shots reaches
+                # `num_used_support_shots`, the class will be skipped
                 if len(self.data_infos_by_class[gt]) < \
                         self.num_used_support_shots:
                     self.data_infos_by_class[gt].append((idx, gt_idx))
+                    # When `one_support_shot_per_image` is true, only one
+                    # annotation will be sampled for each image.
                     if self.one_support_shot_per_image:
                         break
         # make sure all class index lists have enough
@@ -389,36 +390,43 @@ class NWayKShotDataset(object):
                     self.num_support_shots // num_gts + 1)
 
     def shuffle_support(self) -> None:
-        """Generate new batch indexes."""
+        """Generate new batch indices."""
         if not self.shuffle_support_:
             return
         if self._mode != 'support':
             raise ValueError('this is not the support dataset.')
-        self.batch_index = self.generate_index(len(self.batch_index))
+        self.batch_indices = \
+            self.generate_support_batch_indices(len(self.batch_indices))
 
     def convert_query_to_support(self, support_dataset_len: int) -> None:
         """Convert query dataset to support dataset.
 
         Args:
-            support_dataset_len (int): Length of pre sample batch indexes.
+            support_dataset_len (int): Length of pre sample batch indices.
         """
-        self.batch_index = self.generate_index(support_dataset_len)
+        self.batch_indices = \
+            self.generate_support_batch_indices(support_dataset_len)
         self._mode = 'support'
         if hasattr(self, 'flag'):
             self.flag = np.zeros(support_dataset_len, dtype=np.uint8)
 
-    def generate_index(self, dataset_len: int) -> List[List[Tuple[int]]]:
-        """Generate batch index [length of datasets * [support way * support shots]].
+    def generate_support_batch_indices(
+            self, dataset_len: int) -> List[List[Tuple[int]]]:
+        """Generate batch indices from support dataset.
+
+        Batch indices is in the shape of [length of datasets * [support way *
+        support shots]]. And the `dataset_len` will be the length of support
+        dataset.
 
         Args:
-            dataset_len (int): Length of pre sample batch indexes.
+            dataset_len (int): Length of batch indices.
 
         Returns:
-            list[list[(data_idx, gt_idx)]]: Pre sample batch indexes.
+            list[list[(data_idx, gt_idx)]]: Pre-sample batch indices.
         """
-        total_index = []
+        total_indices = []
         for _ in range(dataset_len):
-            batch_index = []
+            batch_indices = []
             selected_classes = np.random.choice(
                 len(self.CLASSES), self.num_support_ways, replace=False)
             for cls in selected_classes:
@@ -429,9 +437,9 @@ class NWayKShotDataset(object):
                     self.data_infos_by_class[cls][gt_idx]
                     for gt_idx in selected_gts_idx
                 ]
-                batch_index.extend(selected_gts)
-            total_index.append(batch_index)
-        return total_index
+                batch_indices.extend(selected_gts)
+            total_indices.append(batch_indices)
+        return total_indices
 
     def save_data_infos(self, output_path: str) -> None:
         """Save data infos of query and support data."""
@@ -457,7 +465,7 @@ class NWayKShotDataset(object):
                 cls=NumpyEncoder)
 
     def get_support_data_infos(self) -> List[Dict]:
-        """Get support data infos from batch index."""
+        """Get support data infos from batch indices."""
         return copy.deepcopy([
             self._get_shot_data_info(idx, gt_idx)
             for class_name in self.data_infos_by_class.keys()
@@ -487,9 +495,9 @@ class TwoBranchDataset:
     will be converted into 'auxiliary'.
 
     Args:
-        main_dataset (:obj:`FewShotBaseDataset`):
+        main_dataset (:obj:`BaseFewShotDataset`):
             Main dataset to be wrapped.
-        auxiliary_dataset (:obj:`FewShotBaseDataset` | None):
+        auxiliary_dataset (:obj:`BaseFewShotDataset` | None):
             Auxiliary dataset to be wrapped. If auxiliary dataset is None,
             auxiliary dataset will copy from main dataset.
         reweight_dataset (bool): Whether to change the sampling weights
@@ -497,8 +505,8 @@ class TwoBranchDataset:
     """
 
     def __init__(self,
-                 main_dataset: FewShotBaseDataset = None,
-                 auxiliary_dataset: Optional[FewShotBaseDataset] = None,
+                 main_dataset: BaseFewShotDataset = None,
+                 auxiliary_dataset: Optional[BaseFewShotDataset] = None,
                  reweight_dataset: bool = False) -> None:
         assert main_dataset and auxiliary_dataset
         self._mode = 'main'
@@ -561,7 +569,7 @@ class TwoBranchDataset:
         self.flag = np.zeros(len(self), dtype=np.uint8)
 
     @staticmethod
-    def reweight_dataset(dataset: FewShotBaseDataset,
+    def reweight_dataset(dataset: BaseFewShotDataset,
                          group_prefix: Sequence[str],
                          repeat_length: int = 100) -> List:
         """Reweight the dataset."""

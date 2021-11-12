@@ -6,11 +6,11 @@ from mmcls.models.builder import CLASSIFIERS, build_head
 from torch import Tensor
 from typing_extensions import Literal
 
-from .base import FewShotBaseClassifier
+from .base import BaseFewShotClassifier
 
 
 @CLASSIFIERS.register_module()
-class FinetuneBaseClassifier(FewShotBaseClassifier):
+class BaseFinetuneClassifier(BaseFewShotClassifier):
     """Base class for fine-tune based classifier.
 
     Args:

@@ -12,7 +12,7 @@ from mmfewshot.classification.apis import (Z_SCORE, multi_gpu_meta_test,
 
 
 class MetaTestEvalHook(Hook):
-    """Evaluation hook.
+    """Evaluation hook for Meta Testing.
 
     Args:
         support_dataloader (:obj:`DataLoader`): A PyTorch dataloader of
@@ -46,12 +46,16 @@ class MetaTestEvalHook(Hook):
                  save_best: bool = True,
                  key_indicator: str = 'accuracy_mean',
                  **eval_kwargs) -> None:
+        # test_set_dataloader will be None, if fast test is disable
         if test_set_dataloader is None:
             dataloaders = [support_dataloader, query_dataloader]
+        # use fast test
         else:
             dataloaders = [
                 support_dataloader, query_dataloader, test_set_dataloader
             ]
+
+        # check dataloader
         for dataloader in dataloaders:
             if not isinstance(dataloader, DataLoader):
                 raise TypeError(
@@ -74,6 +78,7 @@ class MetaTestEvalHook(Hook):
         self.save_best = save_best
         self.best_score = 0.0
         self.key_indicator = key_indicator
+        self.best_ckpt_path = None
 
     def before_run(self, runner: Runner) -> None:
         if self.save_best is not None:
@@ -96,6 +101,7 @@ class MetaTestEvalHook(Hook):
         self.evaluate(runner)
 
     def evaluate(self, runner: Runner) -> Dict:
+        # perform meta testing
         meta_eval_results = single_gpu_meta_test(
             runner.model,
             self.num_test_tasks,
@@ -106,6 +112,7 @@ class MetaTestEvalHook(Hook):
             eval_kwargs=self.eval_kwargs,
             logger=runner.logger,
             confidence_interval=self.confidence_interval)
+        # save the best checkpoint
         if self.save_best:
             self._save_ckpt(runner, meta_eval_results[self.key_indicator])
         for name, val in meta_eval_results.items():
@@ -152,6 +159,7 @@ class DistMetaTestEvalHook(MetaTestEvalHook):
     """Distributed evaluation hook."""
 
     def evaluate(self, runner: Runner) -> Dict:
+        # perform distributed meta testing
         meta_eval_results = multi_gpu_meta_test(
             runner.model,
             self.num_test_tasks,

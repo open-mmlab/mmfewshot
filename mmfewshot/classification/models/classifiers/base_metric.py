@@ -6,11 +6,11 @@ from mmcls.models.builder import CLASSIFIERS
 from torch import Tensor
 from typing_extensions import Literal
 
-from .base import FewShotBaseClassifier
+from .base import BaseFewShotClassifier
 
 
 @CLASSIFIERS.register_module()
-class MetaMetricBaseClassifier(FewShotBaseClassifier):
+class BaseMetricClassifier(BaseFewShotClassifier):
     """Base class for meta metric based classifier."""
 
     def forward(self,
@@ -134,7 +134,6 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
         Returns:
             dict[str, Tensor]: a dictionary of loss components
         """
-
         if support_data.get('feats', None):
             support_feats = support_data['feats']
         else:
@@ -206,9 +205,14 @@ class MetaMetricBaseClassifier(FewShotBaseClassifier):
 
         This function will be called before the meta testing.
         """
+        # For each test task the model will be copied and reset.
+        # When using extracted features to accelerate meta testing,
+        # the unused backbone will be removed to avoid copying
+        # useless parameters.
         if meta_test_cfg.get('fast_test', False):
             self.backbone = None
         else:
+            # fix backbone
             for param in self.backbone.parameters():
                 param.requires_grad = False
         self.meta_test_cfg = meta_test_cfg

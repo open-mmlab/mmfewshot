@@ -33,13 +33,14 @@ class MPSR(TwoStageDetector):
         self.num_fpn_levels = max(
             max(rpn_select_levels), max(roi_select_levels)) + 1
 
+    @auto_fp16(apply_to=('auxiliary_img_list', ))
     def extract_auxiliary_feat(
-            self, auxiliary_data_list: List[Dict]
+            self, auxiliary_img_list: List[Tensor]
     ) -> Tuple[List[Tensor], List[Tensor]]:
         """Extract and select features from data list at multiple scale.
 
         Args:
-            auxiliary_data_list (list[dict]): List of data at different
+            auxiliary_img_list (list[Tensor]): List of data at different
                 scales. In most cases, each dict contains: `img`, `img_metas`,
                 `gt_bboxes`, `gt_labels`, `gt_bboxes_ignore`.
 
@@ -53,8 +54,8 @@ class MPSR(TwoStageDetector):
 
         rpn_feats = []
         roi_feats = []
-        for scale, data in enumerate(auxiliary_data_list):
-            feats = self.backbone(data['img'])
+        for scale, img in enumerate(auxiliary_img_list):
+            feats = self.backbone(img)
             if self.with_neck:
                 feats = self.neck(feats)
             assert len(feats) >= self.num_fpn_levels, \
@@ -70,6 +71,14 @@ class MPSR(TwoStageDetector):
                 rpn_feats.append(feats[self.rpn_select_levels[scale]])
             roi_feats.append(feats[self.roi_select_levels[scale]])
         return rpn_feats, roi_feats
+
+    @auto_fp16(apply_to=('img', ))
+    def extract_feat(self, img: Tensor) -> List[Tensor]:
+        """Directly extract features from the backbone+neck."""
+        x = self.backbone(img)
+        if self.with_neck:
+            x = self.neck(x)
+        return x
 
     def forward_train(self, main_data: Dict, auxiliary_data_list: List[Dict],
                       **kwargs) -> Dict:
@@ -88,8 +97,9 @@ class MPSR(TwoStageDetector):
         # train model with regular pipeline
         x = self.extract_feat(main_data['img'])
         # train model with refine pipeline
+        auxiliary_img_list = [data['img'] for data in auxiliary_data_list]
         auxiliary_rpn_feats, auxiliary_roi_feats = \
-            self.extract_auxiliary_feat(auxiliary_data_list)
+            self.extract_auxiliary_feat(auxiliary_img_list)
 
         # RPN forward and loss
         proposal_cfg = self.train_cfg.get('rpn_proposal', self.test_cfg.rpn)

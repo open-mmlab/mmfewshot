@@ -69,7 +69,7 @@ def test_nway_kshot_dataset():
         assert isinstance(nway_kshot_dataset[0], dict)
         # test support dataset with 5 way 1 shot
         nway_kshot_dataset.convert_query_to_support(support_dataset_len=5)
-        batch_index = nway_kshot_dataset.batch_index
+        batch_index = nway_kshot_dataset.batch_indices
         assert nway_kshot_dataset._mode == 'support'
         assert nway_kshot_dataset.flag.shape[0] == 5
         assert len(batch_index) == 5

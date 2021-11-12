@@ -56,8 +56,8 @@ def test_nway_kshot_dataloader():
         dist=False,
         shuffle=True,
         seed=2021)
-    batch_index_a = \
-        nway_kshot_dataloader.support_data_loader.dataset.batch_index
+    batch_indices_a = \
+        nway_kshot_dataloader.support_data_loader.dataset.batch_indices
     for i, data_batch in enumerate(nway_kshot_dataloader):
         assert len(data_batch['query_data']['img_metas'].data[0]) == 2
         support_labels = data_batch['support_data']['gt_labels'].data[0]
@@ -66,8 +66,8 @@ def test_nway_kshot_dataloader():
         assert len(torch.cat(support_labels).tolist()) == \
                data_config['num_support_ways'] * \
                data_config['num_support_shots']
-    batch_index_b = \
-        nway_kshot_dataloader.support_data_loader.dataset.batch_index
+    batch_indices_b = \
+        nway_kshot_dataloader.support_data_loader.dataset.batch_indices
     for i, data_batch in enumerate(nway_kshot_dataloader):
         assert len(data_batch['query_data']['img_metas'].data[0]) == 2
         support_labels = data_batch['support_data']['gt_labels'].data[0]
@@ -76,4 +76,4 @@ def test_nway_kshot_dataloader():
         assert len(torch.cat(support_labels).tolist()) == \
                data_config['num_support_ways'] * \
                data_config['num_support_shots']
-    assert batch_index_a != batch_index_b
+    assert batch_indices_a != batch_indices_b

@@ -4,12 +4,12 @@ from typing import Dict
 
 from mmcls.models.builder import CLASSIFIERS
 
-from .meta_metric_base import MetaMetricBaseClassifier
+from .base_metric import BaseMetricClassifier
 
 
 @CLASSIFIERS.register_module()
-class RelationNetClassifier(MetaMetricBaseClassifier):
-    """Implementation of `RelationNet  <https://arxiv.org/abs/1711.06025>`_."""
+class RelationNet(BaseMetricClassifier):
+    """Implementation of `RelationNet <https://arxiv.org/abs/1711.06025>`_."""
 
     def __init__(self,
                  head: Dict = dict(

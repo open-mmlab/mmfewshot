@@ -9,7 +9,7 @@ from mmcls.datasets.builder import DATASETS
 from typing_extensions import Literal
 
 from mmfewshot.utils import local_numpy_seed
-from .few_shot_base import FewShotBaseDataset
+from .base import BaseFewShotDataset
 
 ALL_CLASSES = [
     '001.Black_footed_Albatross',
@@ -216,7 +216,7 @@ ALL_CLASSES = [
 
 
 @DATASETS.register_module()
-class CUBDataset(FewShotBaseDataset):
+class CUBDataset(BaseFewShotDataset):
     """CUB dataset for few shot classification.
 
     Args:

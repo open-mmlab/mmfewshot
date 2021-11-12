@@ -9,11 +9,11 @@ from mmcls.models.builder import HEADS
 from torch import Tensor
 
 from mmfewshot.classification.datasets import label_wrapper
-from .base_head import FewShotBaseHead
+from .base_head import BaseFewShotHead
 
 
 @HEADS.register_module()
-class MetaBaselineHead(FewShotBaseHead):
+class MetaBaselineHead(BaseFewShotHead):
     """Classification head for `MetaBaseline
     https://arxiv.org/abs/2003.04390`_.
 

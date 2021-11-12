@@ -13,7 +13,7 @@ from torch.utils.data import Dataset
 
 
 @DATASETS.register_module()
-class FewShotBaseDataset(Dataset, metaclass=ABCMeta):
+class BaseFewShotDataset(Dataset, metaclass=ABCMeta):
     """Base few shot dataset.
 
     Args:
@@ -43,6 +43,8 @@ class FewShotBaseDataset(Dataset, metaclass=ABCMeta):
         self.pipeline = Compose(pipeline)
         self.CLASSES = self.get_classes(classes)
         self.data_infos = self.load_annotations()
+
+        # build a look up dict for sampling instances by class id
         self.data_infos_class_dict = {i: [] for i in range(len(self.CLASSES))}
         for idx, data_info in enumerate(self.data_infos):
             self.data_infos_class_dict[data_info['gt_label'].item()].append(

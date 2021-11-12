@@ -8,11 +8,11 @@ import numpy as np
 from mmcls.datasets.builder import DATASETS
 from typing_extensions import Literal
 
-from .few_shot_base import FewShotBaseDataset
+from .base import BaseFewShotDataset
 
 
 @DATASETS.register_module()
-class MiniImageNetDataset(FewShotBaseDataset):
+class MiniImageNetDataset(BaseFewShotDataset):
     """MiniImageNet dataset for few shot classification.
 
     Args:
@@ -124,6 +124,7 @@ class MiniImageNetDataset(FewShotBaseDataset):
                 f'Please download ann_file through {self.resource}.'
             with open(ann_file, 'r') as f:
                 for i, line in enumerate(f):
+                    # skip file head
                     if i == 0:
                         continue
                     filename, class_name = line.strip().split(',')

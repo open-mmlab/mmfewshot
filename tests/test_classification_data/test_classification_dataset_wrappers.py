@@ -3,18 +3,18 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from mmfewshot.classification.datasets import (EpisodicDataset,
-                                               FewShotBaseDataset,
+from mmfewshot.classification.datasets import (BaseFewShotDataset,
+                                               EpisodicDataset,
                                                MetaTestDataset)
 
 
-@patch.multiple(FewShotBaseDataset, __abstractmethods__=set())
+@patch.multiple(BaseFewShotDataset, __abstractmethods__=set())
 def construct_toy_dataset():
-    FewShotBaseDataset.CLASSES = ('a', 'b', 'c', 'd', 'e', 'f', 'g')
+    BaseFewShotDataset.CLASSES = ('a', 'b', 'c', 'd', 'e', 'f', 'g')
     cat_ids_list = [i for i in range(7)] * 20
     data_infos = [dict(gt_label=np.array(i)) for i in cat_ids_list]
-    FewShotBaseDataset.load_annotations = MagicMock(return_value=data_infos)
-    dataset = FewShotBaseDataset(data_prefix='', pipeline=[])
+    BaseFewShotDataset.load_annotations = MagicMock(return_value=data_infos)
+    dataset = BaseFewShotDataset(data_prefix='', pipeline=[])
     dataset.get_cat_ids = MagicMock(side_effect=lambda idx: cat_ids_list[idx])
     return dataset, cat_ids_list
 
@@ -71,3 +71,4 @@ def test_meta_test_dataset():
     query_set = meta_dataset.query()
     assert query_set._mode == 'query'
     assert len(query_set) == 15
+    assert query_set.with_cache_feats() is False

@@ -101,9 +101,13 @@ def test_few_shot_voc_dataset():
     for data_info in copy_dataset.data_infos:
         count += len(data_info['ann']['bboxes'])
     assert count == 2
-
     # test save and load dataset
     with tempfile.TemporaryDirectory() as tmpdir:
+        dataset.data_infos[0]['ann']['bboxes_ignore'] = np.zeros((0, 4))
+        dataset.data_infos[0]['ann']['labels_ignore'] = np.zeros((0, ))
+        dataset.data_infos[1]['ann']['bboxes_ignore'] = np.array(
+            [[11, 11, 100, 100]])
+        dataset.data_infos[1]['ann']['labels_ignore'] = np.array([0])
         dataset.save_data_infos(tmpdir + 'ann.json')
         data_config['ann_cfg'] = [{
             'type': 'saved_dataset',
@@ -113,6 +117,8 @@ def test_few_shot_voc_dataset():
         count = 0
         for data_info in dataset.data_infos:
             count += len(data_info['ann']['bboxes'])
+            assert 'bboxes_ignore' in data_info['ann'].keys()
+            assert 'labels_ignore' in data_info['ann'].keys()
         assert count == 2
     dataset.SPLIT['test'] = ('aeroplane', )
     result = dataset.evaluate(

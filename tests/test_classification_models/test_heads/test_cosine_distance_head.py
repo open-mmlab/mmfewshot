@@ -38,3 +38,15 @@ def test_cosine_distance_head():
     pred = copy_head.forward_query(feat)
     assert len(pred) == 4
     assert pred[0].shape[0] == 100
+
+    copy_head.before_forward_support()
+    copy_head.cal_acc = True
+    losses = copy_head.forward_support(feat, label)
+    assert losses['loss'].item() > 0
+    assert 'accuracy' in losses
+
+    head = CosineDistanceHead(num_classes=100, in_channels=64, topk=3)
+    head.cal_acc = True
+    losses = head.forward_train(feat, label)
+    assert 'accuracy' in losses
+    assert 'top-3' in losses['accuracy']

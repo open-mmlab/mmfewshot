@@ -9,14 +9,14 @@ import numpy as np
 from mmdet.datasets.builder import DATASETS
 from mmdet.datasets.custom import CustomDataset
 from mmdet.datasets.pipelines import Compose
-from mmdet.utils import get_root_logger
 from terminaltables import AsciiTable
 
+from mmfewshot.utils import get_root_logger
 from .utils import NumpyEncoder
 
 
 @DATASETS.register_module()
-class FewShotBaseDataset(CustomDataset):
+class BaseFewShotDataset(CustomDataset):
     """Base dataset for few shot detection.
 
     The main differences with normal detection dataset fall in two aspects.
@@ -122,6 +122,7 @@ class FewShotBaseDataset(CustomDataset):
         if classes is not None:
             self.CLASSES = self.get_classes(classes)
         self.instance_wise = instance_wise
+        # set dataset name
         if dataset_name is None:
             self.dataset_name = 'Test dataset' \
                 if test_mode else 'Train dataset'
@@ -140,7 +141,7 @@ class FewShotBaseDataset(CustomDataset):
 
         assert self.data_infos is not None, \
             f'{self.dataset_name} : none annotation loaded.'
-
+        # load proposal file
         if self.proposal_file is not None:
             self.proposals = self.load_proposals(self.proposal_file)
         else:
@@ -148,8 +149,10 @@ class FewShotBaseDataset(CustomDataset):
 
         # filter images too small and containing no annotations
         if not test_mode:
+            # filter bbox smaller than the min_bbox_size
             if min_bbox_size:
                 self.data_infos = self._filter_bboxs(min_bbox_size)
+            # filter images
             valid_inds = self._filter_imgs()
             self.data_infos = [self.data_infos[i] for i in valid_inds]
             if self.proposals is not None:
@@ -161,14 +164,8 @@ class FewShotBaseDataset(CustomDataset):
                         assert class_name in self.CLASSES, \
                             f'{self.dataset_name} : class ' \
                             f'{class_name} in ann_shot_filter not in CLASSES.'
-                elif isinstance(ann_shot_filter, int):
-                    ann_shot_filter = {
-                        class_name: ann_shot_filter
-                        for class_name in self.CLASSES
-                    }
                 else:
-                    raise ValueError(
-                        'ann_shot_filter only support dict or int')
+                    raise TypeError('ann_shot_filter only support dict')
                 self.ann_shot_filter = ann_shot_filter
                 self.data_infos = self._filter_annotations(
                     self.data_infos, self.ann_shot_filter)
@@ -179,6 +176,7 @@ class FewShotBaseDataset(CustomDataset):
                 instance_wise_data_infos = []
                 for data_info in self.data_infos:
                     num_instance = data_info['ann']['labels'].size
+                    # split annotations
                     if num_instance > 1:
                         for i in range(data_info['ann']['labels'].size):
                             tmp_data_info = copy.deepcopy(data_info)
@@ -190,9 +188,11 @@ class FewShotBaseDataset(CustomDataset):
                     else:
                         instance_wise_data_infos.append(data_info)
                 self.data_infos = instance_wise_data_infos
+            # merge different annotations with the same image
             else:
                 merge_data_dict = {}
                 for i, data_info in enumerate(self.data_infos):
+                    # merge data_info with the same image id
                     if merge_data_dict.get(data_info['id'], None) is None:
                         merge_data_dict[data_info['id']] = data_info
                     else:
@@ -204,6 +204,7 @@ class FewShotBaseDataset(CustomDataset):
                             'labels':
                             np.concatenate((ann_a['labels'], ann_b['labels'])),
                         }
+                        # merge `bboxes_ignore`
                         if ann_a.get('bboxes_ignore', None) is not None:
                             if not (ann_a['bboxes_ignore']
                                     == ann_b['bboxes_ignore']).all():
@@ -259,14 +260,16 @@ class FewShotBaseDataset(CustomDataset):
         Returns:
             list[dict]: Annotation information.
         """
+        # join paths if data_root is specified
         if self.data_root is not None:
             for i in range(len(ann_cfg)):
                 if not osp.isabs(ann_cfg[i]['ann_file']):
                     ann_cfg[i]['ann_file'] = \
                         osp.join(self.data_root, ann_cfg[i]['ann_file'])
-        # Predefined ann_cfg must be list
+        # ann_cfg must be list
         assert isinstance(ann_cfg, list), \
             f'{self.dataset_name} : ann_cfg should be type of list.'
+        # check type of ann_cfg
         for ann_cfg_ in ann_cfg:
             assert isinstance(ann_cfg_, dict), \
                 f'{self.dataset_name} : ann_cfg should be list of dict.'
@@ -309,7 +312,7 @@ class FewShotBaseDataset(CustomDataset):
         img_info = self.data_infos[idx]
         ann_info = self.get_ann_info(idx)
 
-        # annotation filter
+        # select annotation in `gt_idx`
         if gt_idx is not None:
             selected_ann_info = {
                 'bboxes': ann_info['bboxes'][gt_idx],
@@ -319,6 +322,7 @@ class FewShotBaseDataset(CustomDataset):
             new_img_info = copy.deepcopy(img_info)
             new_img_info['ann'] = selected_ann_info
             results = dict(img_info=new_img_info, ann_info=selected_ann_info)
+        # use all annotations
         else:
             results = dict(img_info=copy.deepcopy(img_info), ann_info=ann_info)
 
@@ -349,49 +353,53 @@ class FewShotBaseDataset(CustomDataset):
         """
         if ann_shot_filter is None:
             return data_infos
-        # build instance indexes of (img_id, gt_idx)
+        # build instance indices of (img_id, gt_idx)
         filter_instances = {key: [] for key in ann_shot_filter.keys()}
-        keep_instances_indexes = []
+        keep_instances_indices = []
         for idx, data_info in enumerate(data_infos):
             ann = data_info['ann']
             for i in range(ann['labels'].shape[0]):
                 instance_class_name = self.CLASSES[ann['labels'][i]]
+                # only filter instance from the filter class
                 if instance_class_name in ann_shot_filter.keys():
                     filter_instances[instance_class_name].append((idx, i))
+                # skip the class not in the filter
                 else:
-                    keep_instances_indexes.append((idx, i))
+                    keep_instances_indices.append((idx, i))
         # filter extra shots
         for class_name in ann_shot_filter.keys():
             num_shots = ann_shot_filter[class_name]
-            instance_indexes = filter_instances[class_name]
+            instance_indices = filter_instances[class_name]
             if num_shots == 0:
                 continue
             # random sample from all instances
-            if len(instance_indexes) > num_shots:
+            if len(instance_indices) > num_shots:
                 random_select = np.random.choice(
-                    len(instance_indexes), num_shots, replace=False)
-                keep_instances_indexes += \
-                    [instance_indexes[i] for i in random_select]
+                    len(instance_indices), num_shots, replace=False)
+                keep_instances_indices += \
+                    [instance_indices[i] for i in random_select]
             # number of available shots less than the predefined number,
             # which may cause the performance degradation
             else:
-                if len(instance_indexes) < num_shots:
+                # check the number of instance
+                if len(instance_indices) < num_shots:
                     warnings.warn(f'number of {class_name} instance is '
-                                  f'{len(instance_indexes)} which is '
+                                  f'{len(instance_indices)} which is '
                                   f'less than predefined shots {num_shots}.')
-                keep_instances_indexes += instance_indexes
+                keep_instances_indices += instance_indices
 
+        # keep the selected annotations and remove the undesired annotations
         new_data_infos = []
         for idx, data_info in enumerate(data_infos):
-            selected_instance_index = \
-                sorted([instance[1] for instance in keep_instances_indexes
+            selected_instance_indices = \
+                sorted([instance[1] for instance in keep_instances_indices
                         if instance[0] == idx])
-            if len(selected_instance_index) == 0:
+            if len(selected_instance_indices) == 0:
                 continue
             ann = data_info['ann']
             selected_ann = dict(
-                bboxes=ann['bboxes'][selected_instance_index],
-                labels=ann['labels'][selected_instance_index],
+                bboxes=ann['bboxes'][selected_instance_indices],
+                labels=ann['labels'][selected_instance_indices],
             )
             new_data_infos.append(
                 dict(
@@ -411,10 +419,12 @@ class FewShotBaseDataset(CustomDataset):
                 bbox = ann['bboxes'][i]
                 w = bbox[2] - bbox[0]
                 h = bbox[3] - bbox[1]
+                # check bbox size
                 if w < min_bbox_size or h < min_bbox_size:
                     ignore_idx.append(i)
                 else:
                     keep_idx.append(i)
+            # remove undesired bbox
             if len(ignore_idx) > 0:
                 bboxes_ignore = ann.get('bboxes_ignore', np.zeros((0, 4)))
                 labels_ignore = ann.get('labels_ignore', np.zeros((0, )))
@@ -448,33 +458,47 @@ class FewShotBaseDataset(CustomDataset):
         """Load data_infos from saved json."""
         with open(ann_file) as f:
             data_infos = json.load(f)
+        # record the index of meta info
         meta_idx = None
         for i, data_info in enumerate(data_infos):
+            # check the meta info CLASSES and img_prefix saved in json
             if 'CLASSES' in data_info.keys():
                 assert self.CLASSES == tuple(data_info['CLASSES']), \
                     f'{self.dataset_name} : class labels mismatch.'
                 assert self.img_prefix == data_info['img_prefix'], \
                     f'{self.dataset_name} : image prefix mismatch.'
                 meta_idx = i
+                # skip the meta info
                 continue
+            # convert annotations from list into numpy array
             for k in data_info['ann']:
-                if isinstance(data_info['ann'][k], list):
-                    if len(data_info['ann'][k]) == 0 and k == 'bboxes_ignore':
+                assert isinstance(data_info['ann'][k], list)
+                # load bboxes and bboxes_ignore
+                if 'bboxes' in k:
+                    # bboxes_ignore can be empty
+                    if len(data_info['ann'][k]) == 0:
                         data_info['ann'][k] = np.zeros((0, 4))
                     else:
-                        data_info['ann'][k] = np.array(data_info['ann'][k])
-                    if 'box' in k:
-                        data_info['ann'][k] = data_info['ann'][k].astype(
-                            np.float32)
+                        data_info['ann'][k] = \
+                            np.array(data_info['ann'][k], dtype=np.float32)
+                # load labels and labels_ignore
+                elif 'labels' in k:
+                    # labels_ignore can be empty
+                    if len(data_info['ann'][k]) == 0:
+                        data_info['ann'][k] = np.zeros((0, ))
                     else:
-                        data_info['ann'][k] = data_info['ann'][k].astype(
-                            np.int64)
+                        data_info['ann'][k] = \
+                            np.array(data_info['ann'][k], dtype=np.int64)
+                else:
+                    raise KeyError(f'unsupported key {k} in ann field')
+        # remove meta info
         if meta_idx is not None:
             data_infos.pop(meta_idx)
         return data_infos
 
     def save_data_infos(self, output_path: str) -> None:
         """Save data_infos into json."""
+        # numpy array will be saved as list in the json
         meta_info = [{'CLASSES': self.CLASSES, 'img_prefix': self.img_prefix}]
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(

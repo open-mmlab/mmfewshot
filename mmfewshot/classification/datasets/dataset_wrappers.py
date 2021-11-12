@@ -15,11 +15,11 @@ from .builder import DATASETS
 class EpisodicDataset:
     """A wrapper of episodic dataset.
 
-    It will generate a list of support and query images indexes for each
+    It will generate a list of support and query images indices for each
     episode (support + query images). Every call of `__getitem__` will fetch
     and return (`num_ways` * `num_shots`) support images and (`num_ways` *
-    `num_queries`) query images according to the generated images indexes.
-    Note that all the episode indexes are generated at once using a specific
+    `num_queries`) query images according to the generated images indices.
+    Note that all the episode indices are generated at once using a specific
     random seed to ensure the reproducibility for same dataset.
 
     Args:
@@ -31,7 +31,7 @@ class EpisodicDataset:
         num_shots (int): Number of support data of each way for each episode.
         num_queries (int): Number of query data of each way for each episode.
         episodes_seed (int | None): A random seed to reproduce episodic
-            indexes. If seed is None, it will use runtime random seed.
+            indices. If seed is None, it will use runtime random seed.
             Default: None.
     """
 
@@ -63,10 +63,12 @@ class EpisodicDataset:
         with local_numpy_seed(self.episodes_seed):
             for _ in range(self.num_episodes):
                 np.random.shuffle(class_ids)
+                # sample classes
                 sampled_cls = class_ids[:self.num_ways]
                 episode_class_ids.append(sampled_cls)
                 episodic_support_idx = []
                 episodic_query_idx = []
+                # sample instances of each class
                 for i in range(self.num_ways):
                     shots = self.dataset.sample_shots_by_class_id(
                         sampled_cls[i], self.num_shots + self.num_queries)

@@ -3,12 +3,12 @@ from typing import Dict
 
 from mmcls.models.builder import CLASSIFIERS
 
-from .finetune_base import FinetuneBaseClassifier
+from .base_finetune import BaseFinetuneClassifier
 
 
 @CLASSIFIERS.register_module()
-class NegMarginClassifier(FinetuneBaseClassifier):
-    """Implementation of `NegMargin  <https://arxiv.org/abs/2003.12060>`_."""
+class NegMargin(BaseFinetuneClassifier):
+    """Implementation of `NegMargin <https://arxiv.org/abs/2003.12060>`_."""
 
     def __init__(self,
                  head: Dict = dict(

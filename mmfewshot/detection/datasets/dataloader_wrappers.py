@@ -59,13 +59,15 @@ class NWayKShotDataloader:
             **self.kwargs)
 
     def __iter__(self) -> Iterator:
+        # if infinite sampler is used, this part of code only run once
+        # a simple solution is creating a larger support dataset
         if self.shuffle_support_dataset:
-            # generate different support batch indexes for each epoch
+            # generate different support batch indices for each epoch
             self.support_dataset.shuffle_support()
             # initialize support dataloader with batch_size 1
             # each batch contains (num_support_ways * num_support_shots)
             # images, the batch images are determined after generating
-            # support batch indexes
+            # support batch indices
             self.support_data_loader = DataLoader(
                 self.support_dataset,
                 batch_size=1,

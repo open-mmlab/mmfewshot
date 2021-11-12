@@ -9,7 +9,7 @@ import numpy as np
 from mmcls.datasets.builder import DATASETS
 from typing_extensions import Literal
 
-from .few_shot_base import FewShotBaseDataset
+from .base import BaseFewShotDataset
 
 TRAIN_CLASSES = [
     ('Yorkshire terrier', 'terrier'), ('space shuttle', 'craft'),
@@ -548,7 +548,7 @@ TEST_CLASSES = [
 
 
 @DATASETS.register_module()
-class TieredImageNetDataset(FewShotBaseDataset):
+class TieredImageNetDataset(BaseFewShotDataset):
     """TieredImageNet dataset for few shot classification.
 
     Args:
@@ -654,9 +654,11 @@ class TieredImageNetDataset(FewShotBaseDataset):
                 unzip_file_path = osp.join(self.data_prefix, subset_)
                 is_unzip_file = osp.exists(unzip_file_path)
                 if not is_unzip_file:
-                    msg = 'Please unzip pickle file first by provided ' \
-                          'script in tools. Otherwise the whole pickle ' \
-                          'file may cost heavy memory usage.'
+                    msg = ('Please use the provided script '
+                           'tools/classification/data/unzip_tiered_imagenet.py'
+                           'to unzip pickle file. Otherwise the whole pickle '
+                           'file may cost heavy memory usage when the model '
+                           'is trained with distributed parallel.')
                     warnings.warn(msg)
                 for i in range(len(img_bytes)):
                     class_specific_name = class_specific[label_specific[i]]
@@ -671,6 +673,8 @@ class TieredImageNetDataset(FewShotBaseDataset):
                         },
                         'gt_label': np.array(gt_label, dtype=np.int64),
                     }
+                    # if the whole pickle file isn't unzipped,
+                    # image bytes of will be put into data_info
                     if not is_unzip_file:
                         info['img_bytes'] = img_bytes[i]
                     data_infos.append(info)

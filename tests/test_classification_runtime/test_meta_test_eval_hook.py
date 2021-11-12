@@ -11,20 +11,20 @@ from mmcv.runner import obj_from_dict
 from torch.utils.data import DataLoader, Dataset
 
 from mmfewshot.classification.core import MetaTestEvalHook
-from mmfewshot.classification.datasets import (FewShotBaseDataset,
+from mmfewshot.classification.datasets import (BaseFewShotDataset,
                                                MetaTestDataset)
 
 
-@patch.multiple(FewShotBaseDataset, __abstractmethods__=set())
+@patch.multiple(BaseFewShotDataset, __abstractmethods__=set())
 def construct_toy_dataset():
-    FewShotBaseDataset.CLASSES = ('a', 'b', 'c', 'd', 'e')
+    BaseFewShotDataset.CLASSES = ('a', 'b', 'c', 'd', 'e')
     cat_ids_list = [0, 1, 2, 3, 4] * 20
     data_infos = [
         dict(gt_label=np.array(i), img=torch.tensor(1), img_metas=[])
         for i in cat_ids_list
     ]
-    FewShotBaseDataset.load_annotations = MagicMock(return_value=data_infos)
-    dataset = FewShotBaseDataset(data_prefix='', pipeline=[])
+    BaseFewShotDataset.load_annotations = MagicMock(return_value=data_infos)
+    dataset = BaseFewShotDataset(data_prefix='', pipeline=[])
     dataset.get_cat_ids = MagicMock(side_effect=lambda idx: cat_ids_list[idx])
     return dataset, cat_ids_list
 

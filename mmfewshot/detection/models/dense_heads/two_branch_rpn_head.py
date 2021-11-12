@@ -213,7 +213,7 @@ class TwoBranchRPNHead(RPNHead):
         assert len(featmap_sizes) == self.anchor_generator.num_levels
 
         device = cls_scores[0].device
-
+        # prepare the anchors and training targets for main data stream
         anchor_list, valid_flag_list = self.get_anchors(
             featmap_sizes, img_metas, device=device)
         label_channels = self.cls_out_channels if self.use_sigmoid_cls else 1
@@ -239,6 +239,8 @@ class TwoBranchRPNHead(RPNHead):
         all_anchor_list = images_to_levels(concat_anchor_list,
                                            num_level_anchors)
 
+        # prepare the training targets (classification only)
+        # for auxiliary data stream
         auxiliary_labels_list = [
             torch.zeros_like(cls_score, dtype=torch.long).to(device)
             for cls_score in auxiliary_cls_scores
@@ -251,6 +253,7 @@ class TwoBranchRPNHead(RPNHead):
             label_weights.numel()
             for label_weights in auxiliary_label_weights_list)
 
+        # get loss
         losses_cls, = multi_apply(
             self.loss_cls_single,
             cls_scores,
@@ -346,6 +349,8 @@ class TwoBranchRPNHead(RPNHead):
                 anchors = anchors[topk_inds, :]
             proposals = self.bbox_coder.decode(
                 anchors, rpn_bbox_pred, max_shape=img_shape)
+            # following the original implementation of MPSR based on
+            # maskrcnn benchmark, we perform nms on each level separately
             _, keep = batched_nms(
                 proposals, scores,
                 scores.new_full((scores.size(0), ), 0, dtype=torch.long),
@@ -373,8 +378,13 @@ class TwoBranchRPNHead(RPNHead):
         assert (cfg.get('max_per_batch', None) is not None) ^ \
                (cfg.get('max_per_img', None) is not None), \
                'max_per_batch and max_per_img can not be set at the same time.'
+        # NOTE: We add max_per_batch to be consistent with the original
+        # implementation of MPSR based on maskrcnn benchmark.
+        # it will return all the proposals and scores for each image
+        # and then select Top k proposals from a batch of proposals
         if self.training and cfg.get('max_per_batch', None) is not None:
             return torch.cat((proposals, scores.unsqueeze(1)), dim=1)
+        # return Top k proposals according to max_per_img for each image
         elif proposals.numel() > 0:
             ranked_scores, rank_inds = scores.sort(descending=True)
             topk_inds = rank_inds[:cfg.max_per_img]
@@ -383,6 +393,7 @@ class TwoBranchRPNHead(RPNHead):
         else:
             return proposals.new_zeros(0, 5)
 
+    @force_fp32(apply_to=('cls_scores', 'bbox_preds'))
     def get_bboxes(self,
                    cls_scores: List[Tensor],
                    bbox_preds: List[Tensor],
@@ -446,10 +457,10 @@ class TwoBranchRPNHead(RPNHead):
             batch_scores = torch.cat(result_list)[:, -1]
             num_proposals = [proposals.size(0) for proposals in result_list]
             post_nms_top_n = min(cfg.max_per_batch, batch_scores.size()[0])
-            _, indexes_sorted = batch_scores.sort(descending=True)
-            indexes_mask = torch.zeros_like(batch_scores, dtype=torch.bool)
-            indexes_mask[indexes_sorted[:post_nms_top_n]] = 1
-            indexes_mask = indexes_mask.split(num_proposals)
+            _, indices_sorted = batch_scores.sort(descending=True)
+            indices_mask = torch.zeros_like(batch_scores, dtype=torch.bool)
+            indices_mask[indices_sorted[:post_nms_top_n]] = 1
+            indices_mask = indices_mask.split(num_proposals)
             for img_id in range(len(img_metas)):
-                result_list[img_id] = result_list[img_id][indexes_mask[img_id]]
+                result_list[img_id] = result_list[img_id][indices_mask[img_id]]
         return result_list

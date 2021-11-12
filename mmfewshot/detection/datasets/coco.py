@@ -13,7 +13,7 @@ from mmdet.datasets.builder import DATASETS
 from mmdet.datasets.coco import CocoDataset
 from terminaltables import AsciiTable
 
-from .few_shot_base import FewShotBaseDataset
+from .base import BaseFewShotDataset
 
 # pre-defined classes split for few shot setting
 COCO_SPLIT = dict(
@@ -51,7 +51,7 @@ COCO_SPLIT = dict(
 
 
 @DATASETS.register_module()
-class FewShotCocoDataset(FewShotBaseDataset, CocoDataset):
+class FewShotCocoDataset(BaseFewShotDataset, CocoDataset):
     """COCO dataset for few shot detection.
 
     Args:
@@ -166,9 +166,11 @@ class FewShotCocoDataset(FewShotBaseDataset, CocoDataset):
             dict[str, int]: The number of shots to keep for each class.
         """
         ann_shot_filter = {}
+        # generate annotation filter for novel classes
         if self.num_novel_shots is not None:
             for class_name in self.SPLIT['NOVEL_CLASSES']:
                 ann_shot_filter[class_name] = self.num_novel_shots
+        # generate annotation filter for base classes
         if self.num_base_shots is not None:
             for class_name in self.SPLIT['BASE_CLASSES']:
                 ann_shot_filter[class_name] = self.num_base_shots
@@ -228,7 +230,8 @@ class FewShotCocoDataset(FewShotBaseDataset, CocoDataset):
             info = self.coco.load_imgs([i])[0]
             info['filename'] = info['file_name']
             info['ann'] = self._get_ann_info(info)
-            # to support different version of coco
+            # to support different version of coco since some annotation file
+            # contain images from train2014 and val2014 at the same time
             if 'train2014' in info['filename']:
                 info['filename'] = 'train2014/' + info['filename']
             elif 'val2014' in info['filename']:
@@ -260,10 +263,24 @@ class FewShotCocoDataset(FewShotBaseDataset, CocoDataset):
         ann_info = self.coco.load_anns(ann_ids)
         return self._parse_ann_info(data_info, ann_info)
 
+    def get_cat_ids(self, idx: int) -> List[int]:
+        """Get category ids by index.
+
+        Overwrite the function in CocoDataset.
+
+        Args:
+            idx (int): Index of data.
+
+        Returns:
+            list[int]: All categories in the image of specified index.
+        """
+
+        return self.data_infos[idx]['ann']['labels'].astype(np.int64).tolist()
+
     def _filter_imgs(self,
                      min_size: int = 32,
                      min_bbox_area: Optional[int] = None) -> List[int]:
-        """Filter images not meet the demand.
+        """Filter images that do not meet the requirements.
 
         Args:
             min_size (int): Filter images with length or width
@@ -273,17 +290,21 @@ class FewShotCocoDataset(FewShotBaseDataset, CocoDataset):
                 this filter. Default: None.
 
         Returns:
-            list[int]: valid indexes of data_infos.
+            list[int]: valid indices of data_infos.
         """
         valid_inds = []
         valid_img_ids = []
         if min_bbox_area is None:
             min_bbox_area = self.min_bbox_area
         for i, img_info in enumerate(self.data_infos):
+            # filter empty image
             if self.filter_empty_gt and img_info['ann']['labels'].size == 0:
                 continue
+            # filter images smaller than `min_size`
             if min(img_info['width'], img_info['height']) < min_size:
                 continue
+            # filter image with bbox smaller than min_bbox_area
+            # it is usually used in Attention RPN
             if min_bbox_area is not None:
                 skip_flag = False
                 for bbox in img_info['ann']['bboxes']:
@@ -294,6 +315,7 @@ class FewShotCocoDataset(FewShotBaseDataset, CocoDataset):
                     continue
             valid_inds.append(i)
             valid_img_ids.append(img_info['id'])
+        # update coco img_ids
         self.img_ids = valid_img_ids
         return valid_inds
 
@@ -577,11 +599,13 @@ class FewShotCocoCopyDataset(FewShotCocoDataset):
         if isinstance(ann_cfg, dict):
             assert ann_cfg.get('data_infos', None) is not None, \
                 'ann_cfg of FewShotCocoCopyDataset require data_infos.'
+            # directly copy data_info
             data_infos = ann_cfg['data_infos']
         elif isinstance(ann_cfg, list):
             for ann_cfg_ in ann_cfg:
                 assert ann_cfg_.get('data_infos', None) is not None, \
                     'ann_cfg of FewShotCocoCopyDataset require data_infos.'
+                # directly copy data_info
                 data_infos += ann_cfg_['data_infos']
         return data_infos
 
@@ -622,7 +646,7 @@ class FewShotCocoDefaultDataset(FewShotCocoDataset):
                 dict(
                     type='ann_file',
                     ann_file='data/few_shot_ann/coco/attention_rpn_10shot/'
-                    'official_10_shot.json')
+                    'official_10_shot_from_instances_train2017.json')
             ]
         },
         MPSR=coco_benchmark,

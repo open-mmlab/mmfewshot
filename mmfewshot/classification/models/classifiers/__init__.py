@@ -1,20 +1,19 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmcls.models.builder import CLASSIFIERS
 
-from .baseline import BaselineClassifier
-from .baseline_plus import BaselinePlusClassifier
-from .finetune_base import FinetuneBaseClassifier
-from .maml import MAMLClassifier
-from .matching_net import MatchingNetClassifier
-from .meta_baseline import MetaBaselineClassifier
-from .meta_metric_base import MetaMetricBaseClassifier
-from .neg_margin import NegMarginClassifier
-from .proto_net import ProtoNetClassifier
-from .relation_net import RelationNetClassifier
+from .base_finetune import BaseFinetuneClassifier
+from .base_metric import BaseMetricClassifier
+from .baseline import Baseline
+from .baseline_plus import BaselinePlus
+from .maml import MAML
+from .matching_net import MatchingNet
+from .meta_baseline import MetaBaseline
+from .neg_margin import NegMargin
+from .proto_net import ProtoNet
+from .relation_net import RelationNet
 
 __all__ = [
-    'CLASSIFIERS', 'FinetuneBaseClassifier', 'MetaMetricBaseClassifier',
-    'BaselineClassifier', 'BaselinePlusClassifier', 'ProtoNetClassifier',
-    'MatchingNetClassifier', 'RelationNetClassifier', 'NegMarginClassifier',
-    'MetaBaselineClassifier', 'MAMLClassifier'
+    'CLASSIFIERS', 'BaseFinetuneClassifier', 'BaseMetricClassifier',
+    'Baseline', 'BaselinePlus', 'ProtoNet', 'MatchingNet', 'RelationNet',
+    'NegMargin', 'MetaBaseline', 'MAML'
 ]

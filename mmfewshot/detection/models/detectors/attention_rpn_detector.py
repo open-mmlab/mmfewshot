@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 import torch
+from mmcv.runner import auto_fp16
 from mmcv.utils import ConfigDict
 from mmdet.core import bbox2roi
 from mmdet.models.builder import DETECTORS
@@ -70,6 +71,7 @@ class AttentionRPNDetector(QuerySupportDetector):
         # in :func:`model_init`
         self.inference_support_dict = {}
 
+    @auto_fp16(apply_to=('img', ))
     def extract_support_feat(self, img: Tensor) -> List[Tensor]:
         """Extract features of support data.
 

@@ -88,6 +88,7 @@ class QuerySupportDetector(BaseDetector):
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
 
+    @auto_fp16(apply_to=('img', ))
     def extract_query_feat(self, img: Tensor) -> List[Tensor]:
         """Extract features of query data.
 

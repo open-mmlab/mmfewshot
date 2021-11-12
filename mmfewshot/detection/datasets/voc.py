@@ -11,7 +11,7 @@ from mmdet.core import eval_recalls
 from mmdet.datasets.builder import DATASETS
 
 from mmfewshot.detection.core import eval_map
-from .few_shot_base import FewShotBaseDataset
+from .base import BaseFewShotDataset
 
 # pre-defined classes split for few shot setting
 VOC_SPLIT = dict(
@@ -43,7 +43,7 @@ VOC_SPLIT = dict(
 
 
 @DATASETS.register_module()
-class FewShotVOCDataset(FewShotBaseDataset):
+class FewShotVOCDataset(BaseFewShotDataset):
     """VOC dataset for few shot detection.
 
     Args:
@@ -205,6 +205,7 @@ class FewShotVOCDataset(FewShotBaseDataset):
             if ann_cfg_['type'] == 'saved_dataset':
                 data_infos += self.load_annotations_saved(ann_cfg_['ann_file'])
             elif ann_cfg_['type'] == 'ann_file':
+                # load annotation from specific classes
                 ann_classes = ann_cfg_.get('ann_classes', None)
                 if ann_classes is not None:
                     for c in ann_classes:
@@ -386,18 +387,22 @@ class FewShotVOCDataset(FewShotBaseDataset):
                 this filter. Default: None.
 
         Returns:
-            list[int]: valid indexes of `data_infos`.
+            list[int]: valid indices of `data_infos`.
         """
         valid_inds = []
         if min_bbox_area is None:
             min_bbox_area = self.min_bbox_area
         for i, img_info in enumerate(self.data_infos):
-            if min(img_info['width'], img_info['height']) < min_size:
-                continue
+            # filter empty image
             if self.filter_empty_gt:
                 cat_ids = img_info['ann']['labels'].astype(np.int64).tolist()
                 if len(cat_ids) == 0:
                     continue
+            # filter images smaller than `min_size`
+            if min(img_info['width'], img_info['height']) < min_size:
+                continue
+            # filter image with bbox smaller than min_bbox_area
+            # it is usually used in Attention RPN
             if min_bbox_area is not None:
                 skip_flag = False
                 for bbox in img_info['ann']['bboxes']:
@@ -549,12 +554,14 @@ class FewShotVOCCopyDataset(FewShotVOCDataset):
             assert ann_cfg.get('data_infos', None) is not None, \
                 f'{self.dataset_name}: ann_cfg of ' \
                 f'FewShotVOCCopyDataset require data_infos.'
+            # directly copy data_info
             data_infos = ann_cfg['data_infos']
         elif isinstance(ann_cfg, list):
             for ann_cfg_ in ann_cfg:
                 assert ann_cfg_.get('data_infos', None) is not None, \
                     f'{self.dataset_name}: ann_cfg of ' \
                     f'FewShotVOCCopyDataset require data_infos.'
+                # directly copy data_info
                 data_infos += ann_cfg_['data_infos']
         return data_infos
 

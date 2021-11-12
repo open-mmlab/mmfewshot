@@ -6,11 +6,11 @@ import torch.nn.functional as F
 from mmcls.models.builder import HEADS
 from torch import Tensor
 
-from .base_head import FewShotBaseHead
+from .base_head import BaseFewShotHead
 
 
 @HEADS.register_module()
-class LinearHead(FewShotBaseHead):
+class LinearHead(BaseFewShotHead):
     """Classification head for Baseline.
 
     Args:

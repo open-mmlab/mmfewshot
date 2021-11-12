@@ -3,6 +3,7 @@ import copy
 from typing import Dict, List, Optional
 
 import torch
+from mmcv.runner import auto_fp16
 from mmcv.utils import ConfigDict
 from mmdet.models.builder import DETECTORS
 from torch import Tensor
@@ -12,7 +13,7 @@ from .query_support_detector import QuerySupportDetector
 
 @DETECTORS.register_module()
 class MetaRCNN(QuerySupportDetector):
-    """Implementation of `MetaRCNN.  <https://arxiv.org/abs/1909.13032>`_.
+    """Implementation of `Meta R-CNN.  <https://arxiv.org/abs/1909.13032>`_.
 
     Args:
         backbone (dict): Config of the backbone for query data.
@@ -68,6 +69,7 @@ class MetaRCNN(QuerySupportDetector):
         # in :func:`model_init`
         self.inference_support_dict = {}
 
+    @auto_fp16(apply_to=('img', ))
     def extract_support_feat(self, img):
         """Extracting features from support data.
 

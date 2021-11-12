@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from mmfewshot.classification.datasets import label_wrapper
 from mmfewshot.classification.utils import MetaTestParallel
 
-# z score for different confidence interval
+# z scores of different confidence intervals
 Z_SCORE = {
     0.50: 0.674,
     0.80: 1.282,
@@ -43,12 +43,12 @@ def single_gpu_meta_test(model: Union[MMDataParallel, nn.Module],
     testing since meta testing can be used as the validation in the middle
     of training. To detach model from previous phase, the model will be
     copied and wrapped with :obj:`MetaTestParallel`. And it has full
-    independence from the training model and will be no logger used
-    after the meta testing.
+    independence from the training model and will be discarded after the
+    meta testing.
 
     Args:
         model (:obj:`MMDataParallel` | nn.Module): Model to be meta tested.
-        num_test_tasks (int): Number of tasks for meta testing.
+        num_test_tasks (int): Number of meta testing tasks.
         support_dataloader (:obj:`DataLoader`): A PyTorch dataloader of
             support data and it is used to fetch support data for each task.
         query_dataloader (:obj:`DataLoader`): A PyTorch dataloader of query
@@ -78,26 +78,30 @@ def single_gpu_meta_test(model: Union[MMDataParallel, nn.Module],
     else:
         model = MetaTestParallel(copy.deepcopy(model))
 
+    # for the backbone-fixed methods, the features can be pre-computed
+    # and saved in dataset to achieve acceleration
     if meta_test_cfg.get('fast_test', False):
         print_log('extracting features from all images.', logger=logger)
         extract_features_for_fast_test(model, support_dataloader,
                                        query_dataloader, test_set_dataloader)
     print_log('start meta testing', logger=logger)
+
     # prepare for meta test
     model.before_meta_test(meta_test_cfg)
 
     results_list = []
     prog_bar = mmcv.ProgressBar(num_test_tasks)
     for task_id in range(num_test_tasks):
-        # make support and query dataloader get same task by task id
+        # set support and query dataloader to the same task by task id
         query_dataloader.dataset.set_task_id(task_id)
         support_dataloader.dataset.set_task_id(task_id)
         # test a task
         results, gt_labels = test_single_task(model, support_dataloader,
                                               query_dataloader, meta_test_cfg)
-        # eval result
+        # evaluate predict result
         eval_result = query_dataloader.dataset.evaluate(
             results, gt_labels, logger=logger, **eval_kwargs)
+        eval_result['task_id'] = task_id
         results_list.append(eval_result)
         prog_bar.update()
 
@@ -110,6 +114,8 @@ def single_gpu_meta_test(model: Union[MMDataParallel, nn.Module],
     meta_eval_results = dict()
     # get the average accuracy and std
     for k in results_list[0].keys():
+        if k == 'task_id':
+            continue
         mean = np.mean([res[k] for res in results_list])
         std = np.std([res[k] for res in results_list])
         std = Z_SCORE[confidence_interval] * std / np.sqrt(num_test_tasks)
@@ -128,7 +134,7 @@ def multi_gpu_meta_test(model: MMDistributedDataParallel,
                         logger: Optional[object] = None,
                         confidence_interval: float = 0.95,
                         show_task_results: bool = False) -> Dict:
-    """Distributed meta testing on multiple gpu.
+    """Distributed meta testing on multiple gpus.
 
     During meta testing, model might be further fine-tuned or added extra
     parameters. While the tested model need to be restored after meta
@@ -148,7 +154,7 @@ def multi_gpu_meta_test(model: MMDistributedDataParallel,
 
     Args:
         model (:obj:`MMDistributedDataParallel`): Model to be meta tested.
-        num_test_tasks (int): Number of tasks for meta testing.
+        num_test_tasks (int): Number of meta testing tasks.
         support_dataloader (:obj:`DataLoader`): A PyTorch dataloader of
             support data.
         query_dataloader (:obj:`DataLoader`): A PyTorch dataloader of
@@ -177,6 +183,9 @@ def multi_gpu_meta_test(model: MMDistributedDataParallel,
     # copy the module and wrap it with an :obj:`MetaTestParallel`, which will
     # send data to the device model.
     model = MetaTestParallel(copy.deepcopy(model.module))
+
+    # for the backbone-fixed methods, the features can be pre-computed
+    # and saved in dataset to achieve acceleration
     if meta_test_cfg.get('fast_test', False):
         print_log('extracting features from all images.', logger=logger)
         extract_features_for_fast_test(model, support_dataloader,
@@ -187,6 +196,7 @@ def multi_gpu_meta_test(model: MMDistributedDataParallel,
 
     results_list = []
 
+    # tasks will be evenly distributed on each gpus
     sub_num_test_tasks = num_test_tasks // world_size
     sub_num_test_tasks += 1 if num_test_tasks % world_size != 0 else 0
     if rank == 0:
@@ -195,15 +205,16 @@ def multi_gpu_meta_test(model: MMDistributedDataParallel,
         task_id = (i * world_size + rank)
         if task_id >= num_test_tasks:
             continue
-        # make support and query dataloader get same task by task id
+        # set support and query dataloader to the same task by task id
         query_dataloader.dataset.set_task_id(task_id)
         support_dataloader.dataset.set_task_id(task_id)
         # test a task
         results, gt_labels = test_single_task(model, support_dataloader,
                                               query_dataloader, meta_test_cfg)
-        # eval result
+        # evaluate predict result
         eval_result = query_dataloader.dataset.evaluate(
             results, gt_labels, logger=logger, **eval_kwargs)
+        eval_result['task_id'] = task_id
         results_list.append(eval_result)
         if rank == 0:
             prog_bar.update(world_size)
@@ -222,6 +233,8 @@ def multi_gpu_meta_test(model: MMDistributedDataParallel,
             f'number of tasks: {len(collect_results_list)}', logger=logger)
         # get the average accuracy and std
         for k in collect_results_list[0].keys():
+            if k == 'task_id':
+                continue
             mean = np.mean([res[k] for res in collect_results_list])
             std = np.std([res[k] for res in collect_results_list])
             std = Z_SCORE[confidence_interval] * std / np.sqrt(num_test_tasks)
@@ -259,9 +272,11 @@ def extract_features_for_fast_test(model: MetaTestParallel,
     if rank == 0:
         prog_bar = mmcv.ProgressBar(len(test_set_dataloader.dataset))
     model.eval()
+    # traverse the whole dataset and compute the features from backbone
     with torch.no_grad():
         for i, data in enumerate(test_set_dataloader):
             img_metas_list.extend(data['img_metas'].data[0])
+            # forward in `extract_feat` mode
             feats = model(img=data['img'], mode='extract_feat')
             feats_list.append(feats)
             if rank == 0:
@@ -317,6 +332,7 @@ def test_single_task(model: MetaTestParallel, support_dataloader: DataLoader,
             # map input labels into range of 0 to numbers of classes-1
             data['gt_label'] = label_wrapper(data['gt_label'], task_class_ids)
             optimizer.zero_grad()
+            # forward in `support` mode
             outputs = model.forward(**data, mode='support')
             outputs['loss'].backward()
             optimizer.step()
@@ -325,6 +341,7 @@ def test_single_task(model: MetaTestParallel, support_dataloader: DataLoader,
         for i, data in enumerate(support_dataloader):
             # map input labels into range of 0 to numbers of classes-1
             data['gt_label'] = label_wrapper(data['gt_label'], task_class_ids)
+            # forward in `support` mode
             model.forward(**data, mode='support')
 
     # forward query set
@@ -334,6 +351,7 @@ def test_single_task(model: MetaTestParallel, support_dataloader: DataLoader,
     with torch.no_grad():
         for i, data in enumerate(query_dataloader):
             gt_label_list.append(data.pop('gt_label'))
+            # forward in `query` mode
             result = model.forward(**data, mode='query')
             results_list.extend(result)
         gt_labels = torch.cat(gt_label_list, dim=0).cpu().numpy()

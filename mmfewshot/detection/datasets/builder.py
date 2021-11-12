@@ -44,6 +44,7 @@ def build_dataset(cfg: ConfigDict,
             build_dataset(cfg['dataset'], default_args), cfg['oversample_thr'])
     elif cfg['type'] == 'QueryAwareDataset':
         query_dataset = build_dataset(cfg['dataset'], default_args)
+        # build support dataset
         if cfg.get('support_dataset', None) is not None:
             # if `copy_from_query_dataset` is True, copy and update config
             # from query_dataset and copy `data_infos` by using copy dataset
@@ -59,6 +60,7 @@ def build_dataset(cfg: ConfigDict,
                 cfg['support_dataset'] = support_dataset_cfg
             support_dataset = build_dataset(cfg['support_dataset'],
                                             default_args)
+        # support dataset will be a copy of query dataset in QueryAwareDataset
         else:
             support_dataset = None
 
@@ -70,6 +72,7 @@ def build_dataset(cfg: ConfigDict,
             repeat_times=cfg.get('repeat_times', 1))
     elif cfg['type'] == 'NWayKShotDataset':
         query_dataset = build_dataset(cfg['dataset'], default_args)
+        # build support dataset
         if cfg.get('support_dataset', None) is not None:
             # if `copy_from_query_dataset` is True, copy and update config
             # from query_dataset and copy `data_infos` by using copy dataset
@@ -85,6 +88,7 @@ def build_dataset(cfg: ConfigDict,
                 cfg['support_dataset'] = support_dataset_cfg
             support_dataset = build_dataset(cfg['support_dataset'],
                                             default_args)
+        # support dataset will be a copy of query dataset in NWayKShotDataset
         else:
             support_dataset = None
 
@@ -217,11 +221,18 @@ def build_dataloader(dataset: Dataset,
             pin_memory=False,
             worker_init_fn=init_fn,
             **kwargs)
-        # create support dataset from query dataset and
-        # sample batch index with same length as query dataloader
+
         support_dataset = copy.deepcopy(dataset)
-        support_dataset.convert_query_to_support(
-            len(query_data_loader) * num_gpus)
+        # if infinite sampler is used, the batch indices in
+        # support_dataset will not be shuffled between epochs
+        # a simple solution is creating a larger support dataset
+        if use_infinite_sampler:
+            support_dataset.convert_query_to_support(len(dataset) * num_gpus)
+        # create support dataset from query dataset and
+        # sample batch indices with same length as query dataloader
+        else:
+            support_dataset.convert_query_to_support(
+                len(query_data_loader) * num_gpus)
 
         (support_sampler, _, _) = build_sampler(
             dist=dist,

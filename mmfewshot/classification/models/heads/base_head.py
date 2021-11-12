@@ -9,7 +9,7 @@ from torch import Tensor
 
 
 @HEADS.register_module()
-class FewShotBaseHead(BaseModule, metaclass=ABCMeta):
+class BaseFewShotHead(BaseModule, metaclass=ABCMeta):
     """Base head for few shot classifier.
 
     Args:

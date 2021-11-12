@@ -14,7 +14,7 @@ from torch import Tensor
 
 
 @CLASSIFIERS.register_module()
-class FewShotBaseClassifier(BaseModule):
+class BaseFewShotClassifier(BaseModule):
     """Base class for classifier.
 
     Args:
@@ -48,7 +48,9 @@ class FewShotBaseClassifier(BaseModule):
             self.augments = Augments(augments_cfg)
 
         self.meta_test_cfg = None
-        # device_indicator is used to record runtime device
+        # `device_indicator` is used to record runtime device
+        # `MetaTestParallel` will use `device_indicator` to
+        # recognize the device of model
         self.register_buffer('device_indicator', torch.empty(0))
 
     @property

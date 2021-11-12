@@ -29,15 +29,17 @@ def build_dataset(cfg: Dict, default_args: Optional[Dict] = None) -> Dataset:
             num_episodes=cfg['num_episodes'],
             num_ways=cfg['num_ways'],
             num_shots=cfg['num_shots'],
-            num_queries=cfg['num_queries'])
+            num_queries=cfg['num_queries'],
+            episodes_seed=cfg.get('episodes_seed', None))
     elif cfg['type'] == 'MetaTestDataset':
         assert cfg.get('meta_test_cfg', None)
         dataset = MetaTestDataset(
             build_dataset(cfg['dataset'], default_args),
-            num_episodes=cfg.meta_test_cfg['num_episodes'],
-            num_ways=cfg.meta_test_cfg['num_ways'],
-            num_shots=cfg.meta_test_cfg['num_shots'],
-            num_queries=cfg.meta_test_cfg['num_queries'])
+            num_episodes=cfg['num_episodes'],
+            num_ways=cfg['num_ways'],
+            num_shots=cfg['num_shots'],
+            num_queries=cfg['num_queries'],
+            episodes_seed=cfg.get('episodes_seed', None))
     else:
         dataset = build_from_cfg(cfg, DATASETS, default_args)
 
@@ -156,6 +158,7 @@ def build_meta_test_dataloader(dataset: Dataset, meta_test_cfg: Dict,
         pin_memory=False,
         shuffle=False,
         **kwargs)
+    # build test set dataloader for fast test
     if meta_test_cfg.get('fast_test', False):
         all_batch_size = meta_test_cfg.test_set.get('batch_size', 16)
         num_all_workers = meta_test_cfg.test_set.get('num_workers', 1)

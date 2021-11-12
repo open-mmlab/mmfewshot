@@ -9,11 +9,11 @@ from mmcls.models.builder import HEADS
 from torch import Tensor
 from torch.nn.utils.weight_norm import WeightNorm
 
-from .base_head import FewShotBaseHead
+from .base_head import BaseFewShotHead
 
 
 @HEADS.register_module()
-class CosineDistanceHead(FewShotBaseHead):
+class CosineDistanceHead(BaseFewShotHead):
     """Classification head for `Baseline++ https://arxiv.org/abs/2003.04390`_.
 
     Args:

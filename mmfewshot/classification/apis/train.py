@@ -105,6 +105,7 @@ def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
 
     # register eval hooks
     if validate:
+        # build dataset and dataloader
         val_dataset = build_dataset(cfg.data.val)
         meta_test_cfg = cfg.data.val['meta_test_cfg']
         (support_data_loader, query_data_loader,
@@ -113,6 +114,7 @@ def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
         eval_cfg = cfg.get('evaluation', {})
         eval_cfg['by_epoch'] = cfg.runner['type'] != 'IterBasedRunner'
         eval_cfg['meta_test_cfg'] = meta_test_cfg
+        # register meta test hooks
         eval_hook = DistMetaTestEvalHook if distributed else MetaTestEvalHook
         runner.register_hook(
             eval_hook(

@@ -7,15 +7,13 @@ import torch
 from mmfewshot.classification.models import CLASSIFIERS
 
 
-@pytest.mark.parametrize('classifier', [
-    'MatchingNetClassifier', 'ProtoNetClassifier', 'RelationNetClassifier',
-    'MetaBaselineClassifier'
-])
+@pytest.mark.parametrize(
+    'classifier', ['MatchingNet', 'ProtoNet', 'RelationNet', 'MetaBaseline'])
 def test_image_classifier(classifier):
     model_cfg = dict(
         type=classifier,
-        backbone=(dict(type='Conv4') if classifier != 'RelationNetClassifier'
-                  else dict(type='Conv4NoPool')))
+        backbone=(dict(type='Conv4') if classifier != 'RelationNet' else dict(
+            type='Conv4NoPool')))
 
     imgs_a = torch.randn(4, 3, 84, 84)
     imgs_b = torch.randn(4, 3, 84, 84)
@@ -50,6 +48,25 @@ def test_image_classifier(classifier):
     assert outputs['loss'].item() > 0
     assert outputs['num_samples'] == 4
 
+    # test train_step
+    outputs = model.val_step(
+        {
+            'support_data': {
+                'img': imgs_a,
+                'gt_label': label,
+                'mode': 'train',
+                'img_metas': [_ for _ in range(4)]
+            },
+            'query_data': {
+                'img': imgs_b,
+                'gt_label': label,
+                'mode': 'train',
+                'img_metas': [_ for _ in range(4)]
+            }
+        }, None)
+    assert outputs['loss'].item() > 0
+    assert outputs['num_samples'] == 4
+
     # test extract features
     outputs = model(**{
         'img': imgs_a,
@@ -61,12 +78,22 @@ def test_image_classifier(classifier):
     model.before_meta_test(dict())
     model.before_forward_support()
 
+    feats = torch.randn(4, 1600)
+    if classifier == 'RelationNet':
+        feats = torch.randn(4, 64, 19, 19)
     # test support step
     model(**{'img': imgs_a, 'gt_label': label, 'mode': 'support'})
+    model(**{'feats': feats, 'gt_label': label, 'mode': 'support'})
 
     model.before_forward_query()
     # test query step
     outputs = model(**{'img': imgs_b, 'gt_label': label, 'mode': 'query'})
+    assert isinstance(outputs, list)
+    assert len(outputs) == 4
+    assert outputs[0].shape[0] == 4
+
+    # test query step
+    outputs = model(**{'feats': feats, 'gt_label': label, 'mode': 'query'})
     assert isinstance(outputs, list)
     assert len(outputs) == 4
     assert outputs[0].shape[0] == 4

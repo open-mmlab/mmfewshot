@@ -27,9 +27,11 @@ class ContrastiveLossDecayHook(Hook):
     def before_iter(self, runner: Runner) -> None:
         runner_iter = runner.iter + 1
         decay_rate = 1.0
+        # update decay rate by number of iteration
         for step in self.decay_steps:
             if runner_iter > step:
                 decay_rate *= self.decay_rate
+        # set decay rate in the bbox_head
         if is_module_wrapper(runner.model):
             runner.model.module.roi_head.bbox_head.set_decay_rate(decay_rate)
         else:

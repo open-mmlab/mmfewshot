@@ -9,21 +9,21 @@ from typing_extensions import Literal
 
 from mmfewshot.classification.datasets import label_wrapper
 from mmfewshot.classification.models.utils import convert_maml_module
-from .base import FewShotBaseClassifier
+from .base import BaseFewShotClassifier
 
 
 @CLASSIFIERS.register_module()
-class MAMLClassifier(FewShotBaseClassifier):
+class MAML(BaseFewShotClassifier):
     """Implementation of `MAML <https://arxiv.org/abs/1703.03400>`_.
 
     Args:
-        num_inner_steps (int): Training steps for each task. Default: 5.
+        num_inner_steps (int): Training steps for each task. Default: 2.
         inner_lr (float): Learning rate for each task. Default: 0.01.
         first_order (bool): First order approximation. Default: False.
     """
 
     def __init__(self,
-                 num_inner_steps: int = 5,
+                 num_inner_steps: int = 2,
                  inner_lr: float = 0.01,
                  first_order: bool = False,
                  *args,
@@ -151,10 +151,12 @@ class MAMLClassifier(FewShotBaseClassifier):
         np.random.shuffle(class_ids)
         support_label = label_wrapper(support_data['gt_label'], class_ids)
         query_label = label_wrapper(query_data['gt_label'], class_ids)
-
+        # inner loop using support data
         self.fast_adapt(self.num_inner_steps, support_img, support_label)
+        # evaluate and get loss from query data
         query_feats = self.extract_feat(query_img)
         loss = self.head.forward_train(query_feats, query_label)
+        # reset all the temporary weights
         for weight in self.parameters():
             weight.fast = None
         return loss
@@ -226,6 +228,7 @@ class MAMLClassifier(FewShotBaseClassifier):
         This function will be called before model forward support data during
         meta testing.
         """
+        # reset all the temporary weights
         for weight in self.parameters():
             weight.fast = None
         self.backbone.train()

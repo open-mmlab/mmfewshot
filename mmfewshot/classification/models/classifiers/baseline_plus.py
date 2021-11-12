@@ -3,11 +3,11 @@ from typing import Dict
 
 from mmcls.models.builder import CLASSIFIERS
 
-from .finetune_base import FinetuneBaseClassifier
+from .base_finetune import BaseFinetuneClassifier
 
 
 @CLASSIFIERS.register_module()
-class BaselinePlusClassifier(FinetuneBaseClassifier):
+class BaselinePlus(BaseFinetuneClassifier):
     """Implementation of `Baseline++ <https://arxiv.org/abs/1904.04232>`_.
 
     Args:

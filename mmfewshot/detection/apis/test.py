@@ -41,6 +41,7 @@ def single_gpu_test(model: nn.Module,
     prog_bar = mmcv.ProgressBar(len(dataset))
     for i, data in enumerate(data_loader):
         with torch.no_grad():
+            # forward in `test` mode
             result = model(mode='test', rescale=True, **data)
 
         batch_size = len(result)
@@ -120,6 +121,7 @@ def multi_gpu_test(model: nn.Module,
     time.sleep(2)  # This line can prevent deadlock problem in some cases.
     for i, data in enumerate(data_loader):
         with torch.no_grad():
+            # forward in `test` mode
             result = model(mode='test', rescale=True, **data)
         results.extend(result)
 
@@ -159,9 +161,11 @@ def single_gpu_model_init(model: nn.Module, data_loader: DataLoader) -> List:
     prog_bar = mmcv.ProgressBar(len(dataset))
     for i, data in enumerate(data_loader):
         with torch.no_grad():
+            # forward in `model_init` mode
             result = model(mode='model_init', **data)
         results.append(result)
         prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
+    # `model_init` will process the forward features saved in model.
     if is_module_wrapper(model):
         model.module.model_init()
     else:
@@ -199,12 +203,16 @@ def multi_gpu_model_init(model: nn.Module, data_loader: DataLoader) -> List:
         logger.info('starting model initialization...')
         prog_bar = mmcv.ProgressBar(len(dataset))
     time.sleep(2)  # This line can prevent deadlock problem in some cases.
+    # the model_init dataloader do not use distributed sampler to make sure
+    # all of the gpus get the same initialization
     for i, data in enumerate(data_loader):
         with torch.no_grad():
+            # forward in `model_init` mode
             result = model(mode='model_init', **data)
         results.append(result)
         if rank == 0:
             prog_bar.update(num_tasks=len(data['img_metas'].data[0]))
+    # model_init function will process the forward features saved in model.
     if is_module_wrapper(model):
         model.module.model_init()
     else:

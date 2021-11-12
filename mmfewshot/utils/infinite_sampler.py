@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import itertools
+import math
 from typing import Iterable, Iterator, Optional
 
 import numpy as np
@@ -199,7 +200,7 @@ class DistributedInfiniteSampler(Sampler):
         """return length of dataset."""
         # The length of sampler is set to the actual length of dataset, thus
         # the length of dataloader is still determined by the dataset.
-        return self.size
+        return math.ceil(self.size / self.num_replicas)
 
     def set_epoch(self, epoch: int) -> None:
         self.epoch = epoch
@@ -289,7 +290,7 @@ class DistributedInfiniteGroupSampler(Sampler):
         """return length of dataset."""
         # The length of sampler is set to the actual length of dataset, thus
         # the length of dataloader is still determined by the dataset.
-        return self.size
+        return math.ceil(self.size / self.num_replicas)
 
     def set_epoch(self, epoch: int) -> None:
         self.epoch = epoch
