@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import argparse
 import copy
 import os
@@ -10,13 +11,14 @@ import torch
 from mmcv import Config, DictAction
 from mmcv.runner import get_dist_info, init_dist, set_random_seed
 from mmcv.utils import get_git_hash
-from mmdet.utils import collect_env, get_root_logger
+from mmdet.utils import collect_env
 
 import mmfewshot  # noqa: F401, F403
 from mmfewshot import __version__
 from mmfewshot.detection.apis import train_detector
 from mmfewshot.detection.datasets import build_dataset
 from mmfewshot.detection.models import build_detector
+from mmfewshot.utils import get_root_logger
 
 
 def parse_args():
@@ -179,7 +181,13 @@ def main():
     model = build_detector(cfg.model, logger=logger)
     # build_dataset will do two things, including building dataset
     # and saving dataset into json file (optional).
-    datasets = [build_dataset(cfg.data.train, rank=rank, timestamp=timestamp)]
+    datasets = [
+        build_dataset(
+            cfg.data.train,
+            rank=rank,
+            work_dir=cfg.work_dir,
+            timestamp=timestamp)
+    ]
 
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)

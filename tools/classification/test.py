@@ -68,6 +68,10 @@ def parse_args():
         choices=['cpu', 'cuda'],
         default='cuda',
         help='device used for testing')
+    parser.add_argument(
+        '--show_task_results',
+        action='store_true',
+        help='whether to record eval result of each task.')
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)

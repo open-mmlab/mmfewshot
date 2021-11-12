@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 """Train few shot model multiple times with different seeds.
 
 The initial seed will be used to generate seeds for multiple experiments. The
@@ -17,15 +18,16 @@ import mmcv
 import numpy as np
 import torch
 from mmcv import Config, DictAction
-from mmcv.runner import get_dist_info, init_dist
+from mmcv.runner import get_dist_info, init_dist, set_random_seed
 from mmcv.utils import get_git_hash
-from mmdet.utils import collect_env, get_root_logger
+from mmdet.utils import collect_env
 
 import mmfewshot  # noqa: F401, F403
 from mmfewshot import __version__
-from mmfewshot.detection.apis import set_random_seed, train_detector
+from mmfewshot.detection.apis import train_detector
 from mmfewshot.detection.datasets import build_dataset
 from mmfewshot.detection.models import build_detector
+from mmfewshot.utils import get_root_logger
 
 
 def parse_args():
@@ -150,7 +152,7 @@ def main():
     elif base_cfg.seed is not None:
         seed = base_cfg.seed
     else:
-        seed = 42
+        seed = 0
         Warning(f'When using DistributedDataParallel, each rank will '
                 f'initialize different random seed. It will cause different'
                 f'random action for each rank. In few shot setting, novel '
