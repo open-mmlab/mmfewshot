@@ -19,7 +19,7 @@ from mmfewshot.detection.apis import (inference_detector, init_detector,
 
 def parse_args():
     parser = ArgumentParser('attention rpn inference.')
-    parser.add_argument('img', help='Image file')
+    parser.add_argument('image', help='Image file')
     parser.add_argument('config', help='Config file')
     parser.add_argument('checkpoint', help='Checkpoint file')
     parser.add_argument(
@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument(
         '--score-thr', type=float, default=0.3, help='bbox score threshold')
     parser.add_argument(
-        '--support-imgs-dir',
+        '--support-images-dir',
         default='demo/demo_detection_images/support_images',
         help='Image file')
     args = parser.parse_args()
@@ -38,18 +38,18 @@ def main(args):
     # build the model from a config file and a checkpoint file
     model = init_detector(args.config, args.checkpoint, device=args.device)
     # prepare support images, each demo image only contain one instance
-    files = os.listdir(args.support_imgs_dir)
-    support_imgs = [
-        os.path.join(args.support_imgs_dir, file) for file in files
+    files = os.listdir(args.support_images_dir)
+    support_images = [
+        os.path.join(args.support_images_dir, file) for file in files
     ]
     classes = [file.split('.')[0] for file in files]
     support_labels = [[file.split('.')[0]] for file in files]
     process_support_images(
-        model, support_imgs, support_labels, classes=classes)
+        model, support_images, support_labels, classes=classes)
     # test a single image
-    result = inference_detector(model, args.img)
+    result = inference_detector(model, args.image)
     # show the results
-    show_result_pyplot(model, args.img, result, score_thr=args.score_thr)
+    show_result_pyplot(model, args.image, result, score_thr=args.score_thr)
 
 
 if __name__ == '__main__':

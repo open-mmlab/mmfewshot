@@ -81,7 +81,7 @@ def process_support_images(model: nn.Module, support_imgs: List[str],
             if next(model.parameters()).is_cuda:
                 # scatter to specified GPU
                 data = scatter(data, [device])[0]
-                model(mode='support', **data)
+            model(mode='support', **data)
     model.before_forward_query()
 
 

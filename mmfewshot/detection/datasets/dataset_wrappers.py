@@ -308,7 +308,6 @@ class NWayKShotDataset(object):
                  num_support_shots: int,
                  one_support_shot_per_image: bool = False,
                  num_used_support_shots: int = 200,
-                 shuffle_support: bool = False,
                  repeat_times: int = 1) -> None:
         self.query_dataset = query_dataset
         if support_dataset is None:
@@ -324,7 +323,6 @@ class NWayKShotDataset(object):
         self.num_support_ways = num_support_ways
         self.one_support_shot_per_image = one_support_shot_per_image
         self.num_used_support_shots = num_used_support_shots
-        self.shuffle_support_ = shuffle_support
         assert num_support_ways <= len(
             self.CLASSES
         ), 'support way can not larger than the number of classes'
@@ -388,15 +386,6 @@ class NWayKShotDataset(object):
             if num_gts < self.num_support_shots:
                 self.data_infos_by_class[i] = self.data_infos_by_class[i] * (
                     self.num_support_shots // num_gts + 1)
-
-    def shuffle_support(self) -> None:
-        """Generate new batch indices."""
-        if not self.shuffle_support_:
-            return
-        if self._mode != 'support':
-            raise ValueError('this is not the support dataset.')
-        self.batch_indices = \
-            self.generate_support_batch_indices(len(self.batch_indices))
 
     def convert_query_to_support(self, support_dataset_len: int) -> None:
         """Convert query dataset to support dataset.

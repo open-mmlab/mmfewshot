@@ -1,9 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict, Iterator
 
-from torch.utils.data import DataLoader, Sampler
-
-from .dataset_wrappers import NWayKShotDataset
+from torch.utils.data import DataLoader
 
 
 class NWayKShotDataloader:
@@ -15,68 +13,18 @@ class NWayKShotDataloader:
 
     Args:
         query_data_loader (DataLoader): DataLoader of query dataset
-        support_dataset (:obj:`NWayKShotDataset`): Support datasets.
-        support_sampler (Sampler): Sampler for support dataloader.
-        num_workers (int): Num workers for support dataloader.
-        support_collate_fn (callable): Collate function for support dataloader.
-        pin_memory (bool): Pin memory for both support and query dataloader.
-        worker_init_fn (callable): Worker init function for both
-            support and query dataloader.
-        kwargs: Any keyword argument to be used to initialize DataLoader.
+        support_data_loader (DataLoader): DataLoader of support datasets.
     """
 
     def __init__(self, query_data_loader: DataLoader,
-                 support_dataset: NWayKShotDataset, support_sampler: Sampler,
-                 num_workers: int, support_collate_fn: callable,
-                 pin_memory: bool, worker_init_fn: callable, **kwargs) -> None:
+                 support_data_loader: DataLoader) -> None:
         self.dataset = query_data_loader.dataset
+        self.sampler = query_data_loader.sampler
         self.query_data_loader = query_data_loader
-        self.support_dataset = support_dataset
-        self.support_sampler = support_sampler
-        self.num_workers = num_workers
-        self.support_collate_fn = support_collate_fn
-        self.pin_memory = pin_memory
-        self.worker_init_fn = worker_init_fn
-        self.shuffle_support_dataset = support_dataset.shuffle_support_
-        if self.shuffle_support_dataset:
-            assert hasattr(
-                self.support_dataset, 'shuffle_support'
-            ), 'Support Dataset should support `shuffle_support`'
-        self.kwargs = kwargs
-        self.sampler = self.query_data_loader.sampler
-
-        # support dataloader is initialized with batch_size 1 as default.
-        # each batch contains (num_support_ways * num_support_shots) images,
-        # since changing batch_size is equal to changing num_support_shots.
-        self.support_data_loader = DataLoader(
-            self.support_dataset,
-            batch_size=1,
-            sampler=self.support_sampler,
-            num_workers=self.num_workers,
-            collate_fn=self.support_collate_fn,
-            pin_memory=self.pin_memory,
-            worker_init_fn=self.worker_init_fn,
-            **self.kwargs)
+        self.support_data_loader = support_data_loader
 
     def __iter__(self) -> Iterator:
         # if infinite sampler is used, this part of code only run once
-        # a simple solution is creating a larger support dataset
-        if self.shuffle_support_dataset:
-            # generate different support batch indices for each epoch
-            self.support_dataset.shuffle_support()
-            # initialize support dataloader with batch_size 1
-            # each batch contains (num_support_ways * num_support_shots)
-            # images, the batch images are determined after generating
-            # support batch indices
-            self.support_data_loader = DataLoader(
-                self.support_dataset,
-                batch_size=1,
-                sampler=self.support_sampler,
-                num_workers=self.num_workers,
-                collate_fn=self.support_collate_fn,
-                pin_memory=self.pin_memory,
-                worker_init_fn=self.worker_init_fn,
-                **self.kwargs)
         self.query_iter = iter(self.query_data_loader)
         self.support_iter = iter(self.support_data_loader)
         return self
@@ -110,6 +58,7 @@ class TwoBranchDataloader:
         self.auxiliary_data_loader = auxiliary_data_loader
 
     def __iter__(self) -> Iterator:
+        # if infinite sampler is used, this part of code only run once
         self.main_iter = iter(self.main_data_loader)
         self.auxiliary_iter = iter(self.auxiliary_data_loader)
         return self

@@ -100,7 +100,6 @@ def build_dataset(cfg: ConfigDict,
             one_support_shot_per_image=cfg.get('one_support_shot_per_image',
                                                False),
             num_used_support_shots=cfg.get('num_used_support_shots', None),
-            shuffle_support=cfg.get('shuffle_support', False),
             repeat_times=cfg.get('repeat_times', 1),
         )
     elif cfg['type'] == 'TwoBranchDataset':
@@ -223,9 +222,9 @@ def build_dataloader(dataset: Dataset,
             **kwargs)
 
         support_dataset = copy.deepcopy(dataset)
-        # if infinite sampler is used, the batch indices in
-        # support_dataset will not be shuffled between epochs
-        # a simple solution is creating a larger support dataset
+        # if infinite sampler is used, the length of batch indices in
+        # support_dataset can be longer than the length of query dataset
+        # as it can achieve better sample diversity
         if use_infinite_sampler:
             support_dataset.convert_query_to_support(len(dataset) * num_gpus)
         # create support dataset from query dataset and
@@ -243,18 +242,23 @@ def build_dataloader(dataset: Dataset,
             workers_per_gpu=workers_per_gpu,
             seed=seed,
             use_infinite_sampler=use_infinite_sampler)
+        # support dataloader is initialized with batch_size 1 as default.
+        # each batch contains (num_support_ways * num_support_shots) images,
+        # since changing batch_size is equal to changing num_support_shots.
+        support_data_loader = DataLoader(
+            support_dataset,
+            batch_size=1,
+            sampler=support_sampler,
+            num_workers=num_workers,
+            collate_fn=partial(multi_pipeline_collate_fn, samples_per_gpu=1),
+            pin_memory=False,
+            worker_init_fn=init_fn,
+            **kwargs)
 
         # wrap two dataloaders with dataloader wrapper
         data_loader = NWayKShotDataloader(
             query_data_loader=query_data_loader,
-            support_dataset=support_dataset,
-            support_sampler=support_sampler,
-            num_workers=num_workers,
-            support_collate_fn=partial(
-                multi_pipeline_collate_fn, samples_per_gpu=1),
-            pin_memory=False,
-            worker_init_fn=init_fn,
-            **kwargs)
+            support_data_loader=support_data_loader)
     elif isinstance(dataset, TwoBranchDataset):
         from .dataloader_wrappers import TwoBranchDataloader
         from mmfewshot.utils import multi_pipeline_collate_fn
