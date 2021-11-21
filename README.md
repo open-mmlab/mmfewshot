@@ -39,7 +39,7 @@ Documentation: https://mmfewshot.readthedocs.io/en/latest/.
 
   MMFewShot provides unified implementation and evaluation of few shot classification and detection.
 
-- **Flexible and Modular Design**
+- **Modular Design**
 
   We decompose the few shot learning framework into different components,
   which makes it much easy and flexible to build a new model by combining different modules.

@@ -1,6 +1,5 @@
 mmcls
 mmcv
 mmdet
-pytorch_sphinx_theme
 torch
 torchvision

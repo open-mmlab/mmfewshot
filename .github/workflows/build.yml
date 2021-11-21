@@ -59,6 +59,8 @@ jobs:
         run: |
           pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cpu/torch${{matrix.torch}}/index.html
           python -c 'import mmcv; print(mmcv.__version__)'
+      - name: Install MMCLS and MMDET
+        run: pip install mmcls mmdet
       - name: Install unittest dependencies
         run: pip install -r requirements/tests.txt -r requirements/optional.txt
       - name: Build and install
@@ -136,6 +138,8 @@ jobs:
           pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/${{matrix.torch_version}}/index.html
           pip install -r requirements.txt
           python -c 'import mmcv; print(mmcv.__version__)'
+      - name: Install MMCLS and MMDET
+        run: pip install mmcls mmdet
       - name: Build and install
         run: |
           rm -rf .eggs
