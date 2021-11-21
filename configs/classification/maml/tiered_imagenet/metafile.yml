@@ -18,8 +18,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 45.56
+    Weights: https://download.openmmlab.com/mmfewshot/classification/maml/tiered_imagenet/maml_conv4_1xb105_tiered-imagenet_5way-1shot_20211104_110055-a08f6d09.pth
     Config: configs/classification/maml/tiered_imagenet/maml_conv4_1xb105_tiered-imagenet_5way-1shot.py
   - Name: maml_conv4_1xb105_tiered-imagenet_5way-5shot
     Metadata:
@@ -30,8 +30,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 60.2
+    Weights: https://download.openmmlab.com/mmfewshot/classification/maml/tiered_imagenet/maml_conv4_1xb105_tiered-imagenet_5way-5shot_20211104_110734-88a559bc.pth
     Config: configs/classification/maml/tiered_imagenet/maml_conv4_1xb105_tiered-imagenet_5way-5shot.py
   - Name: maml_resnet12_1xb105_tiered-imagenet_5way-1shot
     Metadata:
@@ -42,8 +42,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 57.63
+    Weights: https://download.openmmlab.com/mmfewshot/classification/maml/tiered_imagenet/maml_resnet12_1xb105_tiered-imagenet_5way-1shot_20211104_115442-340cb23f.pth
     Config: configs/classification/maml/tiered_imagenet/maml_resnet12_1xb105_tiered-imagenet_5way-1shot.py
   - Name: maml_resnet12_1xb105_tiered-imagenet_5way-5shot
     Metadata:
@@ -54,6 +54,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 72.3
+    Weights: https://download.openmmlab.com/mmfewshot/classification/maml/tiered_imagenet/maml_resnet12_1xb105_tiered-imagenet_5way-5shot_20211104_115442-95920719.pth
     Config: configs/classification/maml/tiered_imagenet/maml_resnet12_1xb105_tiered-imagenet_5way-5shot.py

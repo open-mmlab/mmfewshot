@@ -23,8 +23,8 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: COCO
         Metrics:
-          base box AP: none
-    Weights: none
+          base box AP: 27.8
+    Weights: https://download.openmmlab.com/mmfewshot/detection/meta_rcnn/coco/meta-rcnn_r50_c4_8xb4_coco_base-training_20211102_213915-65a22539.pth
   - Name: meta-rcnn_r50_c4_8xb4_coco_10shot-fine-tuning
     In Collection: Meta RCNN
     Config: configs/detection/meta_rcnn/coco/meta-rcnn_r50_c4_8xb4_coco_10shot-fine-tuning.py
@@ -34,9 +34,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: COCO
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 25.1
+          novel box AP: 9.4
+    Weights: https://download.openmmlab.com/mmfewshot/detection/meta_rcnn/coco/meta-rcnn_r50_c4_8xb4_coco_10shot-fine-tuning_20211112_090638-e703f762.pth
   - Name: meta-rcnn_r50_c4_8xb4_coco_30shot-fine-tuning
     In Collection: Meta RCNN
     Config: configs/detection/meta_rcnn/coco/meta-rcnn_r50_c4_8xb4_coco_30shot-fine-tuning.py
@@ -46,6 +46,6 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: COCO
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 26.9
+          novel box AP: 11.5
+    Weights: https://download.openmmlab.com/mmfewshot/detection/meta_rcnn/coco/meta-rcnn_r50_c4_8xb4_coco_30shot-fine-tuning_20211112_110452-50d791dd.pth

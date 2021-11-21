@@ -1,37 +1,57 @@
-[comment]: <> (<div align="center">)
+<div align="center">
 
-[comment]: <> (  <img src="resources/mmfewshot-logo.png" width="500px"/>)
+  <img src="resources/mmfewshot-logo.png" width="500px"/>
 
-[comment]: <> (</div>)
+</div>
 
 ## Introduction
 
-[comment]: <> (English | [简体中文]&#40;/README_zh-CN.md&#41;)
+English | [简体中文](README_zh-CN.md)
 
-[comment]: <> ([![Documentation]&#40;https://readthedocs.org/projects/mmfewshot/badge/?version=latest&#41;]&#40;https://mmfewshot.readthedocs.io/en/latest/?badge=latest&#41;)
+[![Documentation](https://readthedocs.org/projects/mmfewshot/badge/?version=latest)](https://mmfewshot.readthedocs.io/en/latest/?badge=latest)
 
-[comment]: <> ([![actions]&#40;https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg&#41;]&#40;https://github.com/open-mmlab/mmfewshot/actions&#41;)
+[![actions](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
 
-[comment]: <> ([![codecov]&#40;https://codecov.io/gh/open-mmlab/mmfewshot/branch/master/graph/badge.svg&#41;]&#40;https://codecov.io/gh/open-mmlab/mmfewshot&#41;)
+[![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/master/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
 
-[comment]: <> ([![PyPI]&#40;https://badge.fury.io/py/mmedit.svg&#41;]&#40;https://pypi.org/project/mmedit/&#41;)
+[![PyPI](https://badge.fury.io/py/mmedit.svg)](https://pypi.org/project/mmedit/)
 
-[comment]: <> ([![LICENSE]&#40;https://img.shields.io/github/license/open-mmlab/mmfewshot.svg&#41;]&#40;https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE&#41;)
+[![LICENSE](https://img.shields.io/github/license/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE)
 
-[comment]: <> ([![Average time to resolve an issue]&#40;https://isitmaintained.com/badge/resolution/open-mmlab/mmfewshot.svg&#41;]&#40;https://github.com/open-mmlab/mmfewshot/issues&#41;)
+[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
 
-[comment]: <> ([![Percentage of issues still open]&#40;https://isitmaintained.com/badge/open/open-mmlab/mmfewshot.svg&#41;]&#40;https://github.com/open-mmlab/mmfewshot/issues&#41;)
+[![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
 
 
 mmfewshot is an open source few shot learning toolbox based on PyTorch. It is a part of the [OpenMMLab](https://open-mmlab.github.io/) project.
 
-The master branch works with **PyTorch 1.7+**.
+The master branch works with **PyTorch 1.5+**.
 The compatibility to earlier versions of PyTorch is not fully tested.
 
 Documentation: https://mmfewshot.readthedocs.io/en/latest/.
 
+<div align="left">
+  <img src="resources/demo.png"/>
+</div>
 
 ### Major features
+- **Support multiple tasks in Few Shot Learning**
+
+  MMFewShot provides unified implementation and evaluation of few shot classification and detection.
+
+- **Flexible and Modular Design**
+
+  We decompose the few shot learning framework into different components,
+  which makes it much easy and flexible to build a new model by combining different modules.
+
+- **Strong baseline and State of the art**
+
+  The toolbox provides strong baselines and state-of-the-art methods in few shot classification and detection.
+
+
+## License
+
+This project is released under the [Apache 2.0 license](LICENSE).
 
 
 ## Model Zoo
@@ -65,23 +85,16 @@ Supported algorithms:
 </details>
 
 
-Please refer to [model_zoo](https://mmfewshot.readthedocs.io/en/latest/modelzoo.html) for more details.
-
-## License
-
-This project is released under the [Apache 2.0 license](LICENSE).
-
 ## Changelog
 
 
 ## Installation
 
-Please refer to [install.md](docs/get_started.md) for installation.
+Please refer to [install.md](docs/install.md) for installation of mmfewshot.
 
-## Get Started
+## Getting Started
 
 Please see [getting_started.md](docs/get_started.md) for the basic usage of mmfewshot.
-
 
 
 ## Citation
@@ -89,7 +102,7 @@ Please see [getting_started.md](docs/get_started.md) for the basic usage of mmfe
 If you find this project useful in your research, please consider cite:
 
 ```bibtex
-@misc{mmfewshot2020,
+@misc{mmfewshot2021,
     title={OpenMMLab Few Shot Learning Toolbox and Benchmark},
     author={mmfewshot Contributors},
     howpublished = {\url{https://github.com/open-mmlab/mmfewshot}},

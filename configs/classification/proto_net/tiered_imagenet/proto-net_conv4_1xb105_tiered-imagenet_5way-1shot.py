@@ -20,7 +20,7 @@ train_pipeline = [
 
 data = dict(
     samples_per_gpu=1,
-    workers_per_gpu=4,
+    workers_per_gpu=8,
     train=dict(
         type='EpisodicDataset',
         num_episodes=100000,
@@ -34,6 +34,6 @@ data = dict(
             pipeline=train_pipeline)))
 
 model = dict(
-    type='ProtoNetClassifier',
+    type='ProtoNet',
     backbone=dict(type='Conv4'),
     head=dict(type='PrototypeHead'))

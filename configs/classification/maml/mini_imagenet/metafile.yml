@@ -18,8 +18,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 46.76
+    Weights: https://download.openmmlab.com/mmfewshot/classification/maml/mini_imagenet/maml_conv4_1xb105_mini-imagenet_5way-1shot_20211104_072004-02e6c7a7.pth
     Config: configs/classification/maml/mini_imagenet/maml_conv4_1xb105_mini-imagenet_5way-1shot.py
   - Name: maml_conv4_1xb105_mini-imagenet_5way-5shot
     Metadata:
@@ -30,8 +30,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 63.88
+    Weights: https://download.openmmlab.com/mmfewshot/classification/maml/mini_imagenet/maml_conv4_1xb105_mini-imagenet_5way-5shot_20211104_072004-4c336eec.pth
     Config: configs/classification/maml/mini_imagenet/maml_conv4_1xb105_mini-imagenet_5way-5shot.py
   - Name: maml_resnet12_1xb105_mini-imagenet_5way-1shot
     Metadata:
@@ -42,8 +42,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 57.4
+    Weights: https://download.openmmlab.com/mmfewshot/classification/maml/mini_imagenet/maml_resnet12_1xb105_mini-imagenet_5way-1shot_20211104_105317-d1628e14.pth
     Config: configs/classification/maml/mini_imagenet/maml_resnet12_1xb105_mini-imagenet_5way-1shot.py
   - Name: maml_resnet12_1xb105_mini-imagenet_5way-5shot
     Metadata:
@@ -54,6 +54,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 72.42
+    Weights: https://download.openmmlab.com/mmfewshot/classification/maml/mini_imagenet/maml_resnet12_1xb105_mini-imagenet_5way-5shot_20211104_105516-13547c7b.pth
     Config: configs/classification/maml/mini_imagenet/maml_resnet12_1xb105_mini-imagenet_5way-5shot.py

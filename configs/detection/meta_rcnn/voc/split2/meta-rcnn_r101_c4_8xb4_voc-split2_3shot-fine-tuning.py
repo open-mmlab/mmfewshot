@@ -26,7 +26,7 @@ lr_config = dict(warmup=None)
 runner = dict(max_iters=500)
 # load_from = 'path of base training model'
 load_from = \
-    'work_dirs/meta_rcnn_r101_c4_8xb4_voc-split2_base-training/latest.pth'
+    'work_dirs/meta-rcnn_r101_c4_8xb4_voc-split2_base-training/latest.pth'
 # model settings
 model = dict(frozen_parameters=[
     'backbone', 'shared_head', 'rpn_head', 'aggregation_layer'

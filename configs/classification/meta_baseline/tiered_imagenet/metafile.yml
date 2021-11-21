@@ -18,8 +18,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 53.09
+    Weights: https://download.openmmlab.com/mmfewshot/classification/meta_baseline/tiered_imagenet/meta-baseline_conv4_1xb100_tiered-imagenet_5way-1shot_20211120_230843-e9c196e3.pth
     Config: configs/classification/meta_baseline/tiered_imagenet/meta-baseline_conv4_1xb100_tiered-imagenet_5way-1shot.py
   - Name: meta-baseline_conv4_1xb100_tiered-imagenet_5way-5shot
     Metadata:
@@ -30,8 +30,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 67.85
+    Weights: https://download.openmmlab.com/mmfewshot/classification/meta_baseline/tiered_imagenet/meta-baseline_conv4_1xb100_tiered-imagenet_5way-1shot_20211120_230843-e9c196e3.pth
     Config: configs/classification/meta_baseline/tiered_imagenet/meta-baseline_conv4_1xb100_tiered-imagenet_5way-5shot.py
   - Name: meta-baseline_resnet12_1xb100_tiered-imagenet_5way-1shot
     Metadata:
@@ -42,8 +42,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 65.59
+    Weights: https://download.openmmlab.com/mmfewshot/classification/meta_baseline/tiered_imagenet/meta-baseline_resnet12_1xb100_tiered-imagenet_5way-1shot_20211120_230843-6f3a6e7e.pth
     Config: configs/classification/meta_baseline/tiered_imagenet/meta-baseline_resnet12_1xb100_tiered-imagenet_5way-1shot.py
   - Name: meta-baseline_resnet12_1xb100_tiered-imagenet_5way-5shot
     Metadata:
@@ -54,6 +54,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 79.13
+    Weights: https://download.openmmlab.com/mmfewshot/classification/meta_baseline/tiered_imagenet/meta-baseline_resnet12_1xb100_tiered-imagenet_5way-1shot_20211120_230843-6f3a6e7e.pth
     Config: configs/classification/meta_baseline/tiered_imagenet/meta-baseline_resnet12_1xb100_tiered-imagenet_5way-5shot.py

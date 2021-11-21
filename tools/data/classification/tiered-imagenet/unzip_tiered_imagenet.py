@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 """Unzip tiered imagenet dataset from pickle file."""
 
+import argparse
 import os
 import pickle
 
@@ -8,7 +9,13 @@ import mmcv
 
 
 def main():
-    data_prefix = 'data/tiered_imagenet'
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--dir',
+        default='data/tiered_imagenet',
+        help='the directory to tiered imagenet')
+    args = parser.parse_args()
+    data_prefix = args.dir
     for subset in ['train', 'test', 'val']:
         img_bytes_file = os.path.join(data_prefix, f'{subset}_images_png.pkl')
         os.makedirs((os.path.join(data_prefix, subset)), exist_ok=True)

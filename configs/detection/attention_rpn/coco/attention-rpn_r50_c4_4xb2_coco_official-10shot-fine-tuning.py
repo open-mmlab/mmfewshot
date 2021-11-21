@@ -32,11 +32,7 @@ data = dict(
                 type='ann_file',
                 ann_file='data/coco/annotations/instances_val2017.json')
         ]),
-    model_init=dict(
-        ann_cfg=[dict(method='Attention_RPN', setting='10SHOT')],
-        num_novel_shots=10,
-        classes='NOVEL_CLASSES',
-        instance_wise=True))
+    model_init=dict(classes='NOVEL_CLASSES'))
 evaluation = dict(interval=3000)
 checkpoint_config = dict(interval=3000)
 optimizer = dict(
@@ -51,8 +47,8 @@ lr_config = dict(
 log_config = dict(interval=10)
 runner = dict(max_iters=3000)
 # load_from = 'path of base training model'
-load_from = \
-    'work_dirs/attention_rpn_r50_c4_coco_official-base-training/latest.pth'
+load_from = ('work_dirs/attention-rpn_r50_c4_4xb2_coco_official-base-training/'
+             'latest.pth')
 
 model = dict(
     frozen_parameters=['backbone'],

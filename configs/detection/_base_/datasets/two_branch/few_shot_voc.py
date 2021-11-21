@@ -56,7 +56,7 @@ data = dict(
     auxiliary_workers_per_gpu=2,
     train=dict(
         type='TwoBranchDataset',
-        save_dataset=False,
+        save_dataset=True,
         reweight_dataset=True,
         dataset=dict(
             type='FewShotVOCDataset',
@@ -100,7 +100,7 @@ data = dict(
         ],
         img_prefix=data_root,
         pipeline=test_pipeline,
-        test_mode=True,
         coordinate_offset=[-1, -1, -1, -1],
+        test_mode=True,
         classes=None))
 evaluation = dict(interval=3000, metric='mAP', class_splits=None)

@@ -1,10 +1,8 @@
 # Few Shot Detection
 
 ## Get Started
-To be done.
+If you're new of mmfewshot, you can check out [Get Started](https://mmfewshot.readthedocs.io/en/latest/index.html)
+and [Detection Tutorials](https://mmfewshot.readthedocs.io/en/latest) to try out MMFewShot.
 
 ## Data Preparation
-To be done.
-
-## Model Zoo
-To be done.
+Please follow [DATA Preparation](https://github.com/open-mmlab/mmfewshot/tree/master/tools/data/detection) to prepare data.

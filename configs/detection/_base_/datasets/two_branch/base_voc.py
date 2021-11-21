@@ -100,7 +100,7 @@ data = dict(
         ],
         img_prefix=data_root,
         pipeline=test_pipeline,
-        test_mode=True,
         coordinate_offset=[-1, -1, -1, -1],
+        test_mode=True,
         classes=None))
 evaluation = dict(interval=5000, metric='mAP')

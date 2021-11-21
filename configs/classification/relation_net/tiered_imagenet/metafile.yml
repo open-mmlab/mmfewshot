@@ -18,8 +18,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 47.6
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-1shot_20211120_141404-b41abf4d.pth
     Config: configs/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-1shot.py
   - Name: relation-net_conv4_1xb105_tiered-imagenet_5way-5shot
     Metadata:
@@ -30,8 +30,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 64.09
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-1shot_20211120_141404-b41abf4d.pth
     Config: configs/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-5shot.py
   - Name: relation-net_resnet12_1xb105_tiered-imagenet_5way-1shot
     Metadata:
@@ -42,7 +42,7 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
+          Accuracy: 57.46
     Weights: none
     Config: configs/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-1shot.py
   - Name: relation-net_resnet12_1xb105_tiered-imagenet_5way-5shot
@@ -54,6 +54,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 72.84
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-1shot_20211120_145035-7df8c4d3.pth
     Config: configs/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-5shot.py

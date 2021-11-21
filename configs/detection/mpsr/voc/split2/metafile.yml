@@ -24,8 +24,8 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split2
         Metrics:
-          base box AP: none
-    Weights: none
+          base box AP: 81.3
+    Weights: https://download.openmmlab.com/mmfewshot/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_base-training_20211107_135130-c7b4ee3f.pth
   - Name: mpsr_r101_fpn_2xb2_voc-split2_1shot-fine-tuning
     In Collection: MPSR
     Config: configs/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_1shot-fine-tuning.py
@@ -35,9 +35,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split2
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 61.0
+          novel box AP: 25.8
+    Weights: https://download.openmmlab.com/mmfewshot/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_1shot-fine-tuning_20211107_195800-48163ea0.pth
   - Name: mpsr_r101_fpn_2xb2_voc-split2_2shot-fine-tuning
     In Collection: MPSR
     Config: configs/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_2shot-fine-tuning.py
@@ -47,9 +47,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split2
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 66.9
+          novel box AP: 29.0
+    Weights: https://download.openmmlab.com/mmfewshot/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_2shot-fine-tuning_20211107_203755-65afa20b.pth
   - Name: mpsr_r101_fpn_2xb2_voc-split2_3shot-fine-tuning
     In Collection: MPSR
     Config: configs/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_3shot-fine-tuning.py
@@ -59,9 +59,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split2
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 67.6
+          novel box AP: 40.6
+    Weights: https://download.openmmlab.com/mmfewshot/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_3shot-fine-tuning_20211107_110120-832962b1.pth
   - Name: mpsr_r101_fpn_2xb2_voc-split2_5shot-fine-tuning
     In Collection: MPSR
     Config: configs/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_5shot-fine-tuning.py
@@ -71,9 +71,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split2
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 70.4
+          novel box AP: 41.5
+    Weights: https://download.openmmlab.com/mmfewshot/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_5shot-fine-tuning_20211107_114449-ea834f31.pth
   - Name: mpsr_r101_fpn_2xb2_voc-split2_10shot-fine-tuning
     In Collection: MPSR
     Config: configs/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_10shot-fine-tuning.py
@@ -83,6 +83,6 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split2
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 71.7
+          novel box AP: 47.1
+    Weights: https://download.openmmlab.com/mmfewshot/detection/mpsr/voc/split2/mpsr_r101_fpn_2xb2_voc-split2_10shot-fine-tuning_20211107_122815-8108834b.pth

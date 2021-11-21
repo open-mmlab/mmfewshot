@@ -29,12 +29,11 @@ lr_config = dict(
 )
 runner = dict(max_iters=2000)
 # load_from = 'path of base training model'
-load_from = \
-    'work_dirs/' \
-    'mpsr_r101_fpn_2xb2_voc-split1_base-training/' \
-    'mpsr_voc_base_split1.pth'
+load_from = (
+    'work_dirs/mpsr_r101_fpn_2xb2_voc-split1_base-training/latest.pth')
 model = dict(
     roi_head=dict(
+        bbox_roi_extractor=dict(roi_layer=dict(aligned=False)),
         bbox_head=dict(init_cfg=[
             dict(
                 type='Normal',

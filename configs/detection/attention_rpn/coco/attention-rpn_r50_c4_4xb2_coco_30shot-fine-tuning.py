@@ -21,11 +21,7 @@ data = dict(
             instance_wise=False)),
     val=dict(classes='NOVEL_CLASSES'),
     test=dict(classes='NOVEL_CLASSES'),
-    model_init=dict(
-        ann_cfg=[dict(method='Attention_RPN', setting='30SHOT')],
-        num_novel_shots=30,
-        classes='NOVEL_CLASSES',
-        instance_wise=True))
+    model_init=dict(classes='NOVEL_CLASSES'))
 evaluation = dict(interval=3000)
 checkpoint_config = dict(interval=3000)
 optimizer = dict(
@@ -40,7 +36,7 @@ lr_config = dict(
 log_config = dict(interval=10)
 runner = dict(max_iters=6000)
 # load_from = 'path of base training model'
-load_from = 'work_dirs/attention_rpn_r50_c4_coco_base-training/latest.pth'
+load_from = 'work_dirs/attention-rpn_r50_c4_4xb2_coco_base-training/latest.pth'
 model = dict(
     frozen_parameters=['backbone'],
     rpn_head=dict(

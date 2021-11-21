@@ -23,8 +23,8 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-    Weights: none
+          base box AP: 74.2
+    Weights: https://download.openmmlab.com/mmfewshot/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_base-training_20211101_040111-24a50a91.pth
   - Name: meta-rcnn_r101_c4_8xb4_voc-split3_1shot-fine-tuning
     In Collection: Meta RCNN
     Config: configs/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_1shot-fine-tuning.py
@@ -34,9 +34,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 63.0
+          novel box AP: 32.0
+    Weights: https://download.openmmlab.com/mmfewshot/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_1shot-fine-tuning_20211111_195827-63728ee6.pth
   - Name: meta-rcnn_r101_c4_8xb4_voc-split3_2shot-fine-tuning
     In Collection: Meta RCNN
     Config: configs/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_2shot-fine-tuning.py
@@ -46,9 +46,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 70.1
+          novel box AP: 37.9
+    Weights: https://download.openmmlab.com/mmfewshot/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_2shot-fine-tuning_20211111_200558-4ef3a000.pth
   - Name: meta-rcnn_r101_c4_8xb4_voc-split3_3shot-fine-tuning
     In Collection: Meta RCNN
     Config: configs/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_3shot-fine-tuning.py
@@ -58,9 +58,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 71.3
+          novel box AP: 42.5
+    Weights: https://download.openmmlab.com/mmfewshot/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_3shot-fine-tuning_20211111_201709-eb05339e.pth
   - Name: meta-rcnn_r101_c4_8xb4_voc-split3_5shot-fine-tuning
     In Collection: Meta RCNN
     Config: configs/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_5shot-fine-tuning.py
@@ -70,9 +70,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 72.3
+          novel box AP: 49.6
+    Weights: https://download.openmmlab.com/mmfewshot/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_5shot-fine-tuning_20211111_203427-54bdf978.pth
   - Name: meta-rcnn_r101_c4_8xb4_voc-split3_10shot-fine-tuning
     In Collection: Meta RCNN
     Config: configs/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_10shot-fine-tuning.py
@@ -82,6 +82,6 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 73.2
+          novel box AP: 49.1
+    Weights: https://download.openmmlab.com/mmfewshot/detection/meta_rcnn/voc/split3/meta-rcnn_r101_c4_8xb4_voc-split3_10shot-fine-tuning_20211111_205129-6d94e3b4.pth

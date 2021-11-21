@@ -20,8 +20,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 47.73
+    Weights: https://download.openmmlab.com/mmfewshot/classification/baseline/cub/baseline_conv4_1xb64_cub_5way-1shot_20211120_095923-3a346523.pth
     Config: configs/classification/baseline/cub/baseline_conv4_1xb64_cub_5way-1shot.py
   - Name: baseline_conv4_1xb64_cub_5way-5shot
     Metadata:
@@ -33,8 +33,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 68.77
+    Weights: https://download.openmmlab.com/mmfewshot/classification/baseline/cub/baseline_conv4_1xb64_cub_5way-1shot_20211120_095923-3a346523.pth
     Config: configs/classification/baseline/cub/baseline_conv4_1xb64_cub_5way-5shot.py
   - Name: baseline_resnet12_1xb64_cub_5way-1shot
     Metadata:
@@ -46,8 +46,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 71.85
+    Weights: https://download.openmmlab.com/mmfewshot/classification/baseline/cub/baseline_resnet12_1xb64_cub_5way-1shot_20211120_095923-f1d13cf6.pth
     Config: configs/classification/baseline/cub/baseline_resnet12_1xb64_cub_5way-1shot.py
   - Name: baseline_resnet12_1xb64_cub_5way-5shot
     Metadata:
@@ -59,6 +59,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 88.09
+    Weights: https://download.openmmlab.com/mmfewshot/classification/baseline/cub/baseline_resnet12_1xb64_cub_5way-1shot_20211120_095923-f1d13cf6.pth
     Config: configs/classification/baseline/cub/baseline_resnet12_1xb64_cub_5way-5shot.py

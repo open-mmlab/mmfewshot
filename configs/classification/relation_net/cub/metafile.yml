@@ -18,8 +18,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 65.53
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot_20211120_101425-63bfa087.pth
     Config: configs/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot.py
   - Name: relation-net_conv4_1xb105_cub_5way-5shot
     Metadata:
@@ -30,8 +30,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 82.05
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot_20211120_101425-63bfa087.pth
     Config: configs/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-5shot.py
   - Name: relation-net_resnet12_1xb105_cub_5way-1shot
     Metadata:
@@ -42,8 +42,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 73.22
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot_20211120_101425-d67efa62.pth
     Config: configs/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot.py
   - Name: relation-net_resnet12_1xb105_cub_5way-5shot
     Metadata:
@@ -54,6 +54,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 86.94
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot_20211120_101425-d67efa62.pth
     Config: configs/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-5shot.py

@@ -13,43 +13,51 @@ test_pipeline = [
 num_ways = 5
 num_shots = 1
 num_queries = 15
+num_val_episodes = 100
+num_test_episodes = 2000
 
 data = dict(
     val=dict(
         type='MetaTestDataset',
+        num_episodes=num_val_episodes,
+        num_ways=num_ways,
+        num_shots=num_shots,
+        num_queries=num_queries,
         dataset=dict(
             type='TieredImageNetDataset',
             subset='val',
             data_prefix='data/tiered_imagenet',
             pipeline=test_pipeline),
         meta_test_cfg=dict(
-            num_episodes=100,
+            num_episodes=num_val_episodes,
             num_ways=num_ways,
-            num_shots=num_shots,
-            num_queries=num_queries,
-            # cache features in fixed-backbone methods for
+            # whether to cache features in fixed-backbone methods for
             # testing acceleration.
-            fast_test=True,
+            fast_test=False,
             test_set=dict(batch_size=16, num_workers=2),
             # worker initialization is a time consuming operation
             support=dict(batch_size=num_ways * num_shots, num_workers=0),
             query=dict(batch_size=num_ways * num_queries, num_workers=0))),
     test=dict(
         type='MetaTestDataset',
+        num_episodes=num_test_episodes,
+        num_ways=num_ways,
+        num_shots=num_shots,
+        num_queries=num_queries,
+        # seed for generating meta test episodes
+        episodes_seed=0,
         dataset=dict(
             type='TieredImageNetDataset',
             subset='test',
             data_prefix='data/tiered_imagenet',
             pipeline=test_pipeline),
         meta_test_cfg=dict(
-            num_episodes=2000,
+            num_episodes=num_test_episodes,
             num_ways=num_ways,
-            num_shots=num_shots,
-            num_queries=num_queries,
-            # cache features in fixed-backbone methods for
+            # whether to cache features in fixed-backbone methods for
             # testing acceleration.
-            fast_test=True,
+            fast_test=False,
             test_set=dict(batch_size=16, num_workers=2),
-            # worker initialization is a time consuming operation
+            # worker initialization for each task is a time consuming operation
             support=dict(batch_size=num_ways * num_shots, num_workers=0),
             query=dict(batch_size=num_ways * num_queries, num_workers=0))))

@@ -25,7 +25,7 @@ meta_finetune_cfg = dict(
 
 data = dict(
     samples_per_gpu=64,
-    workers_per_gpu=4,
+    workers_per_gpu=8,
     train=dict(
         type='TieredImageNetDataset',
         data_prefix='data/tiered_imagenet',
@@ -37,11 +37,12 @@ data = dict(
                 batch_size=4, drop_last=True, train=meta_finetune_cfg))),
     test=dict(
         meta_test_cfg=dict(
+            fast_test=True,
             support=dict(
                 batch_size=4, drop_last=True, train=meta_finetune_cfg))))
 
 model = dict(
-    type='BaselineClassifier',
+    type='Baseline',
     backbone=dict(type='Conv4'),
     head=dict(type='LinearHead', num_classes=351, in_channels=1600),
     meta_test_head=dict(type='LinearHead', num_classes=5, in_channels=1600))

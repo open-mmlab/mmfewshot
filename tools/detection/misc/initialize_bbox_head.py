@@ -24,12 +24,12 @@ https://github.com/ucbdrive/few-shot-object-detection/.
 
 Example:
     # VOC base model
-    python3 -m tools.models.initialize_bbox_head \
+    python3 -m tools.detection.misc.initialize_bbox_head \
         --src1 work_dirs/tfa_r101_fpn_voc-split1_base-training/latest.pth \
         --method random_init \
         --save-dir work_dirs/tfa_r101_fpn_voc-split1_base-training
     # COCO base model
-    python3 -m tools.models.initialize_bbox_head \
+    python3 -m tools.detection.misc.initialize_bbox_head \
         --src1 work_dirs/tfa_r101_fpn_coco_base-training/latest.pth \
         --method random_init \
         --coco \

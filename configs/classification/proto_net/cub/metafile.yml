@@ -18,8 +18,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 58.86
+    Weights: https://download.openmmlab.com/mmfewshot/classification/proto_net/cub/proto-net_conv4_1xb105_cub_5way-1shot_20211120_101211-9ab530c3.pth
     Config: configs/classification/proto_net/cub/proto-net_conv4_1xb105_cub_5way-1shot.py
   - Name: proto-net_conv4_1xb105_cub_5way-5shot
     Metadata:
@@ -30,8 +30,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 80.77
+    Weights: https://download.openmmlab.com/mmfewshot/classification/proto_net/cub/proto-net_conv4_1xb105_cub_5way-1shot_20211120_101211-9ab530c3.pth
     Config: configs/classification/proto_net/cub/proto-net_conv4_1xb105_cub_5way-5shot.py
   - Name: proto-net_resnet12_1xb105_cub_5way-1shot
     Metadata:
@@ -42,8 +42,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 74.35
+    Weights: https://download.openmmlab.com/mmfewshot/classification/proto_net/cub/proto-net_resnet12_1xb105_cub_5way-1shot_20211120_101211-da5bfb99.pth
     Config: configs/classification/proto_net/cub/proto-net_resnet12_1xb105_cub_5way-1shot.py
   - Name: proto-net_resnet12_1xb105_cub_5way-5shot
     Metadata:
@@ -54,6 +54,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: CUB
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 88.5
+    Weights: https://download.openmmlab.com/mmfewshot/classification/proto_net/cub/proto-net_resnet12_1xb105_cub_5way-1shot_20211120_101211-da5bfb99.pth
     Config: configs/classification/proto_net/cub/proto-net_resnet12_1xb105_cub_5way-5shot.py

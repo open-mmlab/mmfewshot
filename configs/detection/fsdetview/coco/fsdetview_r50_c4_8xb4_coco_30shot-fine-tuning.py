@@ -25,5 +25,5 @@ load_from = \
     'work_dirs/fsdetview_r50_c4_8xb4_coco_base-training/latest.pth'
 # model settings
 model = dict(frozen_parameters=[
-    'backbone', 'neck', 'rpn_head', 'roi_head.bbox_head.shared_fcs'
+    'backbone', 'shared_head', 'rpn_head', 'aggregation_layer'
 ])

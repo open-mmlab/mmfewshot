@@ -23,8 +23,8 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split1
         Metrics:
-          base box AP: none
-    Weights: none
+          base box AP: 80.9
+    Weights: https://download.openmmlab.com/mmfewshot/detection/tfa/voc/split1/tfa_r101_fpn_voc-split1_base-training_20211031_114821-efbd13e9.pth
   - Name: fsce_r101_fpn_voc-split1_1shot-fine-tuning
     In Collection: FSCE
     Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_1shot-fine-tuning.py
@@ -34,9 +34,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split1
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 78.4
+          novel box AP: 41.2
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_1shot-fine-tuning_20211101_145649-fa1f3164.pth
   - Name: fsce_r101_fpn_voc-split1_2shot-fine-tuning
     In Collection: FSCE
     Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_2shot-fine-tuning.py
@@ -46,9 +46,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split1
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 77.8
+          novel box AP: 51.1
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_2shot-fine-tuning_20211101_151949-cc763dba.pth
   - Name: fsce_r101_fpn_voc-split1_3shot-fine-tuning
     In Collection: FSCE
     Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_3shot-fine-tuning.py
@@ -58,9 +58,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split1
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 76.1
+          novel box AP: 49.3
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_3shot-fine-tuning_20211101_174521-2d12c41b.pth
   - Name: fsce_r101_fpn_voc-split1_5shot-fine-tuning
     In Collection: FSCE
     Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_5shot-fine-tuning.py
@@ -70,9 +70,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split1
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 75.9
+          novel box AP: 59.4
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_5shot-fine-tuning_20211101_181628-3e6bb8fe.pth
   - Name: fsce_r101_fpn_voc-split1_10shot-fine-tuning
     In Collection: FSCE
     Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_10shot-fine-tuning.py
@@ -82,9 +82,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split1
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 76.4
+          novel box AP: 62.6
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsce/voc/split1/fsce_r101_fpn_voc-split1_10shot-fine-tuning_20211101_185037-b8635ce5.pth
   - Name: fsce_r101_fpn_contrastive-loss_voc-split1_3shot-fine-tuning
     In Collection: FSCE
     Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_contrastive-loss_voc-split1_3shot-fine-tuning.py
@@ -94,9 +94,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split1
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 75.0
+          novel box AP: 48.9
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsce/voc/split1/fsce_r101_fpn_contrastive-loss_voc-split1_3shot-fine-tuning_20211101_154514-59838a14.pth
   - Name: fsce_r101_fpn_contrastive-loss_voc-split1_5shot-fine-tuning
     In Collection: FSCE
     Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_contrastive-loss_voc-split1_5shot-fine-tuning.py
@@ -106,9 +106,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split1
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 75.0
+          novel box AP: 58.8
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsce/voc/split1/fsce_r101_fpn_contrastive-loss_voc-split1_5shot-fine-tuning_20211101_161702-67cc5b36.pth
   - Name: fsce_r101_fpn_contrastive-loss_voc-split1_10shot-fine-tuning
     In Collection: FSCE
     Config: configs/detection/fsce/voc/split1/fsce_r101_fpn_contrastive-loss_voc-split1_10shot-fine-tuning.py
@@ -118,6 +118,6 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split1
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 75.5
+          novel box AP: 63.3
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsce/voc/split1/fsce_r101_fpn_contrastive-loss_voc-split1_10shot-fine-tuning_20211101_165137-833012d3.pth

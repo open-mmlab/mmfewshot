@@ -25,7 +25,7 @@ meta_finetune_cfg = dict(
 
 data = dict(
     samples_per_gpu=64,
-    workers_per_gpu=4,
+    workers_per_gpu=8,
     train=dict(
         type='MiniImageNetDataset',
         data_prefix='data/mini_imagenet',
@@ -33,15 +33,17 @@ data = dict(
         pipeline=train_pipeline),
     val=dict(
         meta_test_cfg=dict(
+            fast_test=True,
             support=dict(
                 batch_size=4, drop_last=True, train=meta_finetune_cfg))),
     test=dict(
         meta_test_cfg=dict(
+            fast_test=True,
             support=dict(
                 batch_size=4, drop_last=True, train=meta_finetune_cfg))))
 
 model = dict(
-    type='BaselineClassifier',
+    type='Baseline',
     backbone=dict(type='ResNet12'),
     head=dict(type='LinearHead', num_classes=64, in_channels=640),
     meta_test_head=dict(type='LinearHead', num_classes=5, in_channels=640))

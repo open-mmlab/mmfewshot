@@ -23,8 +23,8 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: COCO
         Metrics:
-          base box AP: none
-    Weights: none
+          base box AP: 39.5
+    Weights: https://download.openmmlab.com/mmfewshot/detection/tfa/coco/tfa_r101_fpn_coco_base-training_20211102_030413-a67975c7.pth
   - Name: tfa_r101_fpn_coco_10shot-fine-tuning
     In Collection: TFA
     Config: configs/detection/tfa/coco/tfa_r101_fpn_coco_10shot-fine-tuning.py
@@ -34,9 +34,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: COCO
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 35.2
+          novel box AP: 10.4
+    Weights: https://download.openmmlab.com/mmfewshot/detection/tfa/coco/tfa_r101_fpn_coco_10shot-fine-tuning_20211102_162241-8abd2a82.pth
   - Name: tfa_r101_fpn_coco_30shot-fine-tuning
     In Collection: TFA
     Config: configs/detection/tfa/coco/tfa_r101_fpn_coco_30shot-fine-tuning.py
@@ -46,6 +46,6 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: COCO
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 36.7
+          novel box AP: 14.7
+    Weights: https://download.openmmlab.com/mmfewshot/detection/tfa/coco/tfa_r101_fpn_coco_30shot-fine-tuning_20211103_001731-a63fce47.pth

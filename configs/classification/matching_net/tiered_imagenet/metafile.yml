@@ -18,8 +18,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 48.20
+    Weights: https://download.openmmlab.com/mmfewshot/classification/matching_net/tiered_imagenet/matching-net_conv4_1xb105_tiered-imagenet_5way-1shot_20211120_100611-e70e9548.pth
     Config: configs/classification/matching_net/tiered_imagenet/matching-net_conv4_1xb105_tiered-imagenet_5way-1shot.py
   - Name: matching-net_conv4_1xb105_tiered-imagenet_5way-5shot
     Metadata:
@@ -30,8 +30,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 61.19
+    Weights: https://download.openmmlab.com/mmfewshot/classification/matching_net/tiered_imagenet/matching-net_conv4_1xb105_tiered-imagenet_5way-1shot_20211120_100611-e70e9548.pth
     Config: configs/classification/matching_net/tiered_imagenet/matching-net_conv4_1xb105_tiered-imagenet_5way-5shot.py
   - Name: matching-net_resnet12_1xb105_tiered-imagenet_5way-1shot
     Metadata:
@@ -42,8 +42,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 58.97
+    Weights: https://download.openmmlab.com/mmfewshot/classification/matching_net/tiered_imagenet/matching-net_resnet12_1xb105_tiered-imagenet_5way-1shot_20211120_100611-90c3124c.pth
     Config: configs/classification/matching_net/tiered_imagenet/matching-net_resnet12_1xb105_tiered-imagenet_5way-1shot.py
   - Name: matching-net_resnet12_1xb105_tiered-imagenet_5way-5shot
     Metadata:
@@ -54,6 +54,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 72.1
+    Weights: https://download.openmmlab.com/mmfewshot/classification/matching_net/tiered_imagenet/matching-net_resnet12_1xb105_tiered-imagenet_5way-1shot_20211120_100611-90c3124c.pth
     Config: configs/classification/matching_net/tiered_imagenet/matching-net_resnet12_1xb105_tiered-imagenet_5way-5shot.py

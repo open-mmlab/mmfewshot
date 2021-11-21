@@ -20,7 +20,7 @@ train_pipeline = [
 
 data = dict(
     samples_per_gpu=1,
-    workers_per_gpu=4,
+    workers_per_gpu=8,
     train=dict(
         type='EpisodicDataset',
         num_episodes=100000,
@@ -31,10 +31,11 @@ data = dict(
             type='MiniImageNetDataset',
             data_prefix='data/mini_imagenet',
             subset='train',
-            pipeline=train_pipeline)))
+            pipeline=train_pipeline)),
+    test=dict(meta_test_cfg=dict(fast_test=True)))
 
 model = dict(
-    type='MetaBaselineClassifier',
+    type='MetaBaseline',
     backbone=dict(type='ResNet12'),
     head=dict(type='MetaBaselineHead'))
 load_from = ('./work_dirs/baseline_resnet12_1xb64_mini-imagenet_5way-1shot/'

@@ -20,7 +20,7 @@ train_pipeline = [
 
 data = dict(
     samples_per_gpu=1,
-    workers_per_gpu=4,
+    workers_per_gpu=8,
     train=dict(
         type='EpisodicDataset',
         num_episodes=100000,
@@ -35,7 +35,7 @@ data = dict(
 optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
 
 model = dict(
-    type='MetaBaselineClassifier',
+    type='MetaBaseline',
     backbone=dict(type='Conv4'),
     head=dict(type='MetaBaselineHead'))
 load_from = ('./work_dirs/baseline_conv4_1xb64_tiered-imagenet_5way-5shot/'

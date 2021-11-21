@@ -37,7 +37,7 @@ data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
-        save_dataset=False,
+        save_dataset=True,
         type='FewShotCocoDataset',
         ann_cfg=[
             dict(

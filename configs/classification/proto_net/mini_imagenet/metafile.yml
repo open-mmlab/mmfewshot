@@ -18,8 +18,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 48.11
+    Weights: https://download.openmmlab.com/mmfewshot/classification/proto_net/mini_imagenet/proto-net_conv4_1xb105_mini-imagenet_5way-1shot_20211120_134319-646809cf.pth
     Config: configs/classification/proto_net/mini_imagenet/proto-net_conv4_1xb105_mini-imagenet_5way-1shot.py
   - Name: proto-net_conv4_1xb105_mini-imagenet_5way-5shot
     Metadata:
@@ -30,7 +30,7 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
+          Accuracy: 68.51
     Weights: none
     Config: configs/classification/proto_net/mini_imagenet/proto-net_conv4_1xb105_mini-imagenet_5way-5shot.py
   - Name: proto-net_resnet12_1xb105_mini-imagenet_5way-1shot
@@ -42,8 +42,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 56.13
+    Weights: https://download.openmmlab.com/mmfewshot/classification/proto_net/mini_imagenet/proto-net_resnet12_1xb105_mini-imagenet_5way-1shot_20211120_134319-73173bee.pth
     Config: configs/classification/proto_net/mini_imagenet/proto-net_resnet12_1xb105_mini-imagenet_5way-1shot.py
   - Name: proto-net_resnet12_1xb105_mini-imagenet_5way-5shot
     Metadata:
@@ -54,6 +54,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 75.7
+    Weights: https://download.openmmlab.com/mmfewshot/classification/proto_net/mini_imagenet/proto-net_resnet12_1xb105_mini-imagenet_5way-1shot_20211120_134319-73173bee.pth
     Config: configs/classification/proto_net/mini_imagenet/proto-net_resnet12_1xb105_mini-imagenet_5way-5shot.py

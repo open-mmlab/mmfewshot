@@ -41,7 +41,7 @@ data = dict(
     workers_per_gpu=2,
     train=dict(
         type='FewShotVOCDataset',
-        save_dataset=False,
+        save_dataset=True,
         ann_cfg=[
             dict(
                 type='ann_file',

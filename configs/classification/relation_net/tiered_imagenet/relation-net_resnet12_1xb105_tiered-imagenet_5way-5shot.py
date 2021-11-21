@@ -20,7 +20,7 @@ train_pipeline = [
 
 data = dict(
     samples_per_gpu=1,
-    workers_per_gpu=4,
+    workers_per_gpu=8,
     train=dict(
         type='EpisodicDataset',
         num_episodes=100000,
@@ -36,6 +36,6 @@ data = dict(
     test=dict(meta_test_cfg=dict(fast_test=False)))
 
 model = dict(
-    type='RelationNetClassifier',
+    type='RelationNet',
     backbone=dict(type='ResNet12', with_avgpool=False, flatten=False),
     head=dict(type='RelationHead', in_channels=640, feature_size=(5, 5)))

@@ -20,8 +20,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 54.07
+    Weights: https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-1shot_20211120_110238-7a81ac2a.pth
     Config: configs/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-1shot.py
   - Name: neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-5shot
     Metadata:
@@ -33,8 +33,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 70.25
+    Weights: https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-1shot_20211120_110238-7a81ac2a.pth
     Config: configs/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-5shot.py
   - Name: neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot
     Metadata:
@@ -46,8 +46,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 65.88
+    Weights: https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot_20211120_111912-344342e6.pth
     Config: configs/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot.py
   - Name: neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-5shot
     Metadata:
@@ -59,6 +59,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Tiered-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 81.06
+    Weights: https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot_20211120_111912-344342e6.pth
     Config: configs/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-5shot.py

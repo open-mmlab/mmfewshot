@@ -30,7 +30,7 @@ log_config = dict(interval=10)
 runner = dict(max_iters=300)
 # load_from = 'path of base training model'
 load_from = \
-    'work_dirs/attention_rpn_r50_c4_voc-split2_base-training/latest.pth'
+    'work_dirs/attention-rpn_r50_c4_voc-split2_base-training/latest.pth'
 model = dict(
     frozen_parameters=[
         'backbone', 'shared_head', 'rpn_head', 'aggregation_layer'

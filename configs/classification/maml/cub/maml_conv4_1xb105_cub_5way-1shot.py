@@ -20,7 +20,7 @@ train_pipeline = [
 
 data = dict(
     samples_per_gpu=1,
-    workers_per_gpu=4,
+    workers_per_gpu=8,
     train=dict(
         type='EpisodicDataset',
         num_episodes=100000,
@@ -40,7 +40,7 @@ data = dict(
             fast_test=False, support=dict(batch_size=5, num_inner_steps=5))))
 
 model = dict(
-    type='MAMLClassifier',
+    type='MAML',
     num_inner_steps=2,
     inner_lr=0.01,
     first_order=False,

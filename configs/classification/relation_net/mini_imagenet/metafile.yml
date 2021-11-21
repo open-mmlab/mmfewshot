@@ -18,8 +18,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 49.69
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-1shot_20211120_105359-c4256d35.pth
     Config: configs/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-1shot.py
   - Name: relation-net_conv4_1xb105_mini-imagenet_5way-5shot
     Metadata:
@@ -30,8 +30,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 68.14
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-1shot_20211120_105359-c4256d35.pth
     Config: configs/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-5shot.py
   - Name: relation-net_resnet12_1xb105_mini-imagenet_5way-1shot
     Metadata:
@@ -42,8 +42,8 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 54.12
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-1shot_20211120_110716-c73a3f81.pth
     Config: configs/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-1shot.py
   - Name: relation-net_resnet12_1xb105_mini-imagenet_5way-5shot
     Metadata:
@@ -54,6 +54,6 @@ Models:
       - Task: Few Shot Image Classification
         Dataset: Mini-ImageNet
         Metrics:
-          Accuracy: none
-    Weights: none
+          Accuracy: 71.31
+    Weights: https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-1shot_20211120_110716-c73a3f81.pth
     Config: configs/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-5shot.py

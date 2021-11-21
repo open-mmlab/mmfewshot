@@ -34,9 +34,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 61.4
+          novel box AP: 37.3
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsdetview/voc/split3/fsdetview_r101_c4_8xb4_voc-split3_1shot-fine-tuning_20211111_210030-71f567aa.pth
   - Name: fsdetview_r101_c4_8xb4_voc-split3_2shot-fine-tuning
     In Collection: FSDETVIEW
     Config: configs/detection/fsdetview/voc/split3/fsdetview_r101_c4_8xb4_voc-split3_2shot-fine-tuning.py
@@ -46,9 +46,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 69.3
+          novel box AP: 44.0
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsdetview/voc/split3/fsdetview_r101_c4_8xb4_voc-split3_2shot-fine-tuning_20211111_211043-903328e6.pth
   - Name: fsdetview_r101_c4_8xb4_voc-split3_3shot-fine-tuning
     In Collection: FSDETVIEW
     Config: configs/detection/fsdetview/voc/split3/fsdetview_r101_c4_8xb4_voc-split3_3shot-fine-tuning.py
@@ -58,9 +58,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 70.5
+          novel box AP: 47.5
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsdetview/voc/split3/fsdetview_r101_c4_8xb4_voc-split3_3shot-fine-tuning_20211111_212549-c2a73819.pth
   - Name: fsdetview_r101_c4_8xb4_voc-split3_5shot-fine-tuning
     In Collection: FSDETVIEW
     Config: configs/detection/fsdetview/voc/split3/fsdetview_r101_c4_8xb4_voc-split3_5shot-fine-tuning.py
@@ -70,9 +70,9 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 72.2
+          novel box AP: 52.9
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsdetview/voc/split3/fsdetview_r101_c4_8xb4_voc-split3_5shot-fine-tuning_20211111_214912-2650edee.pth
   - Name: fsdetview_r101_c4_8xb4_voc-split3_10shot-fine-tuning
     In Collection: FSDETVIEW
     Config: configs/detection/fsdetview/voc/split3/fsdetview_r101_c4_8xb4_voc-split3_10shot-fine-tuning.py
@@ -82,6 +82,6 @@ Models:
       - Task: Few Shot Object Detection
         Dataset: VOC Split3
         Metrics:
-          base box AP: none
-          novel box AP: none
-    Weights: none
+          base box AP: 73.1
+          novel box AP: 52.9
+    Weights: https://download.openmmlab.com/mmfewshot/detection/fsdetview/voc/split3/fsdetview_r101_c4_8xb4_voc-split3_10shot-fine-tuning_20211111_221125-7f2f0ddb.pth

@@ -42,4 +42,4 @@ repos:
     rev: v2.1.0
     hooks:
       - id: codespell
-        args: [ "--skip", "*.ipynb", "-L", "confectionary"]
+        args: ["--skip", "*.ipynb", "-L", "gool,winn,confectionary"]

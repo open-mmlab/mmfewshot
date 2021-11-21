@@ -15,7 +15,6 @@ def test_nway_kshot_dataloader():
         'num_support_ways': 2,
         'num_support_shots': 1,
         'num_used_support_shots': 2,
-        'shuffle_support': True,
         'repeat_times': 2,
         'dataset': {
             'type':
@@ -76,4 +75,4 @@ def test_nway_kshot_dataloader():
         assert len(torch.cat(support_labels).tolist()) == \
                data_config['num_support_ways'] * \
                data_config['num_support_shots']
-    assert batch_indices_a != batch_indices_b
+    assert batch_indices_a == batch_indices_b
