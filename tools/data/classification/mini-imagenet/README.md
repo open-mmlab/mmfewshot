@@ -22,8 +22,8 @@
 }
 ```
 
-The split of mini-imagenet can be found from [here](https://github.com/twitter-research/meta-learning-lstm/tree/master/data/miniImagenet).
-The whole imagenet dataset can be downloaded from [here](https://drive.google.com/open?id=1g1aIDy2Ar_MViF2gDXFYDBTR-HYecV07).
+The split files of mini-imagenet can be downloaded from [here](https://github.com/twitter-research/meta-learning-lstm/tree/master/data/miniImagenet).
+The whole imagenet dataset can be downloaded from [here](https://image-net.org/challenges/LSVRC/2012/index.php).
 
 The data structure is as follows:
 ```text
@@ -35,5 +35,9 @@ mmfewshot
 │   │   ├── images
 │   │   │   ├── n01440764
 │   │   │   ├── n01443537
+│   │   │   ├── ...
+│   │   ├── test.csv
+│   │   ├── train.csv
+│   │   ├── val.csv
 ...
 ```

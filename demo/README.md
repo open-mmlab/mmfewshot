@@ -16,10 +16,9 @@ Examples:
 
 ```shell
 python demo/demo_metric_classifier_1shot_inference.py \
-    configs/body/2d_kpt_sview_rgb_img/topdown_heatmap/coco/hrnet_w48_coco_256x192.py \
     demo/demo_classification_images/query_images/Least_Auklet.jpg \
     configs/classification/proto_net/cub/proto-net_conv4_1xb105_cub_5way-1shot.py \
-    CKPT_LINK \
+    https://download.openmmlab.com/mmfewshot/classification/proto_net/cub/proto-net_conv4_1xb105_cub_5way-1shot_20211120_101211-9ab530c3.pth \
     --support-images-dir demo/demo_classification_images/support_images
 ```
 
@@ -27,10 +26,9 @@ To run demos on CPU:
 
 ```shell
 python demo/demo_metric_classifier_1shot_inference.py \
-    configs/body/2d_kpt_sview_rgb_img/topdown_heatmap/coco/hrnet_w48_coco_256x192.py \
     demo/demo_classification_images/query_images/Least_Auklet.jpg \
     configs/classification/proto_net/cub/proto-net_conv4_1xb105_cub_5way-1shot.py \
-    CKPT_LINK \
+    https://download.openmmlab.com/mmfewshot/classification/proto_net/cub/proto-net_conv4_1xb105_cub_5way-1shot_20211120_101211-9ab530c3.pth \
     --support-images-dir demo/demo_classification_images/support_images \
     --device=cpu
 ```
@@ -56,6 +54,6 @@ Examples:
 python demo/demo_attention_rpn_detector_inference.py \
     demo/demo_detection_images/query_images/demo_query.jpg \
     configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_base-training.py \
-    CKPT_LINK \
+    https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_base-training_20211102_003348-da28cdfd.pth \
     --support-images-dir demo/demo_detection_images/support_images
 ```
