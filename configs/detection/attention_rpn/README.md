@@ -1,7 +1,42 @@
+# Few-Shot Object Detection with Attention-RPN and Multi-Relation Detector <a href="https://arxiv.org/abs/1908.01998"> (CVPR'2020)</a>
+
+
+## Abstract
+
+<!-- [ABSTRACT] -->
+
+Conventional methods for object detection typically require
+a substantial amount of training data and preparing
+such high-quality training data is very labor-intensive. In
+this paper, we propose a novel few-shot object detection
+network that aims at detecting objects of unseen categories
+with only a few annotated examples. Central to our method
+are our Attention-RPN, Multi-Relation Detector and Contrastive
+Training strategy, which exploit the similarity between
+the few shot support set and query set to detect novel
+objects while suppressing false detection in the background.
+To train our network, we contribute a new dataset that contains
+1000 categories of various objects with high-quality
+annotations. To the best of our knowledge, this is one of the
+first datasets specifically designed for few-shot object detection.
+Once our few-shot network is trained, it can detect
+objects of unseen categories without further training or finetuning.
+Our method is general and has a wide range of potential
+applications. We produce a new state-of-the-art performance
+on different datasets in the few-shot setting. The
+dataset link is https://github.com/fanq15/Few-Shot-Object-Detection-Dataset.
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142847191-f9dd3254-bdcf-4c41-9b81-53fb0b332eb5.png" width="80%"/>
+</div>
+
+
+
+## Citation
+
+
 <!-- [ALGORITHM] -->
-
-#<summary><a href="https://arxiv.org/abs/1908.01998"> Attention RPN (CVPR'2020)</a></summary>
-
 ```bibtex
 @inproceedings{fan2020fsod,
     title={Few-Shot Object Detection with Attention-RPN and Multi-Relation Detector},

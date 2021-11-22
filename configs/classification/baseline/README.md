@@ -1,7 +1,36 @@
+# A CLOSER LOOK AT FEW-SHOT CLASSIFICATION (Baseline) <a href="https://arxiv.org/abs/1904.04232"> (ICLR'2019)</a>
+
+## Abstract
+
+<!-- [ABSTRACT] -->
+Few-shot classification aims to learn a classifier to recognize unseen classes during
+training with limited labeled examples. While significant progress has been made,
+the growing complexity of network designs, meta-learning algorithms, and differences
+in implementation details make a fair comparison difficult. In this paper,
+we present 1) a consistent comparative analysis of several representative few-shot
+classification algorithms, with results showing that deeper backbones significantly
+reduce the performance differences among methods on datasets with limited domain
+differences, 2) a modified baseline method that surprisingly achieves competitive
+performance when compared with the state-of-the-art on both the mini-
+ImageNet and the CUB datasets, and 3) a new experimental setting for evaluating
+the cross-domain generalization ability for few-shot classification algorithms. Our
+results reveal that reducing intra-class variation is an important factor when the
+feature backbone is shallow, but not as critical when using deeper backbones. In
+a realistic cross-domain evaluation setting, we show that a baseline method with
+a standard fine-tuning practice compares favorably against other state-of-the-art
+few-shot learning algorithms.
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142851616-b504d6c5-4a4d-4d4a-8b4e-fab5f93d8801.png" width="80%"/>
+</div>
+
+
+
+## Citation
+
+
 <!-- [ALGORITHM] -->
-
-# <summary><a href="https://arxiv.org/abs/1904.04232"> Baseline (ICLR'2019)</a></summary>
-
 ```bibtex
 @inproceedings{chen2019closerfewshot,
     title={A Closer Look at Few-shot Classification},

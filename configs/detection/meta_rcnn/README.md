@@ -1,7 +1,30 @@
+# Meta R-CNN: Towards General Solver for Instance-level Low-shot Learning <a href="https://arxiv.org/pdf/1909.13032.pdf"> (ICCV'2019)</a>
+
+## Abstract
+
+<!-- [ABSTRACT] -->
+
+Resembling the rapid learning capability of human, low-shot learning empowers vision systems to understand new concepts by training with few samples.
+Leading approaches derived from meta-learning on images with a single visual object.
+Obfuscated by a complex background and multiple objects in one image, they are hard to promote the research of low-shot object detection/segmentation.
+In this work, we present a flexible and general methodology to achieve these tasks.
+Our work extends Faster /Mask R-CNN by proposing meta-learning over RoI (Region-of-Interest) features instead of a full image feature.
+This simple spirit disentangles multi-object information merged with the background, without bells and whistles, enabling Faster / Mask R-CNN turn into a meta-learner to achieve the tasks.
+Specifically, we introduce a Predictor-head Remodeling Network (PRN) that shares its main backbone with Faster / Mask R-CNN.
+PRN receives images containing low-shot objects with their bounding boxes or masks to infer their class attentive vectors.
+The vectors take channel-wise soft-attention on RoI features, remodeling those R-CNN predictor heads to detect or segment the objects consistent with the classes these vectors represent.
+In our experiments, Meta R-CNN yields the new state of the art in low-shot object detection and improves low-shot object segmentation by Mask R-CNN.
+Code: https://yanxp.github.io/metarcnn.html.
+
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142843770-6390a0b2-f40a-4731-ad4d-b6ab4c8268b8.png" width="80%"/>
+</div>
+
+## Citation
+
 <!-- [ALGORITHM] -->
-
-#<summary><a href="https://arxiv.org/pdf/1909.13032.pdf"> Meta RCNN (ICCV'2019)</a></summary>
-
 ```bibtex
 @inproceedings{yan2019meta,
     title={Meta r-cnn: Towards general solver for instance-level low-shot learning},

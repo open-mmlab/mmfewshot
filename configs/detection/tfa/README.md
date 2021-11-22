@@ -1,6 +1,30 @@
-<!-- [ALGORITHM] -->
+# Frustratingly Simple Few-Shot Object Detection <a href="https://arxiv.org/abs/2003.06957">(ICML'2020)</a>
 
-# <summary><a href="https://arxiv.org/abs/2003.06957"> TFA (ICML'2020)</a></summary>
+
+## Abstract
+
+<!-- [ABSTRACT] -->
+
+Detecting rare objects from a few examples is an emerging problem.
+Prior works show meta-learning is a promising approach.
+But, fine-tuning techniques have drawn scant attention.
+We find that fine-tuning only the last layer of existing detectors on rare classes is crucial to the few-shot object detection task.
+Such a simple approach outperforms the meta-learning methods by roughly 2~20 points on current benchmarks and sometimes even doubles the accuracy of the prior methods.
+However, the high variance in the few samples often leads to the unreliability of existing benchmarks.
+We revise the evaluation protocols by sampling multiple groups of training examples to obtain stable comparisons and build new benchmarks based on three datasets: PASCAL VOC, COCO and LVIS.
+Again, our fine-tuning approach establishes a new state of the art on the revised benchmarks.
+The code as well as the pretrained models are available at https://github.com/ucbdrive/few-shot-object-detection.
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142841882-4266e4a6-b93f-44d1-9754-72be2473d589.png" width="80%"/>
+</div>
+
+
+
+## Citation
+
+<!-- [ALGORITHM] -->
 
 ```bibtex
 @inproceedings{wang2020few,
@@ -10,6 +34,8 @@
     year={2020}
 }
 ```
+
+
 
 **Note**: ALL the reported results use the data split released from [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/master/datasets/README.md) official repo.
 Currently, each setting is only evaluated with one fixed few shot dataset.

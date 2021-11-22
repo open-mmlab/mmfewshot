@@ -1,6 +1,32 @@
-<!-- [ALGORITHM] -->
+# Matching Networks for One Shot Learning <a href="https://arxiv.org/abs/1606.04080"> (NeurIPS'2016)</a>
 
-# <summary><a href="https://arxiv.org/abs/1606.04080"> MatchingNet (NeurIPS'2016)</a></summary>
+## Abstract
+
+<!-- [ABSTRACT] -->
+Learning from a few examples remains a key challenge in machine learning.
+Despite recent advances in important domains such as vision and language, the
+standard supervised deep learning paradigm does not offer a satisfactory solution
+for learning new concepts rapidly from little data. In this work, we employ ideas
+from metric learning based on deep neural features and from recent advances
+that augment neural networks with external memories. Our framework learns a
+network that maps a small labelled support set and an unlabelled example to its
+label, obviating the need for fine-tuning to adapt to new class types. We then define
+one-shot learning problems on vision (using Omniglot, ImageNet) and language
+tasks. Our algorithm improves one-shot accuracy on ImageNet from 87.6% to
+93.2% and from 88.0% to 93.8% on Omniglot compared to competing approaches.
+We also demonstrate the usefulness of the same model on language modeling by
+introducing a one-shot task on the Penn Treebank.
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142851095-6899580d-3584-442e-b1f2-6cea844e1532.png" width="80%"/>
+</div>
+
+
+
+## Citation
+
+<!-- [ALGORITHM] -->
 
 ```bibtex
 @inproceedings{vinyals2016matching,

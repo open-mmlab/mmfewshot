@@ -1,7 +1,39 @@
+# Meta-Baseline: Exploring Simple Meta-Learning for Few-Shot Learning <a href="https://arxiv.org/abs/2003.04390"> (ICCV'2021)</a>
+
+## Abstract
+
+<!-- [ABSTRACT] -->
+Meta-learning has been the most common framework for
+few-shot learning in recent years. It learns the model from
+collections of few-shot classification tasks, which is believed
+to have a key advantage of making the training objective
+consistent with the testing objective. However, some recent
+works report that by training for whole-classification,
+i.e. classification on the whole label-set, it can get comparable
+or even better embedding than many meta-learning
+algorithms. The edge between these two lines of works
+has yet been underexplored, and the effectiveness of meta-learning
+in few-shot learning remains unclear. In this paper,
+we explore a simple process: meta-learning over a whole classification
+pre-trained model on its evaluation metric.
+We observe this simple method achieves competitive performance
+to state-of-the-art methods on standard benchmarks.
+Our further analysis shed some light on understanding
+the trade-offs between the meta-learning objective and
+the whole-classification objective in few-shot learning. Our
+code is available at https://github.com/yinboc/few-shot-meta-baseline.
+
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142850752-90c6326d-e70a-4cc8-801e-b566052853cd.png" width="80%"/>
+</div>
+
+
+
+## Citation
+
 <!-- [ALGORITHM] -->
-
-# <summary><a href="https://arxiv.org/abs/2003.04390"> Meta Baseline (ICCV'2021)</a></summary>
-
 ```bibtex
 @inproceedings{chen2021meta,
     title={Meta-Baseline: Exploring Simple Meta-Learning for Few-Shot Learning},

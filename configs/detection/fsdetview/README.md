@@ -1,6 +1,30 @@
-<!-- [ALGORITHM] -->
+# Few-Shot Object Detection and Viewpoint Estimation for Objects in the Wild <a href="https://arxiv.org/abs/2007.12107"> (ECCV'2020)</a>
 
-#<summary><a href="https://arxiv.org/abs/2007.12107"> FSDetView (ECCV'2020)</a></summary>
+## Abstract
+
+<!-- [ABSTRACT] -->
+Detecting objects and estimating their viewpoint in images are key tasks of 3D scene understanding.
+Recent approaches have achieved excellent results on very large benchmarks for object detection and view-point estimation.
+However, performances are still lagging behind for novel object categories with few samples.
+In this paper, we tackle the problems of few-shot object detection and few-shot viewpoint estimation.
+We propose a meta-learning framework that can be applied to both tasks, possibly including 3D data.
+Our models improve the results on objects of novel classes by leveraging on rich feature information originating from base classes with many samples. A simple joint
+feature embedding module is proposed to make the most of this feature sharing.
+Despite its simplicity, our method outperforms state-of-the-art methods by a large margin on a range of datasets, including
+PASCAL VOC and MS COCO for few-shot object detection, and Pascal3D+ and ObjectNet3D for few-shot viewpoint estimation.
+And for the first time, we tackle the combination of both few-shot tasks, on ObjectNet3D, showing promising results.
+Our code and data are available at http://imagine.enpc.fr/~xiaoy/FSDetView/.
+
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142845154-a50d8902-1b7a-4c7e-9b36-0848ff080187.png" width="80%"/>
+</div>
+
+
+## Citation
+
+<!-- [ALGORITHM] -->
 
 ```bibtex
 @inproceedings{xiao2020fsdetview,

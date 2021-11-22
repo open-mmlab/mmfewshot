@@ -1,7 +1,30 @@
+# Negative Margin Matters: Understanding Margin in Few-shot Classification <a href="https://arxiv.org/abs/2003.12060"> (ECCV'2020)</a>
+
+## Abstract
+
+<!-- [ABSTRACT] -->
+
+This paper introduces a negative margin loss to metric learning based few-shot learning methods. The negative margin loss significantly outperforms regular softmax loss, and achieves state-of-the-art
+accuracy on three standard few-shot classification benchmarks with few
+bells and whistles. These results are contrary to the common practice
+in the metric learning field, that the margin is zero or positive. To understand why the negative margin loss performs well for the few-shot
+classification, we analyze the discriminability of learned features w.r.t
+different margins for training and novel classes, both empirically and
+theoretically. We find that although negative margin reduces the feature discriminability for training classes, it may also avoid falsely mapping samples of the same novel class to multiple peaks or clusters, and
+thus benefit the discrimination of novel classes. Code is available at
+https://github.com/bl0/negative-margin.few-shot.
+
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142850190-c7ceab7e-468a-48ad-b8f5-e2d0e2df13ae.png" width="80%"/>
+</div>
+
+
+
+## Citation
+
 <!-- [ALGORITHM] -->
-
-# <summary><a href="https://arxiv.org/abs/2003.12060"> NegMargin (ECCV'2020)</a></summary>
-
 ```bibtex
 @inproceedings{liu2020negative,
     title={Negative margin matters: Understanding margin in few-shot classification},

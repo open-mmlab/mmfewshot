@@ -1,7 +1,38 @@
+# FSCE: Few-Shot Object Detection via Contrastive Proposal Encoding <a href="https://arNiv.org/abs/2103.05950"> (CVPR'2021)</a>
+
+
+
+## Abstract
+
+<!-- [ABSTRACT] -->
+Emerging interests have been brought to recognize previously unseen objects given very few training examples, known as few-shot object detection (FSOD).
+Recent researches demonstrate that good feature embedding is
+the key to reach favorable few-shot learning performance.
+We observe object proposals with different Intersection-of-Union (IoU) scores are analogous to the intra-image augmentation
+used in contrastive approaches. And we exploit this analogy and incorporate supervised contrastive learning
+to achieve more robust objects representations in FSOD.
+We present Few-Shot object detection via Contrastive proposals
+Encoding (FSCE), a simple yet effective approach to
+learning contrastive-aware object proposal encodings that
+facilitate the classification of detected objects. We notice
+the degradation of average precision (AP) for rare objects
+mainly comes from misclassifying novel instances as confusable
+classes. And we ease the misclassification issues
+by promoting instance level intra-class compactness and
+inter-class variance via our contrastive proposal encoding
+loss (CPE loss). Our design outperforms current state-ofthe-art works in any shot and all data splits, with up to
++8.8% on standard benchmark PASCAL VOC and +2.7% on challenging COCO benchmark. Code is available at: https://github.com/bsun0802/FSCE.git
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142846618-074a4b8b-c5fa-474d-a0fd-df724c54f72c.png" width="80%"/>
+</div>
+
+
+
+## Citation
+
 <!-- [ALGORITHM] -->
-
-#<summary><a href="https://arNiv.org/abs/2103.05950"> FSCE (CVPR'2021)</a></summary>
-
 ```bibteN
 @inproceedings{sun2021fsce,
     title={FSCE: Few-Shot Object Detection via Contrastive Proposal Encoding},

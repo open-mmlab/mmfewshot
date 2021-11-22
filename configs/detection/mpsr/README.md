@@ -1,7 +1,28 @@
+# Multi-Scale Positive Sample Refinement for Few-Shot Object Detection <a href="https://arxiv.org/abs/2007.09384"> (ECCV'2020)</a>
+## Abstract
+
+<!-- [ABSTRACT] -->
+Few-shot object detection (FSOD) helps detectors adapt to unseen classes with few training instances, and is useful when manual
+annotation is time-consuming or data acquisition is limited.
+Unlike previous attempts that exploit few-shot classification techniques to facilitate FSOD, this work highlights the necessity of handling the problem of scale
+variations, which is challenging due to the unique sample distribution.
+To this end, we propose a Multi-scale Positive Sample Refinement (MPSR) approach to enrich object scales in FSOD.
+It generates multi-scale positive samples as object pyramids and refines the prediction at various scales.
+We demonstrate its advantage by integrating it as an auxiliary branch to the popular architecture of Faster R-CNN with FPN, delivering
+a strong FSOD solution.
+Several experiments are conducted on PASCAL VOC andMS COCO, and the proposed approach achieves state of the art results and significantly outperforms other counterparts, which shows its effectiveness.
+Code is available at https://github.com/jiaxi-wu/MPSR.
+
+<!-- [IMAGE] -->
+<div align=center>
+<img src="https://user-images.githubusercontent.com/15669896/142842616-f081795d-5dd4-4e8c-87b3-8a5192d4877c.png" width="80%"/>
+</div>
+
+
+
+## Citation
+
 <!-- [ALGORITHM] -->
-
-#<summary><a href="https://arxiv.org/abs/2007.09384"> MPSR (ECCV'2020)</a></summary>
-
 ```bibtex
 @inproceedings{wu2020mpsr,
   title={Multi-Scale Positive Sample Refinement for Few-Shot Object Detection},
@@ -10,6 +31,8 @@
   year={2020}
 }
 ```
+
+
 **Note**: ALL the reported results use the data split released from [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/master/datasets/README.md) official repo.
 Currently, each setting is only evaluated with one fixed few shot dataset.
 Please refer to [DATA Preparation](https://github.com/open-mmlab/mmfewshot/tree/master/tools/data/detection) to get more details about the dataset and data preparation.
