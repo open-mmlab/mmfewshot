@@ -256,15 +256,15 @@ class CUBDataset(BaseFewShotDataset):
 
         Args:
             classes (Sequence[str] | str | None): Three types of input
-            will correspond to different processing logics:
+                will correspond to different processing logics:
 
-            - If `classes` is a tuple or list, it will override the CLASSES
-              predefined in the dataset.
-            - If `classes` is None, we directly use pre-defined CLASSES will
-              be used by the dataset.
-            - If `classes` is a string, it is the path of a classes file that
-              contains the name of all classes. Each line of the file contains
-              a single class name.
+                - If `classes` is a tuple or list, it will override the
+                  CLASSES predefined in the dataset.
+                - If `classes` is None, we directly use pre-defined CLASSES
+                  will be used by the dataset.
+                - If `classes` is a string, it is the path of a classes file
+                  that contains the name of all classes. Each line of the file
+                  contains a single class name.
 
         Returns:
             tuple[str] or list[str]: Names of categories of the dataset.

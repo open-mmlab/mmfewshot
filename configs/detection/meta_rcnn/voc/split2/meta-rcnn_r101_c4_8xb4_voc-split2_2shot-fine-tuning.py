@@ -3,8 +3,8 @@ _base_ = [
     '../../../_base_/schedules/schedule.py', '../../meta-rcnn_r101_c4.py',
     '../../../_base_/default_runtime.py'
 ]
-# Predefined ann_cfg, classes and class_splits are defined in
-# mmfewshot.detection.datasets.few_shot_data_config
+# classes splits are predefined in FewShotVOCDataset
+# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
 data = dict(
     train=dict(
         save_dataset=True,

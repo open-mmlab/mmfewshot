@@ -29,5 +29,3 @@ by `QuerySupportEvalHook`. More implementation details can refer to `mmfewshot.d
 ![](../_static/image/detection_data_flow.jpg)
 
 More usage details and customization can refer to [Tutorial 2: Adding New Dataset](https://mmfewshot.readthedocs.io/en/latest/detection/customize_dataset.html)
-
-## Design of data flow

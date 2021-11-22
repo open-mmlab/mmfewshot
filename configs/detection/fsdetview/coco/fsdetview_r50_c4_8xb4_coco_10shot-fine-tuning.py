@@ -3,7 +3,8 @@ _base_ = [
     '../../_base_/schedules/schedule.py', '../fsdetview_r50_c4.py',
     '../../_base_/default_runtime.py'
 ]
-# classes splits are predefined in FewShotVOCDataset
+# classes splits are predefined in FewShotCocoDataset
+# FewShotCocoDefaultDataset predefine ann_cfg for model reproducibility
 data = dict(
     train=dict(
         save_dataset=True,

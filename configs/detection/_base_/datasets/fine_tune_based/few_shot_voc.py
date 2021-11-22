@@ -17,8 +17,8 @@ train_pipeline = [
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
 ]
-# Predefined ann_cfg, classes and class_splits are defined in
-# mmfewshot.detection.datasets.few_shot_data_config
+# classes splits are predefined in FewShotVOCDataset
+# FewShotVOCDefaultDataset predefine ann_cfg for model reproducibility.
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
