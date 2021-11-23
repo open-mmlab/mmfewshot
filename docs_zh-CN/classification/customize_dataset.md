@@ -5,7 +5,7 @@
 ### Customize loading annotations
 
 You can write a new Dataset class inherited from `BaseFewShotDataset`, and overwrite `load_annotations(self)`,
-like [CUB](https://github.com/open-mmlab/mmfewshot/blob/master/mmfewshot/classification/datasets/cub.py) and [MiniImageNet](https://github.com/open-mmlab/mmfewshot/blob/master/mmfewshot/classification/datasets/mini_imagenet.py).
+like [CUB](https://github.com/open-mmlab/mmfewshot/blob/main/mmfewshot/classification/datasets/cub.py) and [MiniImageNet](https://github.com/open-mmlab/mmfewshot/blob/main/mmfewshot/classification/datasets/mini_imagenet.py).
 Typically, this function returns a list, where each sample is a dict, containing necessary data information, e.g., `img` and `gt_label`.
 
 Assume we are going to implement a `Filelist` dataset, which takes filelists for both training and testing. The format of annotation list is as follows:

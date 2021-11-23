@@ -165,16 +165,18 @@ conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10
 pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.0/index.html
 
 # install mmcls
-git clone https://github.com/open-mmlab/mmdetection.git
-cd mmdetection
+git clone https://github.com/open-mmlab/mmclassification.git
+cd mmclassification
 pip install -r requirements/build.txt
 python setup.py install
+cd ..
 
 # install mmdetection
 git clone https://github.com/open-mmlab/mmdetection.git
 cd mmdetection
 pip install -r requirements/build.txt
 python setup.py install
+cd ..
 
 # install mmfewshot
 git clone https://github.com/open-mmlab/mmfewshot.git
@@ -188,6 +190,6 @@ pip install -v -e .  # or "python setup.py develop"
 
 To verify whether MMFewShot is installed correctly, we can run the demo code and inference a demo image.
 
-Please refer to [few shot classification demo](https://github.com/open-mmlab/mmfewshot/demo/#Few-Shot-Classification-Demo)
-or [few shot detection demo](https://github.com/open-mmlab/mmfewshot/demo/#Few-Shot-Detection-Demo)
+Please refer to [few shot classification demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-classification-demo)
+or [few shot detection demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-detection-demo)
  for more details. The demo code is supposed to run successfully upon you finish the installation.

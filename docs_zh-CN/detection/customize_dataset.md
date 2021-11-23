@@ -32,7 +32,7 @@ Unlike few shot classification can test on thousands of tasks in a short time,
 it is hard to follow the same protocol in few shot detection because of the computation cost.
 Thus, we provide the predefined data split for reproducibility.
 These data splits directly use the files released from TFA [repo](https://github.com/ucbdrive/few-shot-object-detection).
-The details of data preparation can refer to [here](https://github.com/open-mmlab/mmfewshot/tree/master/tools/data/detection).
+The details of data preparation can refer to [here](https://github.com/open-mmlab/mmfewshot/tree/main/tools/data/detection).
 
 To load these predefined data splits, the type of dataset need to be set to
 `FewShotVOCDefaultDataset` or `FewShotCocoDefaultDataset`.

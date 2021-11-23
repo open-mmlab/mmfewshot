@@ -2,7 +2,7 @@
 
 We incorporate modular and inheritance design into our config system, which is convenient to conduct various experiments.
 If you wish to inspect the config file, you may run `python tools/misc/print_config.py /PATH/TO/CONFIG` to see the complete config.
-The classification part of mmfewshot is built upon the [mmcls](https://mmcv.readthedocs.io/en/latest/understand_mmcv/config.html),
+The classification part of mmfewshot is built upon the [mmcls](https://github.com/open-mmlab/mmclassification),
 thus it is highly recommended learning the basic of mmcls.
 
 
@@ -47,7 +47,6 @@ We follow the below style to name config files. Contributors are advised to foll
 - `{dataset}`: dataset like `cub`, `mini-imagenet` and `tiered-imagenet`.
 - `{meta test setting}`: n way k shot setting like `5way_1shot` or `5way_5shot`.
 
-We follow the config structure of [mmdet](https://mmcv.readthedocs.io/en/latest/understand_mmcv/config.html)
 
 
 

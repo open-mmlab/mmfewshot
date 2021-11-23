@@ -9,17 +9,11 @@
 English | [简体中文](README_zh-CN.md)
 
 [![Documentation](https://readthedocs.org/projects/mmfewshot/badge/?version=latest)](https://mmfewshot.readthedocs.io/en/latest/?badge=latest)
-
 [![actions](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
-
 [![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/master/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
-
 [![PyPI](https://badge.fury.io/py/mmedit.svg)](https://pypi.org/project/mmedit/)
-
 [![LICENSE](https://img.shields.io/github/license/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE)
-
 [![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
-
 [![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
 
 
@@ -113,7 +107,7 @@ If you find this project useful in your research, please consider cite:
 
 ## Contributing
 
-We appreciate all contributions to improve mmfewshot. Please refer to [CONTRIBUTING.md in MMFewShot](https://github.com/open-mmlab/mmcv/blob/master/.github/CONTRIBUTING.md) for the contributing guideline.
+We appreciate all contributions to improve mmfewshot. Please refer to [CONTRIBUTING.md in MMFewShot](https://github.com/open-mmlab/mmfewshot/blob/main/.github/CONTRIBUTING.md) for the contributing guideline.
 
 ## Acknowledgement
 
@@ -130,6 +124,8 @@ mmfewshot is an open source project that is contributed by researchers and engin
 - [MMAction2](https://github.com/open-mmlab/mmaction2): OpenMMLab's next-generation action understanding toolbox and benchmark.
 - [MMTracking](https://github.com/open-mmlab/mmtracking): OpenMMLab video perception toolbox and benchmark.
 - [MMPose](https://github.com/open-mmlab/mmpose): OpenMMLab pose estimation toolbox and benchmark.
-- [MMEditing](https://github.com/open-mmlab/mmfewshot): OpenMMLab image and video editing toolbox.
+- [MMEditing](https://github.com/open-mmlab/mmediting): OpenMMLab image and video editing toolbox.
 - [MMOCR](https://github.com/open-mmlab/mmocr): A Comprehensive Toolbox for Text Detection, Recognition and Understanding.
-- [MMGeneration](https://github.com/open-mmlab/mmgeneration): A powerful toolkit for generative models.
+- [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab image and video generative models toolbox.
+- [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab optical flow toolbox and benchmark.
+- [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab FewShot Learning Toolbox and Benchmark.

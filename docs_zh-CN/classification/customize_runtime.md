@@ -114,7 +114,7 @@ Tricks not implemented by the optimizer should be implemented through optimizer 
 
 - __Use momentum schedule to accelerate model convergence__:
     We support momentum scheduler to modify model's momentum according to learning rate, which could make the model converge in a faster way.
-    Momentum scheduler is usually used with LR scheduler, for example, the following config is used in 3D classification to accelerate convergence.
+    Momentum scheduler is usually used with LR scheduler, for example, the following config is used in 3D detection to accelerate convergence.
     For more details, please refer to the implementation of [CyclicLrUpdater](https://github.com/open-mmlab/mmcv/blob/f48241a65aebfe07db122e9db320c31b685dc674/mmcv/runner/hooks/lr_updater.py#L327) and [CyclicMomentumUpdater](https://github.com/open-mmlab/mmcv/blob/f48241a65aebfe07db122e9db320c31b685dc674/mmcv/runner/hooks/momentum_updater.py#L130).
 
     ```python

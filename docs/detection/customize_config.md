@@ -2,8 +2,8 @@
 
 We incorporate modular and inheritance design into our config system, which is convenient to conduct various experiments.
 If you wish to inspect the config file, you may run `python tools/misc/print_config.py /PATH/TO/CONFIG` to see the complete config.
-The detection part of mmfewshot is built upon the [mmdet](https://mmcv.readthedocs.io/en/latest/understand_mmcv/config.html),
-thus it is highly recommended learning the basic of [mmdet](https://mmcv.readthedocs.io/en/latest/understand_mmcv/config.html).
+The detection part of mmfewshot is built upon the [mmdet](https://github.com/open-mmlab/mmdetection),
+thus it is highly recommended learning the basic of [mmdet](https://mmdetection.readthedocs.io/en/latest/).
 
 
 ## Modify a config through script arguments

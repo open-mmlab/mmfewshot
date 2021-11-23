@@ -171,16 +171,18 @@ conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10
 pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.0/index.html
 
 # 安装 mmcls
-git clone https://github.com/open-mmlab/mmdetection.git
-cd mmdetection
+git clone https://github.com/open-mmlab/mmclassification.git
+cd mmclassification
 pip install -r requirements/build.txt
 python setup.py install
+cd ..
 
 # 安装 mmdetection
 git clone https://github.com/open-mmlab/mmdetection.git
 cd mmdetection
 pip install -r requirements/build.txt
 python setup.py install
+cd ..
 
 # 安装 mmfewshot
 git clone https://github.com/open-mmlab/mmfewshot.git
@@ -194,6 +196,6 @@ pip install -v -e .  # or "python setup.py develop"
 
 为了验证是否正确安装了 MMFewShot 和所需的环境，我们可以运行示例的 Python 代码在示例图像进行推理：
 
-具体的细节可以参考 [few shot classification demo](https://github.com/open-mmlab/mmfewshot/demo/#Few-Shot-Classification-Demo)
-以及 [few shot detection demo](https://github.com/open-mmlab/mmfewshot/demo/#Few-Shot-Detection-Demo) 。
+具体的细节可以参考 [few shot classification demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-classification-demo)
+以及 [few shot detection demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-detection-demo) 。
 如果成功安装 MMFewShot，则上面的代码可以完整地运行。

@@ -7,19 +7,12 @@
 ## Introduction
 
 [English](README.md) | 简体中文
-
 [![Documentation](https://readthedocs.org/projects/mmfewshot/badge/?version=latest)](https://mmfewshot.readthedocs.io/en/latest/?badge=latest)
-
 [![actions](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
-
 [![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/master/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
-
 [![PyPI](https://badge.fury.io/py/mmedit.svg)](https://pypi.org/project/mmedit/)
-
 [![LICENSE](https://img.shields.io/github/license/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE)
-
 [![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
-
 [![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
 
 MMFewShot 是一款基于 PyTorch 的少样本学习代码库，是 [OpenMMLab](http://openmmlab.org/) 项目的成员之一。
@@ -113,7 +106,7 @@ MMFewShot 也提供了其他更详细的教程，包括：
 
 ## 贡献指南
 
-我们感谢所有的贡献者为改进和提升 MMFewShot 所作出的努力。请参考[贡献指南](https://github.com/open-mmlab/mmcv/blob/master/CONTRIBUTING.md)来了解参与项目贡献的相关指引。
+我们感谢所有的贡献者为改进和提升 MMFewShot 所作出的努力。请参考[贡献指南](https://github.com/open-mmlab/mmfewshot/blob/main/.github/CONTRIBUTING.md)来了解参与项目贡献的相关指引。
 
 
 ## 致谢
@@ -151,6 +144,7 @@ MMFewShot 是一款由不同学校和公司共同贡献的开源项目。我们�
 - [MMOCR](https://github.com/open-mmlab/mmocr): OpenMMLab 全流程文字检测识别理解工具包
 - [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab 新一代生成模型工具箱
 - [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab 光流估计工具箱与测试基准
+- [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab 少样本学习工具箱与测试基准
 
 ## 欢迎加入 OpenMMLab 社区
 
