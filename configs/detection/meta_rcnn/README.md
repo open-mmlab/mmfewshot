@@ -34,9 +34,9 @@ Code: https://yanxp.github.io/metarcnn.html.
 }
 ```
 
-**Note**: ALL the reported results use the data split released from [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/master/datasets/README.md) official repo.
+**Note**: ALL the reported results use the data split released from [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/main/datasets/README.md) official repo.
 Currently, each setting is only evaluated with one fixed few shot dataset.
-Please refer to [DATA Preparation](https://github.com/open-mmlab/mmfewshot/tree/master/tools/data/detection) to get more details about the dataset and data preparation.
+Please refer to [DATA Preparation](https://github.com/open-mmlab/mmfewshot/tree/main/tools/data/detection) to get more details about the dataset and data preparation.
 
 ## How to reproduce Meta RCNN
 

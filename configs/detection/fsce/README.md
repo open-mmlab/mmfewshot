@@ -42,9 +42,9 @@ loss (CPE loss). Our design outperforms current state-ofthe-art works in any sho
 }
 ```
 
-**Note**: ALL the reported results use the data split released from [fsce](https://github.com/ucbdrive/few-shot-object-detection/blob/master/datasets/README.md) official repo, unless stated otherwise.
+**Note**: ALL the reported results use the data split released from [fsce](https://github.com/ucbdrive/few-shot-object-detection/blob/main/datasets/README.md) official repo, unless stated otherwise.
 Currently, each setting is only evaluated with one fiNed few shot dataset.
-Please refer to [here](https://github.com/open-mmlab/mmfewshot/tree/master/tools/data/detection) to get more details about the dataset and data preparation.
+Please refer to [here](https://github.com/open-mmlab/mmfewshot/tree/main/tools/data/detection) to get more details about the dataset and data preparation.
 
 
 ## How to reproduce FSCE
@@ -100,7 +100,7 @@ bash ./tools/detection/dist_train.sh \
 
 
 **Note**:
-- All the base training configs is the same as [TFA](https://github.com/open-mmlab/mmfewshot/tree/master/configs/detection/fsce/README.md).
+- All the base training configs is the same as [TFA](https://github.com/open-mmlab/mmfewshot/tree/main/configs/detection/fsce/README.md).
   Therefore, the few shot fine-tuning can directly reuse the reshaped
   base model of fsce by creating a symlink or copying the whole checkpoint to the corresponding folder.
   Also, the released base training checkpoint is the same as the TFA, too.

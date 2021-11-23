@@ -46,9 +46,9 @@ dataset link is https://github.com/fanq15/Few-Shot-Object-Detection-Dataset.
 }
 ```
 
-**Note**: ALL the reported results use the data split released from [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/master/datasets/README.md) official repo.
+**Note**: ALL the reported results use the data split released from [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/main/datasets/README.md) official repo.
 Currently, each setting is only evaluated with one fixed few shot dataset.
-Please refer to [DATA Preparation](https://github.com/open-mmlab/mmfewshot/tree/master/tools/data/detection) to get more details about the dataset and data preparation.
+Please refer to [DATA Preparation](https://github.com/open-mmlab/mmfewshot/tree/main/tools/data/detection) to get more details about the dataset and data preparation.
 
 
 
@@ -87,7 +87,7 @@ bash ./tools/detection/dist_train.sh \
 
 **Note**:
 - The paper doesn't conduct experiments of VOC dataset.
-  Therefore, we use the VOC setting of [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/master/datasets/README.md) to evaluate the method.
+  Therefore, we use the VOC setting of [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/main/datasets/README.md) to evaluate the method.
 - Some implementation details should be noticed:
   - The training batch size are 8x2 for all the VOC experiments and 4x2 for all the COCO experiments(following the official repo).
   - Only the roi head will be trained during few shot fine-tuning for VOC experiments.
@@ -134,7 +134,7 @@ bash ./tools/detection/dist_train.sh \
 **Note**:
 - Following the original implementation, the training batch size are 4x2 for all the COCO experiments.
 - The official implementation use different COCO data split from TFA, and we report the results of both setting.
-  To reproduce the result following official data split (coco 17), please refer to [Data Preparation](https://github.com/open-mmlab/mmfewshot/tree/master/tools/data/detection/coco) to get more details about data preparation.
+  To reproduce the result following official data split (coco 17), please refer to [Data Preparation](https://github.com/open-mmlab/mmfewshot/tree/main/tools/data/detection/coco) to get more details about data preparation.
 - The performance of the base training and few shot setting can be unstable, even using the same random seed.
   To reproduce the reported few shot results, it is highly recommended using the released model for few shot fine-tuning.
 
@@ -142,14 +142,14 @@ bash ./tools/detection/dist_train.sh \
 
 | Arch  | data source| Base mAP |  ckpt | log |
 | :------: | :-----------: | :------: | :------: |:------: |
-| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_base-training.py) | [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/master/datasets/README.md) | 23.6 |[ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_base-training_20211102_003348-da28cdfd.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_base-training.log.json) |
-| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-base-training.py) | [official repo](https://github.com/fanq15/FewX/tree/master/datasets) | 24.0 | [ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-base-training_20211102_003347-f9e2dab0.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-base-training.log.json) |
+| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_base-training.py) | [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/main/datasets/README.md) | 23.6 |[ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_base-training_20211102_003348-da28cdfd.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_base-training.log.json) |
+| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-base-training.py) | [official repo](https://github.com/fanq15/FewX/tree/main/datasets) | 24.0 | [ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-base-training_20211102_003347-f9e2dab0.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-base-training.log.json) |
 
 
 ### Few Shot Finetuning
 
 | Arch  | data source|  Shot | Novel mAP |  ckpt | log |
 | :--------------: |  :--------------: | :-----------: |  :------: |:------: |:------: |
-| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_10shot-fine-tuning.py) | [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/master/datasets/README.md) | 10 | 9.2 | [ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_10shot-fine-tuning_20211103_003801-94ec8ada.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_10shot-fine-tuning.log.json) |
-| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_30shot-fine-tuning.py) | [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/master/datasets/README.md) | 30 | 14.8 | [ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_30shot-fine-tuning_20211103_010800-50611991.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_30shot-fine-tuning.log.json) |
-| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_10shot-fine-tuning.py) | [official repo](https://github.com/fanq15/FewX/tree/master/datasets) | 10 | 11.6 | [ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-10shot-fine-tuning_20211107_214729-6d046301.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-10shot-fine-tuning.log.json) |
+| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_10shot-fine-tuning.py) | [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/main/datasets/README.md) | 10 | 9.2 | [ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_10shot-fine-tuning_20211103_003801-94ec8ada.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_10shot-fine-tuning.log.json) |
+| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_30shot-fine-tuning.py) | [TFA](https://github.com/ucbdrive/few-shot-object-detection/blob/main/datasets/README.md) | 30 | 14.8 | [ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_30shot-fine-tuning_20211103_010800-50611991.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_30shot-fine-tuning.log.json) |
+| [r50 c4](/configs/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_10shot-fine-tuning.py) | [official repo](https://github.com/fanq15/FewX/tree/main/datasets) | 10 | 11.6 | [ckpt](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-10shot-fine-tuning_20211107_214729-6d046301.pth) | [log](https://download.openmmlab.com/mmfewshot/detection/attention_rpn/coco/attention-rpn_r50_c4_4xb2_coco_official-10shot-fine-tuning.log.json) |
