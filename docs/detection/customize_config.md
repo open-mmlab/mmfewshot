@@ -27,7 +27,7 @@ When submitting jobs using "tools/train.py" or "tools/test.py", you may specify 
   change this key, you may specify `--cfg-options workflow="[(train,1),(val,1)]"`. Note that the quotation mark \" is necessary to
   support list/tuple data types, and that **NO** white space is allowed inside the quotation marks in the specified value.
 
-## Config File Naming Convention
+## Config file naming convention
 
 We follow the below style to name config files. Contributors are advised to follow the same style.
 
@@ -48,7 +48,7 @@ We follow the below style to name config files. Contributors are advised to foll
 - `{dataset}`: dataset like `coco`, `voc-split1`, `voc-split2` and `voc-split3`.
 - `{data setting}`: like `base-training` or `1shot-fine-tuning`.
 
-## An Example of TFA
+## An example of TFA
 
 To help the users have a basic idea of a complete config and the modules in a modern classification system,
 we make brief comments on the config of TFA in coco 10 shot fine-tuning setting as the following.

@@ -2,7 +2,7 @@
 
 ## Customize optimization settings
 
-### Customize optimizer supported by Pytorch
+### Customize an optimizer supported by Pytorch
 
 We already support to use all the optimizers implemented by PyTorch, and the only modification is to change the `optimizer` field of config files.
 For example, if you want to use `ADAM` (note that the performance could drop a lot), the modification could be as the following.
@@ -347,7 +347,7 @@ evaluation = dict(interval=1, metric='bbox')
 ```
 
 
-## Customize Meta Testing
+## Customize meta testing
 
 We already support two ways to handle the support data, fine-tuning and straight forwarding.
 To customize the code for a meta test task, we need to add a new function `test_my_single_task`
