@@ -205,7 +205,7 @@ class MyClassifier(BaseFewShotClassifier):
             raise ValueError()
 ```
 
-#### using customize dataset wrapper in config
+#### Using customize dataset wrapper in config
 Then in the config, to use `MyDatasetWrapper` you can modify the config as the following,
 ```python
 dataset_A_train = dict(

@@ -27,7 +27,7 @@ When submitting jobs using "tools/classification/train.py" or "tools/classificat
   change this key, you may specify `--cfg-options workflow="[(train,1),(val,1)]"`. Note that the quotation mark \" is necessary to
   support list/tuple data types, and that **NO** white space is allowed inside the quotation marks in the specified value.
 
-## Config Name Style
+## Config name style
 
 We follow the below style to name config files. Contributors are advised to follow the same style.
 
@@ -50,7 +50,7 @@ We follow the below style to name config files. Contributors are advised to foll
 
 
 
-## An Example of Baseline
+## An example of Baseline
 
 To help the users have a basic idea of a complete config and the modules in a modern classification system,
 we make brief comments on the config of Baseline for MiniImageNet in 5 way 1 shot setting as the following.

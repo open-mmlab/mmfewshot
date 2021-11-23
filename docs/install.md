@@ -75,40 +75,15 @@ Or you can still install MMFewShot manually:
 
     Optionally you can compile mmcv from source if you need to develop both mmcv and mmdet. Refer to the [guide](https://github.com/open-mmlab/mmcv#installation) for details.
 
-2. Install MMClassification.
+2. Install MMClassification and MMDetection.
 
-    You can simply install mmclassification with the following command:
-
-    ```shell
-    pip install mmcls
-    ```
-
-    or clone the repository and then install it:
+    You can simply install mmclassification and mmdetection with the following command:
 
     ```shell
-    git clone https://github.com/open-mmlab/mmclassification.git
-    cd mmclassification
-    pip install -r requirements/build.txt
-    python setup.py install
+    pip install mmcls mmdet
     ```
 
-3. Install MMDetection.
-
-    You can simply install mmdetection with the following command:
-
-    ```shell
-    pip install mmdet
-    ```
-
-    or clone the repository and then install it:
-
-    ```shell
-    git clone https://github.com/open-mmlab/mmdetection.git
-    cd mmdetection
-    pip install -r requirements/build.txt
-    python setup.py install
-    ```
-4. Install MMFewShot.
+3. Install MMFewShot.
 
     You can simply install mmfewshot with the following command:
 
@@ -164,19 +139,8 @@ conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10
 # install the latest mmcv
 pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.0/index.html
 
-# install mmcls
-git clone https://github.com/open-mmlab/mmclassification.git
-cd mmclassification
-pip install -r requirements/build.txt
-python setup.py install
-cd ..
-
-# install mmdetection
-git clone https://github.com/open-mmlab/mmdetection.git
-cd mmdetection
-pip install -r requirements/build.txt
-python setup.py install
-cd ..
+# install mmclassification mmdetection
+pip install mmcls mmdet
 
 # install mmfewshot
 git clone https://github.com/open-mmlab/mmfewshot.git

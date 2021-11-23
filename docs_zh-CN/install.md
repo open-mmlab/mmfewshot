@@ -84,40 +84,15 @@ MIM 能够自动地安装 OpenMMLab 的项目以及对应的依赖包。
     pip install mmcv-full
     ```
 
-2. 安装 MMClassification.
+2. 安装 MMClassification 和 MMDetection.
 
-    你可以直接通过如下命令从 pip 安装使用 mmclassification：
-
-    ```shell
-    pip install mmcls
-    ```
-
-    或者从 git 仓库编译源码：
+    你可以直接通过如下命令从 pip 安装使用 mmclassification 和 mmdetection：
 
     ```shell
-    git clone https://github.com/open-mmlab/mmclassification.git
-    cd mmclassification
-    pip install -r requirements/build.txt
-    python setup.py install
+    pip install mmcls mmdet
     ```
 
-3. 安装 MMDetection.
-
-    你可以直接通过如下命令从 pip 安装使用 mmdetection：
-
-    ```shell
-    pip install mmdet
-    ```
-
-    或者从 git 仓库编译源码：
-
-    ```shell
-    git clone https://github.com/open-mmlab/mmdetection.git
-    cd mmdetection
-    pip install -r requirements/build.txt
-    python setup.py install
-    ```
-4. 安装 MMFewShot.
+3. 安装 MMFewShot.
 
     你可以直接通过如下命令从 pip 安装使用 mmfewshot：
 
@@ -170,19 +145,8 @@ conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10
 # 安装最新版本的 mmcv
 pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.0/index.html
 
-# 安装 mmcls
-git clone https://github.com/open-mmlab/mmclassification.git
-cd mmclassification
-pip install -r requirements/build.txt
-python setup.py install
-cd ..
-
-# 安装 mmdetection
-git clone https://github.com/open-mmlab/mmdetection.git
-cd mmdetection
-pip install -r requirements/build.txt
-python setup.py install
-cd ..
+# 安装 mmclassification mmdetection
+pip install mmcls mmdet
 
 # 安装 mmfewshot
 git clone https://github.com/open-mmlab/mmfewshot.git

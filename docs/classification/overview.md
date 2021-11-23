@@ -6,7 +6,7 @@ Therefore, the design of MMFewShot target at data sampling, meta test and models
 Additionally, the modules in [mmcls](https://github.com/open-mmlab/mmclassification) can be imported and reused in the code or config.
 
 
-## Design of Data Sampling
+## Design of data sampling
 In MMFewShot, we suggest customizing the data pipeline using a dataset wrapper and modify the arguments in forward
 function when returning the dict with customize keys.
 
@@ -29,7 +29,7 @@ class CustomizeDataset:
 More details can refer to [Tutorial 2: Adding New Dataset](https://mmfewshot.readthedocs.io/en/latest/classification/customize_dataset.html)
 
 
-## Design of Models API
+## Design of model APIs
 Each model in MMFewShot should implement following functions to support meta testing.
 More details can refer to [Tutorial 3: Customize Models](https://mmfewshot.readthedocs.io/en/latest/classification/customize_models.html)
 
@@ -68,7 +68,7 @@ class BaseFewShotClassifier(BaseModule):
 ```
 
 
-## Design of Meta Testing
+## Design of meta testing
 Meta testing performs prediction on random sampled tasks multiple times.
 Each task contains support and query data.
 More details can refer to `mmfewshot/classification/apis/test.py`.

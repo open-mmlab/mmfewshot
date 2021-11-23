@@ -1,8 +1,8 @@
 # Few Shot Classification Demo
 
-## 1 shot classification Demo (Metric Based Model)
+## One Shot Classification Demo (Metric Based Model)
 
-We provide a demo script to test a single query image, given directory of 1shot support images.
+We provide a demo script to test a single query image given the directory of one shot support images.
 The file names of support images will be used as class names.
 
 ```shell
@@ -35,7 +35,7 @@ python demo/demo_metric_classifier_1shot_inference.py \
 
 # Few Shot Detection Demo
 
-## Attention RPN inference with support instances Demo
+## Attention RPN Inference with Support Instances Demo
 
 We provide a demo script to test a single query image, given directory of support instance images.
 The file names of support images will be used as class names.

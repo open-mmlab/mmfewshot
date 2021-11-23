@@ -1,7 +1,7 @@
 # Tutorial 2: Adding New Dataset
 
 
-## Customize Dataset
+## Customize dataset
 
 ### Load annotations from file
 Different from the config in mmdet using `ann_file` to load a single dataset, we use `ann_cfg` to support the complex few shot setting.
@@ -153,7 +153,7 @@ dataset.prepare_train_img(self, idx, 'query')
 ```
 
 
-## Customize Dataset Wrapper
+## Customize a new dataset wrapper
 In few shot setting, the various sampling logic is implemented by
 dataset wrapper.
 An example of customizing query-support data sampling logic for training:
@@ -263,7 +263,7 @@ dataset_A_train = dict(
 ```
 
 
-## Customize Dataloader Wrapper
+## Customize a dataloader wrapper
 We also support to iterate two different dataset simultaneously by dataloader wrapper.
 
 An example of customizing dataloader wrapper for query and support dataset:
