@@ -84,7 +84,7 @@ Supported algorithms:
 
 ## Installation
 
-Please refer to [install.md](docs/install.md) for installation of mmfewshot.
+Please refer to [install.md](docs/install.md) for installation of mmfewshot and [guidance](tools/data/README.md) for dataset preparation.
 
 ## Getting Started
 
