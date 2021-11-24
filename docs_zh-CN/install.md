@@ -6,8 +6,8 @@
 - CUDA 9.2+
 - GCC 5+
 - [mmcv](https://mmcv.readthedocs.io/en/latest/#installation) 1.3.12+
-- [mmdet](https://mmdet.readthedocs.io/en/latest/#installation) 2.16.0+
-- [mmcls](https://mmcls.readthedocs.io/en/latest/#installation) 0.15.0+
+- [mmdet](https://mmdetection.readthedocs.io/en/latest/#installation) 2.16.0+
+- [mmcls](https://mmclassification.readthedocs.io/en/latest/#installation) 0.15.0+
 
 
 MMFewShot 和 MMCV, MMCls, MMDet 版本兼容性如下所示，需要安装正确的版本以避免安装出现问题。

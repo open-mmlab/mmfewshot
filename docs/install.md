@@ -6,8 +6,8 @@
 - CUDA 9.2+
 - GCC 5+
 - [mmcv](https://mmcv.readthedocs.io/en/latest/#installation) 1.3.12+
-- [mmdet](https://mmdet.readthedocs.io/en/latest/#installation) 2.16.0+
-- [mmcls](https://mmcls.readthedocs.io/en/latest/#installation) 0.15.0+
+- [mmdet](https://mmdetection.readthedocs.io/en/latest/#installation) 2.16.0+
+- [mmcls](https://mmclassification.readthedocs.io/en/latest/#installation) 0.15.0+
 
 
 Compatible MMCV, MMClassification and MMDetection versions are shown as below. Please install the correct version of them to avoid installation issues.
@@ -73,7 +73,7 @@ Or you can still install MMFewShot manually:
 
     See [here](https://github.com/open-mmlab/mmcv#installation) for different versions of MMCV compatible to different PyTorch and CUDA versions.
 
-    Optionally you can compile mmcv from source if you need to develop both mmcv and mmdet. Refer to the [guide](https://github.com/open-mmlab/mmcv#installation) for details.
+    Optionally you can compile mmcv from source if you need to develop both mmcv and mmfewshot. Refer to the [guide](https://github.com/open-mmlab/mmcv#installation) for details.
 
 2. Install MMClassification and MMDetection.
 
