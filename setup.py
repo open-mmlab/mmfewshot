@@ -159,7 +159,7 @@ if __name__ == '__main__':
         description='OpenMMLab FewShot Learning Toolbox and Benchmark',
         long_description=readme(),
         long_description_content_type='text/markdown',
-        author='OpenMMLab',
+        author='MMFewShot Contributors',
         author_email='openmmlab@gmail.com',
         keywords='computer vision, few shot learning',
         url='https://github.com/open-mmlab/mmfewshot',
