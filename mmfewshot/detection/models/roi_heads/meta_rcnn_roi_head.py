@@ -343,12 +343,12 @@ class MetaRCNNRoIHead(StandardRoIHead):
         cls_scores_dict[num_classes] /= len(support_feats_dict.keys())
         cls_scores = [
             cls_scores_dict[i] if i in cls_scores_dict.keys() else
-            torch.zeros_like(cls_scores_dict[cls_scores_dict.keys()[0]])
+            torch.zeros_like(cls_scores_dict[list(cls_scores_dict.keys())[0]])
             for i in range(num_classes + 1)
         ]
         bbox_preds = [
             bbox_preds_dict[i] if i in bbox_preds_dict.keys() else
-            torch.zeros_like(bbox_preds_dict[bbox_preds_dict.keys()[0]])
+            torch.zeros_like(bbox_preds_dict[list(bbox_preds_dict.keys())[0]])
             for i in range(num_classes)
         ]
         cls_score = torch.cat(cls_scores, dim=1)
