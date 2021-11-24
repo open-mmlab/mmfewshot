@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# Copyright (c) OpenMMLab. All rights reserved.
 import os
 import os.path as osp
 import platform
@@ -6,10 +6,6 @@ import shutil
 import sys
 import warnings
 from setuptools import find_packages, setup
-
-import torch
-from torch.utils.cpp_extension import (BuildExtension, CppExtension,
-                                       CUDAExtension)
 
 
 def readme():
@@ -25,30 +21,6 @@ def get_version():
     with open(version_file, 'r') as f:
         exec(compile(f.read(), version_file, 'exec'))
     return locals()['__version__']
-
-
-def make_cuda_ext(name, module, sources, sources_cuda=[]):
-    define_macros = []
-    extra_compile_args = {'cxx': []}
-
-    if torch.cuda.is_available() or os.getenv('FORCE_CUDA', '0') == '1':
-        define_macros += [('WITH_CUDA', None)]
-        extension = CUDAExtension
-        extra_compile_args['nvcc'] = [
-            '-D__CUDA_NO_HALF_OPERATORS__',
-            '-D__CUDA_NO_HALF_CONVERSIONS__',
-            '-D__CUDA_NO_HALF2_OPERATORS__',
-        ]
-        sources += sources_cuda
-    else:
-        print(f'Compiling {name} without CUDA')
-        extension = CppExtension
-
-    return extension(
-        name=f'{module}.{name}',
-        sources=[os.path.join(*module.split('.'), p) for p in sources],
-        define_macros=define_macros,
-        extra_compile_args=extra_compile_args)
 
 
 def parse_requirements(fname='requirements.txt', with_version=True):
@@ -187,7 +159,7 @@ if __name__ == '__main__':
         description='OpenMMLab FewShot Learning Toolbox and Benchmark',
         long_description=readme(),
         long_description_content_type='text/markdown',
-        author='OpenMMLab',
+        author='MMFewShot Contributors',
         author_email='openmmlab@gmail.com',
         keywords='computer vision, few shot learning',
         url='https://github.com/open-mmlab/mmfewshot',
@@ -211,5 +183,4 @@ if __name__ == '__main__':
             'optional': parse_requirements('requirements/optional.txt'),
         },
         ext_modules=[],
-        cmdclass={'build_ext': BuildExtension},
         zip_safe=False)
