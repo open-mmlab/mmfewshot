@@ -81,7 +81,7 @@ MMFewShot 是一款基于 PyTorch 的少样本学习代码库，是 [OpenMMLab](
 
 ## 安装
 
-请参考[安装文档](docs/install.md)进行安装。
+请参考[安装文档](docs/install.md)进行安装和参考[数据准备](tools/data/README.md)准备数据集。
 
 ## 快速入门
 

@@ -1,4 +1,4 @@
-# Data Preparation for Few Shot Detection
+# Data Preparation for Few Shot Classification
 
 It is recommended to symlink the dataset root to `$MMFEWSHOT/data`.
 If your folder structure is different, you may need to change the corresponding paths in config files.
