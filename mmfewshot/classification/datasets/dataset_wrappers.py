@@ -56,6 +56,7 @@ class EpisodicDataset:
             self.generate_episodic_idxes()
 
     def generate_episodic_idxes(self) -> Tuple[List[Mapping], List[List[int]]]:
+        """Generate batch indices for each episodic."""
         episode_idxes, episode_class_ids = [], []
         class_ids = [i for i in range(len(self.CLASSES))]
         # using same episodes seed can generate same episodes for same dataset
@@ -95,12 +96,15 @@ class EpisodicDataset:
         }
 
     def __len__(self) -> int:
+        """The length of the dataset is the number of generated episodes."""
         return self.num_episodes
 
     def evaluate(self, *args, **kwargs) -> List:
+        """Evaluate prediction."""
         return self.dataset.evaluate(*args, **kwargs)
 
     def get_episode_class_ids(self, idx: int) -> List[int]:
+        """Return class ids in one episode."""
         return self.episode_class_ids[idx]
 
 

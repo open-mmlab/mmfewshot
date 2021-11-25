@@ -76,6 +76,7 @@ class BaseFewShotDataset(Dataset, metaclass=ABCMeta):
             all_shot_ids, num_shots, replace=False).tolist()
 
     def __len__(self) -> int:
+        """Return length of the dataset."""
         return len(self.data_infos)
 
     def __getitem__(self, idx: int) -> Dict:
