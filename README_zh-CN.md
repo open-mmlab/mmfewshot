@@ -10,7 +10,7 @@
 [![Documentation](https://readthedocs.org/projects/mmfewshot/badge/?version=latest)](https://mmfewshot.readthedocs.io/en/latest/?badge=latest)
 [![actions](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
 [![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/master/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
-[![PyPI](https://badge.fury.io/py/mmedit.svg)](https://pypi.org/project/mmedit/)
+[![PyPI](https://badge.fury.io/py/mmfewshot.svg)](https://pypi.org/project/mmfewshot/)
 [![LICENSE](https://img.shields.io/github/license/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE)
 [![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
 [![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
@@ -84,8 +84,8 @@ MMFewShot 是一款基于 PyTorch 的少样本学习代码库，是 [OpenMMLab](
 请参考[安装文档](docs/install.md)进行安装和参考[数据准备](tools/data/README.md)准备数据集。
 
 ## 快速入门
-
-请参考[使用教程](docs/get_started.md)获取MMFewShot的基本用法。
+如果初次了解少样本学习，你可以从[Learn the basics](docs/intro.md)开始了解少样本学习的基本概念和 MMFewShot 的框架。
+如果对少样本学习很熟悉，请参考[使用教程](docs/get_started.md)获取MMFewShot的基本用法。
 
 MMFewShot 也提供了其他更详细的教程，包括：
 
