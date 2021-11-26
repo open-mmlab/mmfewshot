@@ -2,6 +2,13 @@ Welcome to MMFewShot's documentation!
 =======================================
 
 .. toctree::
+   :maxdepth: 1
+   :caption: Learn the Basics
+
+   intro.md
+
+
+.. toctree::
    :maxdepth: 2
    :caption: Get Started
 

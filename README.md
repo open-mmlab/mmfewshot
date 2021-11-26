@@ -10,8 +10,8 @@ English | [简体中文](README_zh-CN.md)
 
 [![Documentation](https://readthedocs.org/projects/mmfewshot/badge/?version=latest)](https://mmfewshot.readthedocs.io/en/latest/?badge=latest)
 [![actions](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
-[![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/master/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
-[![PyPI](https://badge.fury.io/py/mmedit.svg)](https://pypi.org/project/mmedit/)
+[![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/main/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
+[![PyPI](https://badge.fury.io/py/mmfewshot.svg)](https://pypi.org/project/mmfewshot/)
 [![LICENSE](https://img.shields.io/github/license/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE)
 [![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
 [![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
@@ -88,8 +88,25 @@ Please refer to [install.md](docs/install.md) for installation of mmfewshot and 
 
 ## Getting Started
 
-Please see [getting_started.md](docs/get_started.md) for the basic usage of mmfewshot.
+If you are new of few shot learning, you can start with [learn the basics](docs/intro.md).
+If you are familiar with it, check out [getting_started.md](docs/get_started.md) for the basic usage of mmfewshot.
 
+
+Refer to the below tutorials to dive deeper:
+
+- Few Shot Classification
+    - [Overview](docs/classification/overview.md)
+    - [Config](docs/classification/customize_config.md)
+    - [Customize Dataset](docs/classification/customize_dataset.md)
+    - [Customize Model](docs/classification/customize_models.md)
+    - [Customize Runtime](docs/classification/customize_runtime.md)
+
+- Few Shot Detection
+    - [Overview](docs/detection/overview.md)
+    - [Config](docs/detection/customize_config.md)
+    - [Customize Dataset](docs/detection/customize_dataset.md)
+    - [Customize Model](docs/detection/customize_models.md)
+    - [Customize Runtime](docs/detection/customize_runtime.md)
 
 ## Citation
 
