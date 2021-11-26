@@ -11,8 +11,8 @@ The prior knowledge usually refers to a large scale training set that has many c
 while the samples in new tasks are never seen in the training set.
 For example, in few shot image classification, a pre-trained model only can see
 five bird images (each class has one image and doesn't exist in the pretrained dataset) and
-predict the bird in query image belongs to which class.
-And in few shot detection, a detector needs to detect the new categories based on a few instances.
+predict the class of bird in the query image.
+Another example in few shot detection is that a detector needs to detect the new categories based on a few instances.
 
 In summary, few shot learning focus on two aspects:
 - how to embed prior knowledge into models (pre-train with large scale dataset)
@@ -28,14 +28,17 @@ In summary, few shot learning focus on two aspects:
 - Support set: a small set of labeled images and all the classes do not exist in the training set.
 - Query set: unlabeled images to predict and share the same classes with support set.
 - N way K shot: the support set setting, and it means support images contain N classes and
-  each class samples K images, so there will be NxK support images in each new task.
+  each class has K samples.
+  - For classification, there will be NxK support images in a support set.
+  - For detection, there will be NxK support instances in a support set,
+    and the number of images can be less than NxK.
 
 
 ### Evaluation
 #### Few shot classification
 The classes of a dataset will be divided into three disjoint groups: train, test and val set.
 The evaluation also called meta test, will randomly sample (N way x K shot) labeled support images + Q unlabeled
-query images from the test set to form a task and get the prediction accuracy of query images.
+query images from the test set to form a task and get the prediction accuracy of query images in that task.
 Usually, meta test will repeatedly sample numerous tasks to get a sufficient evaluation and
 calculate the mean and std of accuracy from all tasks.
 #### Few shot detection
