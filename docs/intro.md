@@ -33,8 +33,11 @@ In summary, few shot learning focus on two aspects:
 
 ### Evaluation
 #### Few shot classification
-Meta test: randomly sample different tasks ((N way x K shot) support images + Q query images)
-and calculate the mean and std of prediction accuracy on query images.
+The classes of a dataset will be divided into three disjoint groups: train, test and val set.
+The evaluation also called meta test, will randomly sample (N way x K shot) labeled support images + Q unlabeled
+query images from the test set to form a task and get the prediction accuracy of query images.
+Usually, meta test will repeatedly sample numerous tasks to get a sufficient evaluation and
+calculate the mean and std of accuracy from all tasks.
 #### Few shot detection
 The classes of dataset are split into two group, base classes and novel classes.
 The training set contains all the annotations from base classes and a few annotations from novel classes.
