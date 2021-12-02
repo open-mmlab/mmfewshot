@@ -7,6 +7,7 @@
 ## Introduction
 
 [English](README.md) | 简体中文
+
 [![Documentation](https://readthedocs.org/projects/mmfewshot/badge/?version=latest)](https://mmfewshot.readthedocs.io/en/latest/?badge=latest)
 [![actions](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
 [![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/main/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)

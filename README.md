@@ -53,7 +53,7 @@ This project is released under the [Apache 2.0 license](LICENSE).
 Supported algorithms:
 
 <details open>
-<summary>classification</summary>
+<summary>Classification</summary>
 
 - [x] [Baseline](configs/classification/baseline/README.md) (ICLR'2019)
 - [x] [Baseline++](configs/classification/baseline_plus/README.md) (ICLR'2019)
