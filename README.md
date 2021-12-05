@@ -53,7 +53,7 @@ This project is released under the [Apache 2.0 license](LICENSE).
 Supported algorithms:
 
 <details open>
-<summary>classification</summary>
+<summary>Classification</summary>
 
 - [x] [Baseline](configs/classification/baseline/README.md) (ICLR'2019)
 - [x] [Baseline++](configs/classification/baseline_plus/README.md) (ICLR'2019)
@@ -146,3 +146,4 @@ mmfewshot is an open source project that is contributed by researchers and engin
 - [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab image and video generative models toolbox.
 - [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab optical flow toolbox and benchmark.
 - [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab FewShot Learning Toolbox and Benchmark.
+- [MMHuman3D](https://github.com/open-mmlab/mmhuman3d): OpenMMLab 3D Human Parametric Model Toolbox and Benchmark.

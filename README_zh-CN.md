@@ -7,6 +7,7 @@
 ## Introduction
 
 [English](README.md) | 简体中文
+
 [![Documentation](https://readthedocs.org/projects/mmfewshot/badge/?version=latest)](https://mmfewshot.readthedocs.io/en/latest/?badge=latest)
 [![actions](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
 [![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/main/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
@@ -145,6 +146,7 @@ MMFewShot 是一款由不同学校和公司共同贡献的开源项目。我们�
 - [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab 新一代生成模型工具箱
 - [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab 光流估计工具箱与测试基准
 - [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab 少样本学习工具箱与测试基准
+- [MMHuman3D](https://github.com/open-mmlab/mmhuman3d): OpenMMLab 人体参数化模型工具箱与测试基准
 
 ## 欢迎加入 OpenMMLab 社区
 
