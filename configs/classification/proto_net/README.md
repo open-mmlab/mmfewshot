@@ -68,6 +68,9 @@ python ./tools/classification/test.py \
   feel free to tone and try different configurations.
   For example, try different learning rate or validation episodes for each setting.
   Anyway, we will continue to improve it.
+- The training batch size is calculated by `num_support_way` * (`num_support_shots` + `num_query_shots`)
+
+
 
 ## Results on CUB dataset with 2000 episodes
 
