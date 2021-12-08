@@ -163,3 +163,6 @@ pip install -v -e .  # or "python setup.py develop"
 具体的细节可以参考 [few shot classification demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-classification-demo)
 以及 [few shot detection demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-detection-demo) 。
 如果成功安装 MMFewShot，则上面的代码可以完整地运行。
+
+## 准备数据集
+具体的细节可以参考 [准备数据](https://github.com/open-mmlab/mmfewshot/tree/main/tools/data) 下载并组织数据集。
