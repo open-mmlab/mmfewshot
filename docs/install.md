@@ -157,3 +157,6 @@ To verify whether MMFewShot is installed correctly, we can run the demo code and
 Please refer to [few shot classification demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-classification-demo)
 or [few shot detection demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-detection-demo)
  for more details. The demo code is supposed to run successfully upon you finish the installation.
+
+## Dataset Preparation
+Please refer to [data preparation](https://github.com/open-mmlab/mmfewshot/tree/main/tools/data) for dataset preparation.

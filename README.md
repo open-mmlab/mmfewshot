@@ -82,9 +82,9 @@ Supported algorithms:
 ## Changelog
 
 
-## Installation
+## Installation & Dataset Preparation
 
-Please refer to [install.md](docs/install.md) for installation of mmfewshot and [guidance](tools/data/README.md) for dataset preparation.
+Please refer to [install.md](docs/install.md) for installation of mmfewshot and [data preparation](tools/data/README.md) for dataset preparation.
 
 ## Getting Started
 
