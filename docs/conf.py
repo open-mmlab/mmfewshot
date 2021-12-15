@@ -22,6 +22,9 @@ sys.path.insert(0, os.path.abspath('..'))
 
 project = 'mmfewshot'
 copyright = '2018-2021, OpenMMLab'
+
+
+
 author = 'MMFewShot Author'
 version_file = '../mmfewshot/version.py'
 
