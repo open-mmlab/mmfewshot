@@ -53,7 +53,7 @@ This project is released under the [Apache 2.0 license](LICENSE).
 Supported algorithms:
 
 <details open>
-<summary>classification</summary>
+<summary>Classification</summary>
 
 - [x] [Baseline](configs/classification/baseline/README.md) (ICLR'2019)
 - [x] [Baseline++](configs/classification/baseline_plus/README.md) (ICLR'2019)
@@ -82,9 +82,9 @@ Supported algorithms:
 ## Changelog
 
 
-## Installation
+## Installation & Dataset Preparation
 
-Please refer to [install.md](docs/install.md) for installation of mmfewshot and [guidance](tools/data/README.md) for dataset preparation.
+Please refer to [install.md](docs/install.md) for installation of mmfewshot and [data preparation](tools/data/README.md) for dataset preparation.
 
 ## Getting Started
 
@@ -142,7 +142,8 @@ mmfewshot is an open source project that is contributed by researchers and engin
 - [MMTracking](https://github.com/open-mmlab/mmtracking): OpenMMLab video perception toolbox and benchmark.
 - [MMPose](https://github.com/open-mmlab/mmpose): OpenMMLab pose estimation toolbox and benchmark.
 - [MMEditing](https://github.com/open-mmlab/mmediting): OpenMMLab image and video editing toolbox.
-- [MMOCR](https://github.com/open-mmlab/mmocr): A Comprehensive Toolbox for Text Detection, Recognition and Understanding.
-- [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab image and video generative models toolbox.
+- [MMOCR](https://github.com/open-mmlab/mmocr): A comprehensive toolbox for text detection, recognition and understanding.
+- [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab's next-generation toolbox for generative models.
 - [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab optical flow toolbox and benchmark.
-- [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab FewShot Learning Toolbox and Benchmark.
+- [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab fewshot learning toolbox and benchmark.
+- [MMHuman3D](https://github.com/open-mmlab/mmhuman3d): OpenMMLab 3D human parametric model toolbox and benchmark.

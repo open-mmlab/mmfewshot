@@ -5,9 +5,9 @@
 - PyTorch 1.5+
 - CUDA 9.2+
 - GCC 5+
-- [mmcv](https://mmcv.readthedocs.io/en/latest/#installation) 1.3.12+
-- [mmdet](https://mmdetection.readthedocs.io/en/latest/#installation) 2.16.0+
-- [mmcls](https://mmclassification.readthedocs.io/en/latest/#installation) 0.15.0+
+- [mmcv](https://mmcv.readthedocs.io/en/latest/get_started/installation.html) 1.3.12+
+- [mmdet](https://mmdetection.readthedocs.io/en/latest/get_started.html#installation) 2.16.0+
+- [mmcls](https://mmclassification.readthedocs.io/en/latest/install.html) 0.15.0+
 
 
 Compatible MMCV, MMClassification and MMDetection versions are shown as below. Please install the correct version of them to avoid installation issues.
@@ -157,3 +157,6 @@ To verify whether MMFewShot is installed correctly, we can run the demo code and
 Please refer to [few shot classification demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-classification-demo)
 or [few shot detection demo](https://github.com/open-mmlab/mmfewshot/tree/main/demo#few-shot-detection-demo)
  for more details. The demo code is supposed to run successfully upon you finish the installation.
+
+## Dataset Preparation
+Please refer to [data preparation](https://github.com/open-mmlab/mmfewshot/tree/main/tools/data) for dataset preparation.
