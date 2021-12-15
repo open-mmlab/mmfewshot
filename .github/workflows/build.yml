@@ -7,8 +7,6 @@ on:
       - 'README_zh-CN.md'
       - 'docs/**'
       - 'docs_zh-CN/**'
-      - 'examples/**'
-      - '.dev_scripts/**'
 
   pull_request:
     paths-ignore:
@@ -16,8 +14,10 @@ on:
       - 'README_zh-CN.md'
       - 'docs/**'
       - 'docs_zh-CN/**'
-      - 'examples/**'
-      - '.dev_scripts/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build_cpu:
