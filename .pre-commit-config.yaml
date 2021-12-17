@@ -43,7 +43,7 @@ repos:
     hooks:
       - id: codespell
         args: ["--skip", "*.ipynb", "-L", "gool,winn,confectionary"]
-  - repo: https://github.com/zhouzaida/pre-commit-hooks
+  - repo: https://github.com/open-mmlab/pre-commit-hooks
     rev: v0.1.0  # Use the ref you want to point at
     hooks:
       - id: check-algo-readme
