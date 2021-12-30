@@ -86,8 +86,8 @@ class MetaTestEvalHook(Hook):
                 warnings.warn('runner.meta is None. Creating an empty one.')
                 runner.meta = dict()
             runner.meta.setdefault('hook_msgs', dict())
-            self.best_score = runner.meta.get('best_score', 0.0)
-            if self.best_score > 0.0:
+            if runner.meta['hook_msgs'].get('best_score', False):
+                self.best_score = runner.meta['hook_msgs']['best_score']
                 runner.logger.info(
                     f'Previous best score is: {self.best_score}.')
             self.best_ckpt_path = runner.meta['hook_msgs'].get(
@@ -140,7 +140,6 @@ class MetaTestEvalHook(Hook):
 
         if self.best_score < key_score:
             self.best_score = key_score
-            runner.meta['best_score'] = self.best_score
             runner.meta['hook_msgs']['best_score'] = self.best_score
             runner.meta['hook_msgs']['ckpt_time'] = current
 
@@ -152,10 +151,7 @@ class MetaTestEvalHook(Hook):
             runner.meta['hook_msgs']['best_ckpt'] = self.best_ckpt_path
 
             runner.save_checkpoint(
-                runner.work_dir,
-                best_ckpt_name,
-                meta={'best_score': self.best_score},
-                create_symlink=False)
+                runner.work_dir, best_ckpt_name, create_symlink=False)
             runner.logger.info(
                 f'Now best checkpoint is saved as {best_ckpt_name}.')
             runner.logger.info(

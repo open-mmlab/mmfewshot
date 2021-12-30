@@ -213,6 +213,6 @@ def test_resume_eval_hook():
             logger=logging.getLogger(),
             max_epochs=1)
         runner.register_hook(eval_hook)
-        runner.meta = {'best_score': 99.0}
+        runner.meta = {'hook_msgs': {'best_score': 99.0}}
         runner.run([loader], [('train', 1)], 1)
         assert eval_hook.best_score == 99.0
