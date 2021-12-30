@@ -123,7 +123,8 @@ def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
                 all_data_loader,
                 num_test_tasks=meta_test_cfg['num_episodes'],
                 **eval_cfg),
-            priority='LOW')
+            # make eval hook (45) run before checkpoint saver hook (50)
+            priority=45)
 
         # user-defined hooks
         if cfg.get('custom_hooks', None):
