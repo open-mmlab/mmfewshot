@@ -5,6 +5,7 @@ import os
 import os.path as osp
 import time
 
+import cv2
 import mmcv
 import torch
 from mmcls import __version__
@@ -16,6 +17,10 @@ from mmcv.runner import get_dist_info, init_dist, set_random_seed
 from mmfewshot.classification.apis import train_model
 from mmfewshot.classification.datasets import build_dataset
 from mmfewshot.utils import get_root_logger
+
+cv2.setNumThreads(0)
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
 
 
 def parse_args():
