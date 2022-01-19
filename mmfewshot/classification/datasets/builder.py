@@ -4,7 +4,8 @@ from functools import partial
 from typing import Dict, Optional
 
 from mmcls.datasets import ClassBalancedDataset, ConcatDataset, RepeatDataset
-from mmcls.datasets.builder import DATASETS, DistributedSampler, worker_init_fn
+from mmcls.datasets.builder import DATASETS, worker_init_fn
+from mmcls.datasets.samplers import DistributedSampler
 from mmcv.runner import get_dist_info
 from mmcv.utils import build_from_cfg
 from torch.utils.data import DataLoader, Dataset
