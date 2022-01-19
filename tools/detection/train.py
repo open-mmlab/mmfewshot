@@ -21,6 +21,7 @@ from mmfewshot.detection.datasets import build_dataset
 from mmfewshot.detection.models import build_detector
 from mmfewshot.utils import get_root_logger
 
+# disable multithreading to avoid system being overloaded
 cv2.setNumThreads(0)
 os.environ['OMP_NUM_THREADS'] = '1'
 os.environ['MKL_NUM_THREADS'] = '1'
