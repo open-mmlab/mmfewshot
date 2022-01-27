@@ -6,6 +6,7 @@ import os.path as osp
 import time
 import warnings
 
+import cv2
 import mmcv
 import torch
 from mmcv import Config, DictAction
@@ -19,6 +20,11 @@ from mmfewshot.detection.apis import train_detector
 from mmfewshot.detection.datasets import build_dataset
 from mmfewshot.detection.models import build_detector
 from mmfewshot.utils import get_root_logger
+
+# disable multithreading to avoid system being overloaded
+cv2.setNumThreads(0)
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
 
 
 def parse_args():
