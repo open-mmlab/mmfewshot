@@ -32,7 +32,7 @@ assert (digit_version(mmcv_minimum_version) <= mmcv_version
     f'Please install mmcv>={mmcv_minimum_version}, <={mmcv_maximum_version}.'
 
 mmdet_minimum_version = '2.16.0'
-mmdet_maximum_version = '2.20.0'
+mmdet_maximum_version = '2.21.0'
 mmdet_version = digit_version(mmdet.__version__)
 
 
@@ -43,7 +43,7 @@ assert (digit_version(mmdet_minimum_version) <= mmdet_version
      <={mmdet_maximum_version}.'
 
 mmcls_minimum_version = '0.15.0'
-mmcls_maximum_version = '0.19.0'
+mmcls_maximum_version = '0.21.0'
 mmcls_version = digit_version(mmcls.__version__)
 
 
