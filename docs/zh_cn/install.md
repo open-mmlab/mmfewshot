@@ -60,29 +60,18 @@ MIM 能够自动地安装 OpenMMLab 的项目以及对应的依赖包。
 1. 安装 mmcv-full，我们建议使用预构建包来安装：
 
     ```shell
-    pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch_version}/index.html
+    # pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch_version}/index.html
+    pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu102/torch1.10.0/index.html
     ```
 
-    需要把命令行中的 `{cu_version}` 和 `{torch_version}` 替换成对应的版本。例如：在 CUDA 11 和 PyTorch 1.7.0 的环境下，可以使用下面命令安装最新版本的 MMCV：
+    PyTorch 在 1.x.0 和 1.x.1 之间通常是兼容的，故 mmcv-full 只提供 1.x.0 的编译包。如果你的 PyTorch 版本是 1.x.1，你可以放心地安装在 1.x.0 版本编译的 mmcv-full。
 
-    ```shell
-    pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu110/torch1.7.0/index.html
+    ```
+    # 我们可以忽略 PyTorch 的小版本号
+    pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu102/torch1.10/index.html
     ```
 
-    请参考 [MMCV](https://mmcv.readthedocs.io/en/latest/#installation) 获取不同版本的 MMCV 所兼容的的不同的 PyTorch 和 CUDA 版本。同时，也可以通过以下命令行从源码编译 MMCV：
-
-    ```shell
-    git clone https://github.com/open-mmlab/mmcv.git
-    cd mmcv
-    MMCV_WITH_OPS=1 pip install -e .  # 安装好 mmcv-full
-    cd ..
-    ```
-
-    或者，可以直接使用命令行安装：
-
-    ```shell
-    pip install mmcv-full
-    ```
+    请参阅 [MMCV](https://github.com/open-mmlab/mmcv#install-with-pip) 了解不同版本的 MMCV 与不同版本的 PyTorch 和 CUDA 的兼容情况。同时，您可以使用以下命令从源码编译 MMCV：
 
 2. 安装 MMClassification 和 MMDetection.
 
