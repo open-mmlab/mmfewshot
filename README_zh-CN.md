@@ -100,8 +100,8 @@ MMFewShot 是一款基于 PyTorch 的少样本学习代码库，是 [OpenMMLab](
 请参考[安装文档](docs/install.md)进行安装和参考[数据准备](tools/data/README.md)准备数据集。
 
 ## 快速入门
-如果初次了解少样本学习，你可以从[基础介绍](docs/intro.md)开始了解少样本学习的基本概念和 MMFewShot 的框架。
-如果对少样本学习很熟悉，请参考[使用教程](docs/get_started.md)获取MMFewShot的基本用法。
+如果初次了解少样本学习，你可以从[基础介绍](docs/en/intro.md)开始了解少样本学习的基本概念和 MMFewShot 的框架。
+如果对少样本学习很熟悉，请参考[使用教程](docs/en/get_started.md)获取MMFewShot的基本用法。
 
 MMFewShot 也提供了其他更详细的教程，包括：
 
