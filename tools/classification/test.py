@@ -3,6 +3,7 @@ import argparse
 import os
 import os.path as osp
 import time
+import warnings
 
 import mmcv
 import torch
@@ -64,10 +65,19 @@ def parse_args():
         help='whether to set deterministic options for CUDNN backend.')
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument(
-        '--device',
-        choices=['cpu', 'cuda'],
-        default='cuda',
-        help='device used for testing')
+        '--device', default=None, help='device used for testing. (Deprecated)')
+    parser.add_argument(
+        '--gpu-ids',
+        type=int,
+        nargs='+',
+        help='(Deprecated, please use --gpu-id) ids of gpus to use '
+        '(only applicable to non-distributed testing)')
+    parser.add_argument(
+        '--gpu-id',
+        type=int,
+        default=0,
+        help='id of gpu to use '
+        '(only applicable to non-distributed testing)')
     parser.add_argument(
         '--show_task_results',
         action='store_true',
@@ -75,6 +85,15 @@ def parse_args():
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
+
+    if args.device:
+        warnings.warn(
+            '--device is deprecated. To use cpu to test, please '
+            'refers to https://mmclassification.readthedocs.io/en/latest/'
+            'getting_started.html#inference-with-pretrained-models')
+
+    assert args.metrics or args.out, \
+        'Please specify at least one of output path and evaluation metrics.'
     return args
 
 
@@ -96,7 +115,14 @@ def main():
         # use config filename as default work_dir if cfg.work_dir is None
         cfg.work_dir = osp.join('./work_dirs',
                                 osp.splitext(osp.basename(args.config))[0])
-
+    if args.gpu_ids is not None:
+        cfg.gpu_ids = args.gpu_ids[0:1]
+        warnings.warn('`--gpu-ids` is deprecated, please use `--gpu-id`. '
+                      'Because we only support single GPU mode in '
+                      'non-distributed testing. Use the first GPU '
+                      'in `gpu_ids` now.')
+    else:
+        cfg.gpu_ids = [args.gpu_id]
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         distributed = False

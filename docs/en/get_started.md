@@ -1,6 +1,7 @@
 ## Test a model
 
 - single GPU
+- CPU
 - single node multiple GPU
 - multiple node
 
@@ -8,6 +9,10 @@ You can use the following commands to infer a dataset.
 
 ```shell
 # single-gpu
+python tools/test.py ${CONFIG_FILE} ${CHECKPOINT_FILE} [optional arguments]
+
+# CPU: disable GPUs and run single-gpu testing script
+export CUDA_VISIBLE_DEVICES=-1
 python tools/test.py ${CONFIG_FILE} ${CHECKPOINT_FILE} [optional arguments]
 
 # multi-gpu
@@ -45,6 +50,20 @@ python tools/train.py ${CONFIG_FILE} [optional arguments]
 ```
 
 If you want to specify the working directory in the command, you can add an argument `--work_dir ${YOUR_WORK_DIR}`.
+
+### Train on CPU
+
+The process of training on the CPU is consistent with single GPU training. We just need to disable GPUs before the training process.
+
+```shell
+export CUDA_VISIBLE_DEVICES=-1
+python tools/train.py ${CONFIG_FILE} [optional arguments]
+```
+
+**Note**:
+
+We do not recommend users to use CPU for training because it is too slow. We support this feature to allow users to debug on machines without GPU for convenience.
+
 
 ### Train with multiple GPUs
 
