@@ -189,6 +189,7 @@ def build_dataloader(dataset: Dataset,
         seed=seed) if seed is not None else None
     if isinstance(dataset, QueryAwareDataset):
         from mmfewshot.utils import multi_pipeline_collate_fn
+
         # `QueryAwareDataset` will return a list of DataContainer
         # `multi_pipeline_collate_fn` are designed to handle
         # the data with list[list[DataContainer]]
@@ -203,12 +204,12 @@ def build_dataloader(dataset: Dataset,
             worker_init_fn=init_fn,
             **kwargs)
     elif isinstance(dataset, NWayKShotDataset):
-        from .dataloader_wrappers import NWayKShotDataloader
         from mmfewshot.utils import multi_pipeline_collate_fn
+        from .dataloader_wrappers import NWayKShotDataloader
+
         # `NWayKShotDataset` will return a list of DataContainer
         # `multi_pipeline_collate_fn` are designed to handle
         # the data with list[list[DataContainer]]
-
         # initialize query dataloader
         query_data_loader = DataLoader(
             dataset,
@@ -260,12 +261,12 @@ def build_dataloader(dataset: Dataset,
             query_data_loader=query_data_loader,
             support_data_loader=support_data_loader)
     elif isinstance(dataset, TwoBranchDataset):
-        from .dataloader_wrappers import TwoBranchDataloader
         from mmfewshot.utils import multi_pipeline_collate_fn
+        from .dataloader_wrappers import TwoBranchDataloader
+
         # `TwoBranchDataset` will return a list of DataContainer
         # `multi_pipeline_collate_fn` are designed to handle
         # the data with list[list[DataContainer]]
-
         # initialize main dataloader
         main_data_loader = DataLoader(
             dataset,
