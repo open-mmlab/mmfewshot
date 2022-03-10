@@ -1,4 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import warnings
 from typing import Dict, Union
 
 import torch
@@ -22,7 +23,7 @@ def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
                 distributed: bool = False,
                 validate: bool = False,
                 timestamp: str = None,
-                device: str = 'cuda',
+                device: str = None,
                 meta: Dict = None) -> None:
     logger = get_root_logger(log_level=cfg.log_level)
 
@@ -54,13 +55,14 @@ def train_model(model: Union[MMDataParallel, MMDistributedDataParallel],
             broadcast_buffers=False,
             find_unused_parameters=find_unused_parameters)
     else:
-        if device == 'cuda':
-            model = MMDataParallel(
-                model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
-        elif device == 'cpu':
+        if device == 'cpu':
+            warnings.warn(
+                'The argument `device` is deprecated. To use cpu to train, '
+                'please refers to https://mmclassification.readthedocs.io/en'
+                '/latest/getting_started.html#train-a-model')
             model = model.cpu()
         else:
-            raise ValueError(F'unsupported device name {device}.')
+            model = MMDataParallel(model, device_ids=cfg.gpu_ids)
 
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)
