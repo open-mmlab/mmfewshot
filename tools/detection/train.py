@@ -142,6 +142,7 @@ def main():
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
         distributed = False
+        rank = 0
     else:
         distributed = True
         init_dist(args.launcher, **cfg.dist_params)

@@ -195,6 +195,7 @@ def main():
             shuffle=False)
 
     if not distributed:
+        # Please use MMCV >= 1.4.4 for CPU testing!
         model = MMDataParallel(model, device_ids=cfg.gpu_ids)
         show_kwargs = dict(show_score_thr=args.show_score_thr)
         if cfg.data.get('model_init', None) is not None:
