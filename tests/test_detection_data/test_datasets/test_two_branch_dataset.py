@@ -1,4 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import os
 import tempfile
 
 from mmdet.apis import set_random_seed
@@ -45,4 +46,4 @@ def test_two_branch_dataset():
     assert len(two_branch_dataset) == 25
     # test save dataset
     with tempfile.TemporaryDirectory() as tmpdir:
-        two_branch_dataset.save_data_infos(tmpdir + 'ann.json')
+        two_branch_dataset.save_data_infos(tmpdir + f'{os.sep}ann.json')
