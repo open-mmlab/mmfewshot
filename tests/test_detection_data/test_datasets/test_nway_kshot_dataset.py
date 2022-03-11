@@ -1,4 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import os
 import tempfile
 
 import numpy as np
@@ -85,4 +86,4 @@ def test_nway_kshot_dataset():
                 assert count <= 1
         # test save dataset
         with tempfile.TemporaryDirectory() as tmpdir:
-            nway_kshot_dataset.save_data_infos(tmpdir + 'ann.json')
+            nway_kshot_dataset.save_data_infos(tmpdir + f'{os.sep}ann.json')
