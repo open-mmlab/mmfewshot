@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
+import os
 import tempfile
 
 import numpy as np
@@ -108,10 +109,10 @@ def test_few_shot_voc_dataset():
         dataset.data_infos[1]['ann']['bboxes_ignore'] = np.array(
             [[11, 11, 100, 100]])
         dataset.data_infos[1]['ann']['labels_ignore'] = np.array([0])
-        dataset.save_data_infos(tmpdir + 'ann.json')
+        dataset.save_data_infos(tmpdir + f'{os.sep}ann.json')
         data_config['ann_cfg'] = [{
             'type': 'saved_dataset',
-            'ann_file': tmpdir + 'ann.json'
+            'ann_file': tmpdir + f'{os.sep}ann.json'
         }]
         dataset = FewShotVOCDataset(**data_config)
         count = 0

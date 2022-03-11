@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
+import os
 import tempfile
 
 import numpy as np
@@ -144,10 +145,10 @@ def test_few_shot_coco_dataset():
 
     # test save and load dataset
     with tempfile.TemporaryDirectory() as tmpdir:
-        dataset.save_data_infos(tmpdir + 'ann.json')
+        dataset.save_data_infos(tmpdir + f'{os.sep}ann.json')
         data_config['ann_cfg'] = [{
             'type': 'saved_dataset',
-            'ann_file': tmpdir + 'ann.json'
+            'ann_file': tmpdir + f'{os.sep}ann.json'
         }]
         dataset = FewShotCocoDataset(**data_config)
         count = 0
