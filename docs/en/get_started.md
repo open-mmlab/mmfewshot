@@ -16,7 +16,7 @@ export CUDA_VISIBLE_DEVICES=-1
 python tools/test.py ${CONFIG_FILE} ${CHECKPOINT_FILE} [optional arguments]
 
 # multi-gpu
-./tools/dist_test.sh ${CONFIG_FILE} ${CHECKPOINT_FILE} ${GPU_NUM} [optional arguments]
+sh ./tools/dist_test.sh ${CONFIG_FILE} ${CHECKPOINT_FILE} ${GPU_NUM} [optional arguments]
 
 # multi-node in slurm environment
 python tools/test.py ${CONFIG_FILE} ${CHECKPOINT_FILE} [optional arguments] --launcher slurm
@@ -68,7 +68,7 @@ We do not recommend users to use CPU for training because it is too slow. We sup
 ### Train with multiple GPUs
 
 ```shell
-./tools/dist_train.sh ${CONFIG_FILE} ${GPU_NUM} [optional arguments]
+sh ./tools/dist_train.sh ${CONFIG_FILE} ${GPU_NUM} [optional arguments]
 ```
 
 Optional arguments are:
@@ -82,11 +82,28 @@ Difference between `resume-from` and `load-from`:
 `load-from` only loads the model weights and the training epoch starts from 0. It is usually used for finetuning.
 
 ### Train with multiple machines
+If you launch with multiple machines simply connected with ethernet, you can simply run following commands:
+
+On the first machine:
+
+```shell
+NNODES=2 NODE_RANK=0 PORT=$MASTER_PORT MASTER_ADDR=$MASTER_ADDR sh tools/dist_train.sh $CONFIG $GPUS
+```
+
+On the second machine:
+
+```shell
+NNODES=2 NODE_RANK=1 PORT=$MASTER_PORT MASTER_ADDR=$MASTER_ADDR sh tools/dist_train.sh $CONFIG $GPUS
+```
+
+Usually it is slow if you do not have high speed networking like InfiniBand.
+
+
 
 If you run MMClassification on a cluster managed with [slurm](https://slurm.schedmd.com/), you can use the script `slurm_train.sh`. (This script also supports single machine training.)
 
 ```shell
-[GPUS=${GPUS}] ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} ${CONFIG_FILE} ${WORK_DIR}
+[GPUS=${GPUS}] sh ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} ${CONFIG_FILE} ${WORK_DIR}
 ```
 
 You can check [slurm_train.sh](https://github.com/open-mmlab/mmclassification/blob/master/tools/slurm_train.sh) for full arguments and environment variables.
@@ -103,8 +120,8 @@ you need to specify different ports (29500 by default) for each job to avoid com
 If you use `dist_train.sh` to launch training jobs, you can set the port in commands.
 
 ```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 PORT=29500 ./tools/dist_train.sh ${CONFIG_FILE} 4
-CUDA_VISIBLE_DEVICES=4,5,6,7 PORT=29501 ./tools/dist_train.sh ${CONFIG_FILE} 4
+CUDA_VISIBLE_DEVICES=0,1,2,3 PORT=29500 sh ./tools/dist_train.sh ${CONFIG_FILE} 4
+CUDA_VISIBLE_DEVICES=4,5,6,7 PORT=29501 sh ./tools/dist_train.sh ${CONFIG_FILE} 4
 ```
 
 If you use launch training jobs with Slurm, you need to modify the config files (usually the 6th line from the bottom in config files) to set different communication ports.
@@ -124,6 +141,6 @@ dist_params = dict(backend='nccl', port=29501)
 Then you can launch two jobs with `config1.py` ang `config2.py`.
 
 ```shell
-CUDA_VISIBLE_DEVICES=0,1,2,3 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config1.py ${WORK_DIR}
-CUDA_VISIBLE_DEVICES=4,5,6,7 GPUS=4 ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config2.py ${WORK_DIR}
+CUDA_VISIBLE_DEVICES=0,1,2,3 GPUS=4 sh ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config1.py ${WORK_DIR}
+CUDA_VISIBLE_DEVICES=4,5,6,7 GPUS=4 sh ./tools/slurm_train.sh ${PARTITION} ${JOB_NAME} config2.py ${WORK_DIR}
 ```
