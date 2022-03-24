@@ -45,7 +45,7 @@ class InfiniteSampler(Sampler):
     def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
         g = torch.Generator()
-        g.manual_seed(self.seed)
+        g.manual_seed(self.seed + self.epoch)
         while True:
             if self.shuffle:
                 yield from torch.randperm(self.size, generator=g).tolist()
@@ -119,7 +119,7 @@ class InfiniteGroupSampler(Sampler):
     def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
         g = torch.Generator()
-        g.manual_seed(self.seed)
+        g.manual_seed(self.seed + self.epoch)
         while True:
             if self.shuffle:
                 yield from torch.randperm(self.size, generator=g).tolist()
@@ -197,7 +197,7 @@ class DistributedInfiniteSampler(Sampler):
     def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
         g = torch.Generator()
-        g.manual_seed(self.seed)
+        g.manual_seed(self.seed + self.epoch)
         while True:
             if self.shuffle:
                 indices = []
@@ -286,7 +286,7 @@ class DistributedInfiniteGroupSampler(Sampler):
     def _infinite_indices(self) -> Iterator:
         """Infinitely yield a sequence of indices."""
         g = torch.Generator()
-        g.manual_seed(self.seed)
+        g.manual_seed(self.seed + self.epoch)
         while True:
             if self.shuffle:
                 indices = []
