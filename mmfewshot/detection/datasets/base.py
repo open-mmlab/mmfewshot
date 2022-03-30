@@ -539,6 +539,8 @@ class BaseFewShotDataset(CustomDataset):
             if len(row_data) == 10:
                 table_data.append(row_data)
                 row_data = []
+        if len(row_data) != 0:
+            table_data.append(row_data)
 
         table = AsciiTable(table_data)
         result += table.table
