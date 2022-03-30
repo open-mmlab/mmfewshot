@@ -101,7 +101,7 @@ Supported algorithms:
 
 MMFewShot depends on [PyTorch](https://pytorch.org/) and [MMCV](https://github.com/open-mmlab/mmcv).
 Below are quick steps for installation.
-Please refer to [install.md](/docs/en/install.md) for more detailed instruction.
+Please refer to [install.md](/docs/en/install.md) for installation of MMFewShot and [data preparation](tools/data/README.md) for dataset preparation.
 ```shell
 conda create -n openmmlab python=3.7 -y
 conda activate openmmlab
