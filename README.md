@@ -99,7 +99,27 @@ Supported algorithms:
 
 ## Installation & Dataset Preparation
 
-Please refer to [install.md](docs/install.md) for installation of mmfewshot and [data preparation](tools/data/README.md) for dataset preparation.
+MMFewShot depends on [PyTorch](https://pytorch.org/) and [MMCV](https://github.com/open-mmlab/mmcv).
+Below are quick steps for installation.
+Please refer to [install.md](/docs/en/install.md) for installation of MMFewShot and [data preparation](tools/data/README.md) for dataset preparation.
+```shell
+conda create -n openmmlab python=3.7 -y
+conda activate openmmlab
+
+conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10.1 -c pytorch
+
+# install the latest mmcv
+pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.0/index.html
+
+# install mmclassification mmdetection
+pip install mmcls mmdet
+
+# install mmfewshot
+git clone https://github.com/open-mmlab/mmfewshot.git
+cd mmfewshot
+pip install -r requirements/build.txt
+pip install -v -e .  # or "python setup.py develop"
+```
 
 ## Getting Started
 
