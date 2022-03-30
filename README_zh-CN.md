@@ -97,7 +97,27 @@ MMFewShot 是一款基于 PyTorch 的少样本学习代码库，是 [OpenMMLab](
 
 ## 安装与准备数据集
 
-请参考[安装文档](docs/install.md)进行安装和参考[数据准备](tools/data/README.md)准备数据集。
+MMFewShot 依赖 [PyTorch](https://pytorch.org/) 和 [MMCV](https://github.com/open-mmlab/mmcv) ，以下是安装的简要步骤。
+更详细的安装指南请参考 [install.md](/docs/zh_cn/install.md)。
+
+```shell
+conda create -n openmmlab python=3.7 -y
+conda activate openmmlab
+
+conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10.1 -c pytorch
+
+# install the latest mmcv
+pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.0/index.html
+
+# install mmclassification mmdetection
+pip install mmcls mmdet
+
+# install mmfewshot
+git clone https://github.com/open-mmlab/mmfewshot.git
+cd mmfewshot
+pip install -r requirements/build.txt
+pip install -v -e .  # or "python setup.py develop"
+```
 
 ## 快速入门
 如果初次了解少样本学习，你可以从[基础介绍](docs/en/intro.md)开始了解少样本学习的基本概念和 MMFewShot 的框架。
