@@ -10,9 +10,9 @@ def check_dist_init():
 
 
 def sync_random_seed(seed=None, device='cuda'):
-    """Make sure different ranks share the same seed.
+    """Propagating the seed of rank 0 to all other ranks.
 
-    All workers must call
+    Make sure different ranks share the same seed. All workers must call
     this function, otherwise it will deadlock. This method is generally used in
     `DistributedSampler`, because the seed should be identical across all
     processes in the distributed group.
