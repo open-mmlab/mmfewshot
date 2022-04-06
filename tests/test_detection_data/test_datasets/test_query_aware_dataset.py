@@ -1,4 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
+import os
 import tempfile
 
 import numpy as np
@@ -115,4 +116,4 @@ def test_query_aware_dataset():
 
     # test save dataset
     with tempfile.TemporaryDirectory() as tmpdir:
-        query_aware_dataset.save_data_infos(tmpdir + 'ann.json')
+        query_aware_dataset.save_data_infos(tmpdir + f'{os.sep}ann.json')
