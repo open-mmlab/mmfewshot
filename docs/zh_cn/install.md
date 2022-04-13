@@ -1,6 +1,6 @@
 ## 依赖
 
-- Linux (Windows 目前尚不支持)
+- Linux | Windows | macOS
 - Python 3.7+
 - PyTorch 1.5+
 - CUDA 9.2+
@@ -19,6 +19,30 @@ MMFewShot 和 MMCV, MMCls, MMDet 版本兼容性如下所示，需要安装正�
 **注意：**如果已经安装了 mmcv，首先需要使用 `pip uninstall mmcv` 卸载已安装的 mmcv，如果同时安装了 mmcv 和 mmcv-full，将会报 `ModuleNotFoundError` 错误。
 
 ## 安装流程
+
+### 从零开始设置脚本
+
+假设当前已经成功安装 CUDA 10.1，这里提供了一个完整的基于 conda 安装 MMFewShot 的脚本。您可以参考下一节中的分步安装说明。
+
+```shell
+conda create -n openmmlab python=3.7 -y
+conda activate openmmlab
+
+conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10.1 -c pytorch
+
+pip install openmim
+mim install mmcv-full
+
+# install mmclassification mmdetection
+mim install mmcls
+mim install mmdet
+
+# install mmfewshot
+git clone https://github.com/open-mmlab/mmfewshot.git
+cd mmfewshot
+pip install -r requirements/build.txt
+pip install -v -e .  # or "python setup.py develop"
+```
 
 ### 准备环境
 
@@ -120,30 +144,6 @@ docker build -t mmfewshot docker/
 ```shell
 docker run --gpus all --shm-size=8g -it -v {DATA_DIR}:/mmfewshot/data mmfewshot
 ```
-
-### 从零开始设置脚本
-
-假设当前已经成功安装 CUDA 10.1，这里提供了一个完整的基于 conda 安装 MMDetection 的脚本：
-
-```shell
-conda create -n openmmlab python=3.7 -y
-conda activate openmmlab
-
-conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10.1 -c pytorch
-
-# 安装最新版本的 mmcv
-pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.0/index.html
-
-# 安装 mmclassification mmdetection
-pip install mmcls mmdet
-
-# 安装 mmfewshot
-git clone https://github.com/open-mmlab/mmfewshot.git
-cd mmfewshot
-pip install -r requirements/build.txt
-pip install -v -e .  # or "python setup.py develop"
-```
-
 
 ## 验证
 

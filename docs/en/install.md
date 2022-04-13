@@ -1,6 +1,6 @@
 ## Prerequisites
 
-- Linux (Windows is not officially supported)
+- Linux | Windows | macOS
 - Python 3.7+
 - PyTorch 1.5+
 - CUDA 9.2+
@@ -20,6 +20,31 @@ Compatible MMCV, MMClassification and MMDetection versions are shown as below. P
 If mmcv and mmcv-full are both installed, there will be `ModuleNotFoundError`.
 
 ## Installation
+
+### A from-scratch setup script
+
+Assuming that you already have CUDA 10.1 installed, here is a full script for setting up MMFewShot with conda.
+You can refer to the step-by-step installation instructions in the next section.
+
+```shell
+conda create -n openmmlab python=3.7 -y
+conda activate openmmlab
+
+conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10.1 -c pytorch
+
+pip install openmim
+mim install mmcv-full
+
+# install mmclassification mmdetection
+mim install mmcls
+mim install mmdet
+
+# install mmfewshot
+git clone https://github.com/open-mmlab/mmfewshot.git
+cd mmfewshot
+pip install -r requirements/build.txt
+pip install -v -e .  # or "python setup.py develop"
+```
 
 ### Prepare environment
 
@@ -127,30 +152,6 @@ Run it with
 ```shell
 docker run --gpus all --shm-size=8g -it -v {DATA_DIR}:/mmfewshot/data mmfewshot
 ```
-
-### A from-scratch setup script
-
-Assuming that you already have CUDA 10.1 installed, here is a full script for setting up MMDetection with conda.
-
-```shell
-conda create -n openmmlab python=3.7 -y
-conda activate openmmlab
-
-conda install pytorch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0 cudatoolkit=10.1 -c pytorch
-
-# install the latest mmcv
-pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.0/index.html
-
-# install mmclassification mmdetection
-pip install mmcls mmdet
-
-# install mmfewshot
-git clone https://github.com/open-mmlab/mmfewshot.git
-cd mmfewshot
-pip install -r requirements/build.txt
-pip install -v -e .  # or "python setup.py develop"
-```
-
 
 ## Verification
 
