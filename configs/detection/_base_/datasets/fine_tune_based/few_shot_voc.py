@@ -77,5 +77,10 @@ data = dict(
         img_prefix=data_root,
         pipeline=test_pipeline,
         test_mode=True,
-        classes=None))
+        classes=None),
+    train_dataloader=dict(persistent_workers=False),
+    val_dataloader=dict(
+        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2),
+    test_dataloader=dict(
+        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2))
 evaluation = dict(interval=2000, metric='mAP', class_splits=None)

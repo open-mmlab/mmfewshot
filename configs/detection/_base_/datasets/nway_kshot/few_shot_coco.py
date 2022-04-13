@@ -90,7 +90,12 @@ data = dict(
         pipeline=train_multi_pipelines['support'],
         instance_wise=True,
         classes='ALL_CLASSES',
-        dataset_name='model_init_dataset'))
+        dataset_name='model_init_dataset'),
+    train_dataloader=dict(persistent_workers=False),
+    val_dataloader=dict(
+        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2),
+    test_dataloader=dict(
+        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2))
 evaluation = dict(
     interval=3000,
     metric='bbox',

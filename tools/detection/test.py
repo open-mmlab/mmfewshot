@@ -125,9 +125,6 @@ def main():
         torch.backends.cudnn.benchmark = True
     cfg.model.pretrained = None
 
-    # currently only support single images testing
-    samples_per_gpu = cfg.data.test.pop('samples_per_gpu', 1)
-    assert samples_per_gpu == 1, 'currently only support single images testing'
     if args.gpu_ids is not None:
         cfg.gpu_ids = args.gpu_ids[0:1]
         warnings.warn('`--gpu-ids` is deprecated, please use `--gpu-id`. '
@@ -145,12 +142,21 @@ def main():
 
     # build the dataloader
     dataset = build_dataset(cfg.data.test)
-    data_loader = build_dataloader(
-        dataset,
-        samples_per_gpu=samples_per_gpu,
-        workers_per_gpu=cfg.data.workers_per_gpu,
-        dist=distributed,
-        shuffle=False)
+
+    test_dataloader_default_args = dict(
+        samples_per_gpu=1, workers_per_gpu=2, dist=distributed, shuffle=False)
+    # update overall dataloader(for train, val and test) setting
+    test_dataloader_default_args.update({
+        k: v
+        for k, v in cfg.data.items() if k not in [
+            'train', 'val', 'test', 'train_dataloader', 'val_dataloader',
+            'test_dataloader', 'samples_per_gpu', 'model_init'
+        ]
+    })
+    # currently only support single images testing
+    assert test_dataloader_default_args['samples_per_gpu'] == 1, \
+        'currently only support single images testing'
+    data_loader = build_dataloader(dataset, **test_dataloader_default_args)
 
     # pop frozen_parameters
     cfg.model.pop('frozen_parameters', None)
