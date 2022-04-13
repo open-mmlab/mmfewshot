@@ -43,7 +43,7 @@ assert (digit_version(mmdet_minimum_version) <= mmdet_version
      <={mmdet_maximum_version}.'
 
 mmcls_minimum_version = '0.15.0'
-mmcls_maximum_version = '0.21.0'
+mmcls_maximum_version = '0.22.0'
 mmcls_version = digit_version(mmcls.__version__)
 
 
