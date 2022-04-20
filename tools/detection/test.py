@@ -148,13 +148,6 @@ def main():
     test_dataloader_default_args = dict(
         samples_per_gpu=1, workers_per_gpu=2, dist=distributed, shuffle=False)
     # update overall dataloader(for train, val and test) setting
-    test_dataloader_default_args.update({
-        k: v
-        for k, v in cfg.data.items() if k not in [
-            'train', 'val', 'test', 'train_dataloader', 'val_dataloader',
-            'test_dataloader', 'samples_per_gpu', 'model_init'
-        ]
-    })
     test_loader_cfg = {
         **test_dataloader_default_args,
         **cfg.data.get('test_dataloader', {})
