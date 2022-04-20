@@ -16,7 +16,7 @@ from mmfewshot.detection.core import (QuerySupportDistEvalHook,
                                       QuerySupportEvalHook)
 from mmfewshot.detection.datasets import (build_dataloader, build_dataset,
                                           get_copy_dataset_type)
-from mmfewshot.utils import get_root_logger
+from mmfewshot.utils import compat_cfg, get_root_logger
 
 
 def train_detector(model: nn.Module,
@@ -26,23 +26,26 @@ def train_detector(model: nn.Module,
                    validate: bool = False,
                    timestamp: Optional[str] = None,
                    meta: Optional[Dict] = None) -> None:
+    cfg = compat_cfg(cfg)
     logger = get_root_logger(log_level=cfg.log_level)
 
     # prepare data loaders
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
-
-    data_loaders = [
-        build_dataloader(
-            ds,
-            cfg.data.samples_per_gpu,
-            cfg.data.workers_per_gpu,
-            # cfg.gpus will be ignored if distributed
-            len(cfg.gpu_ids),
-            dist=distributed,
-            seed=cfg.seed,
-            data_cfg=copy.deepcopy(cfg.data),
-            use_infinite_sampler=cfg.use_infinite_sampler) for ds in dataset
-    ]
+    train_dataloader_default_args = dict(
+        samples_per_gpu=2,
+        workers_per_gpu=2,
+        # `num_gpus` will be ignored if distributed
+        num_gpus=len(cfg.gpu_ids),
+        dist=distributed,
+        seed=cfg.seed,
+        data_cfg=copy.deepcopy(cfg.data),
+        use_infinite_sampler=cfg.use_infinite_sampler,
+        persistent_workers=False)
+    train_loader_cfg = {
+        **train_dataloader_default_args,
+        **cfg.data.get('train_dataloader', {})
+    }
+    data_loaders = [build_dataloader(ds, **train_loader_cfg) for ds in dataset]
 
     # put model on gpus
     if distributed:
@@ -100,17 +103,23 @@ def train_detector(model: nn.Module,
     # register eval hooks
     if validate:
         # currently only support single images testing
-        samples_per_gpu = cfg.data.val.pop('samples_per_gpu', 1)
-        assert samples_per_gpu == 1, \
-            'currently only support single images testing'
+        val_dataloader_default_args = dict(
+            samples_per_gpu=1,
+            workers_per_gpu=2,
+            dist=distributed,
+            shuffle=False,
+            persistent_workers=False)
+        val_dataloader_args = {
+            **val_dataloader_default_args,
+            **cfg.data.get('val_dataloader', {})
+        }
 
         val_dataset = build_dataset(cfg.data.val, dict(test_mode=True))
-        val_dataloader = build_dataloader(
-            val_dataset,
-            samples_per_gpu=samples_per_gpu,
-            workers_per_gpu=cfg.data.workers_per_gpu,
-            dist=distributed,
-            shuffle=False)
+
+        assert val_dataloader_args['samples_per_gpu'] == 1, \
+            'currently only support single images testing'
+        val_dataloader = build_dataloader(val_dataset, **val_dataloader_args)
+
         eval_cfg = cfg.get('evaluation', {})
         eval_cfg['by_epoch'] = cfg.runner['type'] != 'IterBasedRunner'
 

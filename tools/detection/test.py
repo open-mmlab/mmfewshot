@@ -13,6 +13,7 @@ from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
 from mmfewshot.detection.datasets import (build_dataloader, build_dataset,
                                           get_copy_dataset_type)
 from mmfewshot.detection.models import build_detector
+from mmfewshot.utils import compat_cfg
 
 
 def parse_args():
@@ -112,6 +113,7 @@ def main():
         raise ValueError('The output file must be a pkl file.')
 
     cfg = Config.fromfile(args.config)
+    cfg = compat_cfg(cfg)
 
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
@@ -125,9 +127,6 @@ def main():
         torch.backends.cudnn.benchmark = True
     cfg.model.pretrained = None
 
-    # currently only support single images testing
-    samples_per_gpu = cfg.data.test.pop('samples_per_gpu', 1)
-    assert samples_per_gpu == 1, 'currently only support single images testing'
     if args.gpu_ids is not None:
         cfg.gpu_ids = args.gpu_ids[0:1]
         warnings.warn('`--gpu-ids` is deprecated, please use `--gpu-id`. '
@@ -145,12 +144,19 @@ def main():
 
     # build the dataloader
     dataset = build_dataset(cfg.data.test)
-    data_loader = build_dataloader(
-        dataset,
-        samples_per_gpu=samples_per_gpu,
-        workers_per_gpu=cfg.data.workers_per_gpu,
-        dist=distributed,
-        shuffle=False)
+
+    test_dataloader_default_args = dict(
+        samples_per_gpu=1, workers_per_gpu=2, dist=distributed, shuffle=False)
+    # update overall dataloader(for train, val and test) setting
+    test_loader_cfg = {
+        **test_dataloader_default_args,
+        **cfg.data.get('test_dataloader', {})
+    }
+
+    # currently only support single images testing
+    assert test_loader_cfg['samples_per_gpu'] == 1, \
+        'currently only support single images testing'
+    data_loader = build_dataloader(dataset, **test_loader_cfg)
 
     # pop frozen_parameters
     cfg.model.pop('frozen_parameters', None)
