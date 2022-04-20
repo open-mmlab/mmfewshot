@@ -16,7 +16,7 @@ from mmfewshot.detection.core import (QuerySupportDistEvalHook,
                                       QuerySupportEvalHook)
 from mmfewshot.detection.datasets import (build_dataloader, build_dataset,
                                           get_copy_dataset_type)
-from mmfewshot.utils import get_root_logger
+from mmfewshot.utils import compat_cfg, get_root_logger
 
 
 def train_detector(model: nn.Module,
@@ -26,6 +26,7 @@ def train_detector(model: nn.Module,
                    validate: bool = False,
                    timestamp: Optional[str] = None,
                    meta: Optional[Dict] = None) -> None:
+    cfg = compat_cfg(cfg)
     logger = get_root_logger(log_level=cfg.log_level)
 
     # prepare data loaders
@@ -40,13 +41,6 @@ def train_detector(model: nn.Module,
         data_cfg=copy.deepcopy(cfg.data),
         use_infinite_sampler=cfg.use_infinite_sampler,
         persistent_workers=False)
-    train_dataloader_default_args.update({
-        k: v
-        for k, v in cfg.data.items() if k not in [
-            'train', 'val', 'test', 'train_dataloader', 'val_dataloader',
-            'test_dataloader', 'model_init'
-        ]
-    })
     train_loader_cfg = {
         **train_dataloader_default_args,
         **cfg.data.get('train_dataloader', {})
@@ -115,22 +109,6 @@ def train_detector(model: nn.Module,
             dist=distributed,
             shuffle=False,
             persistent_workers=False)
-
-        # update overall dataloader(for train, val and test) setting
-        val_dataloader_default_args.update({
-            k: v
-            for k, v in cfg.data.items() if k not in [
-                'train', 'val', 'test', 'train_dataloader', 'val_dataloader',
-                'test_dataloader', 'samples_per_gpu', 'model_init'
-            ]
-        })
-        if 'samples_per_gpu' in cfg.data.val:
-            logger.warning('`samples_per_gpu` in `val` field of '
-                           'data will be deprecated, you should'
-                           ' move it to `val_dataloader` field')
-            # keep default value of `sample_per_gpu` is 1
-            val_dataloader_default_args['samples_per_gpu'] = \
-                cfg.data.val.pop('samples_per_gpu')
         val_dataloader_args = {
             **val_dataloader_default_args,
             **cfg.data.get('val_dataloader', {})

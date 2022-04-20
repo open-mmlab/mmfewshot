@@ -95,10 +95,5 @@ data = dict(
         img_prefix=data_root,
         pipeline=test_pipeline,
         test_mode=True,
-        classes='BASE_CLASSES'),
-    train_dataloader=dict(persistent_workers=False),
-    val_dataloader=dict(
-        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2),
-    test_dataloader=dict(
-        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2))
+        classes='BASE_CLASSES'))
 evaluation = dict(interval=20000, metric='bbox', classwise=True)

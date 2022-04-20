@@ -102,10 +102,5 @@ data = dict(
         pipeline=test_pipeline,
         coordinate_offset=[-1, -1, -1, -1],
         test_mode=True,
-        classes=None),
-    train_dataloader=dict(persistent_workers=False),
-    val_dataloader=dict(
-        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2),
-    test_dataloader=dict(
-        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2))
+        classes=None))
 evaluation = dict(interval=3000, metric='mAP', class_splits=None)

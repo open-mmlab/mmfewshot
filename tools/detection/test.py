@@ -13,6 +13,7 @@ from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
 from mmfewshot.detection.datasets import (build_dataloader, build_dataset,
                                           get_copy_dataset_type)
 from mmfewshot.detection.models import build_detector
+from mmfewshot.utils import compat_cfg
 
 
 def parse_args():
@@ -112,6 +113,7 @@ def main():
         raise ValueError('The output file must be a pkl file.')
 
     cfg = Config.fromfile(args.config)
+    cfg = compat_cfg(cfg)
 
     if args.cfg_options is not None:
         cfg.merge_from_dict(args.cfg_options)
@@ -153,10 +155,15 @@ def main():
             'test_dataloader', 'samples_per_gpu', 'model_init'
         ]
     })
+    test_loader_cfg = {
+        **test_dataloader_default_args,
+        **cfg.data.get('test_dataloader', {})
+    }
+
     # currently only support single images testing
-    assert test_dataloader_default_args['samples_per_gpu'] == 1, \
+    assert test_loader_cfg['samples_per_gpu'] == 1, \
         'currently only support single images testing'
-    data_loader = build_dataloader(dataset, **test_dataloader_default_args)
+    data_loader = build_dataloader(dataset, **test_loader_cfg)
 
     # pop frozen_parameters
     cfg.model.pop('frozen_parameters', None)

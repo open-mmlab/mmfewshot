@@ -103,10 +103,5 @@ data = dict(
         num_base_shots=10,
         instance_wise=True,
         min_bbox_area=32 * 32,
-        dataset_name='model_init_dataset'),
-    train_dataloader=dict(persistent_workers=False),
-    val_dataloader=dict(
-        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2),
-    test_dataloader=dict(
-        persistent_workers=False, samples_per_gpu=1, workers_per_gpu=2))
+        dataset_name='model_init_dataset'))
 evaluation = dict(interval=20000, metric='bbox', classwise=True)
