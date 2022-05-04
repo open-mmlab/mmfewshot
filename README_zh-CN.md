@@ -104,6 +104,7 @@ MMFewShot 依赖 [PyTorch](https://pytorch.org/) 和 [MMCV](https://github.com/o
 如果初次了解少样本学习，你可以从[基础介绍](docs/en/intro.md)开始了解少样本学习的基本概念和 MMFewShot 的框架。
 如果对少样本学习很熟悉，请参考[使用教程](docs/en/get_started.md)获取MMFewShot的基本用法。
 我们也为新手提供了[少样本分类的 colab 教程](demo/MMFewShot_Tutorial-Classification.ipynb)和[少样本检测的 colab 教程】](demo/MMFewShot_Tutorial-Detection.ipynb)。
+
 MMFewShot 也提供了其他更详细的教程，包括：
 
 - 少样本分类
