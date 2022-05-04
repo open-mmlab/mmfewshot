@@ -106,6 +106,8 @@ Please refer to [install.md](/docs/en/install.md) for installation of MMFewShot 
 
 If you are new of few shot learning, you can start with [learn the basics](docs/en/intro.md).
 If you are familiar with it, check out [getting_started.md](docs/en/get_started.md) for the basic usage of mmfewshot.
+We provide [fewshot classification colab tutorial](demo/MMFewShot_Tutorial-Classification.ipynb) and
+[fewshot detection colab tutorial](demo/MMFewShot_Tutorial-Detection.ipynb) for beginners.
 
 
 Refer to the below tutorials to dive deeper:
