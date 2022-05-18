@@ -1,8 +1,6 @@
 # Model Zoo
 
-
 ## Few Shot Classification Model Zoo
-
 
 #### Baseline
 
@@ -35,8 +33,6 @@ Please refer to [NegMargin](https://github.com/open-mmlab/mmfewshot/tree/main/co
 #### Meta Baseline
 
 Please refer to [Meta Baseline](https://github.com/open-mmlab/mmfewshot/tree/main/configs/classification/meta_baseline) for details.
-
-
 
 ## Few Shot Detection Model Zoo
 

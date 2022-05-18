@@ -1,30 +1,37 @@
 # Tutorial 2: Adding New Dataset
 
-
 ## Customize dataset
 
 ### Load annotations from file
+
 Different from the config in mmdet using `ann_file` to load a single dataset, we use `ann_cfg` to support the complex few shot setting.
 
 The `ann_cfg` is a list of dict and support two type of file:
+
 - loading annotation from the regular `ann_file` of dataset.
-    ```python
-    ann_cfg = [dict(type='ann_file', ann_file='path/to/ann_file'), ...]
-    ```
-    For `FewShotVOCDataset`, we also support load specific class from `ann_file` in `ann_classes`.
-    ```python
-    dict(type='ann_file', ann_file='path/to/ann_file', ann_classes=['dog', 'cat'])
-    ```
+
+  ```python
+  ann_cfg = [dict(type='ann_file', ann_file='path/to/ann_file'), ...]
+  ```
+
+  For `FewShotVOCDataset`, we also support load specific class from `ann_file` in `ann_classes`.
+
+  ```python
+  dict(type='ann_file', ann_file='path/to/ann_file', ann_classes=['dog', 'cat'])
+  ```
 
 - loading annotation from a json file saved by a dataset.
-    ```python
-    ann_cfg = [dict(type='saved_dataset', ann_file='path/to/ann_file'), ...]
-    ```
-    To save a dataset, we can set the `save_dataset=True` in config file,
-    and the dataset will be saved as `${WORK_DIR}/{TIMESTAMP}_saved_data.json`
-    ```python
-    dataset=dict(type='FewShotVOCDataset', save_dataset=True, ...)
-    ```
+
+  ```python
+  ann_cfg = [dict(type='saved_dataset', ann_file='path/to/ann_file'), ...]
+  ```
+
+  To save a dataset, we can set the `save_dataset=True` in config file,
+  and the dataset will be saved as `${WORK_DIR}/{TIMESTAMP}_saved_data.json`
+
+  ```python
+  dataset=dict(type='FewShotVOCDataset', save_dataset=True, ...)
+  ```
 
 ### Load annotations from predefined benchmark
 
@@ -40,6 +47,7 @@ We provide data splits of each reproduced checkpoint for each method.
 In config file, we can use `method` and `setting` to determine which data split to load.
 
 Here is an example of config:
+
 ```python
 dataset = dict(
         type='FewShotVOCDefaultDataset',
@@ -54,6 +62,7 @@ during runtime for some special cases, such as copying online random sampled sup
 It needs user to modify code in `mmfewshot.detection.apis`.
 More details can refer to mmfewshot/detection/apis/train.py.
 Here is an example of config:
+
 ```python
 dataset = dict(
         type='FewShotVOCCopyDataset',
@@ -61,13 +70,15 @@ dataset = dict(
 ```
 
 ### Use predefined class splits
+
 The predefined class splits are supported in datasets.
-For VOC, we support [`ALL_CLASSES_SPLIT1`,`ALL_CLASSES_SPLIT2`, `ALL_CLASSES_SPLIT3`,
+For VOC, we support \[`ALL_CLASSES_SPLIT1`,`ALL_CLASSES_SPLIT2`, `ALL_CLASSES_SPLIT3`,
 `NOVEL_CLASSES_SPLIT1`, `NOVEL_CLASSES_SPLIT2`, `NOVEL_CLASSES_SPLIT3`, `BASE_CLASSES_SPLIT1`,
-`BASE_CLASSES_SPLIT2`, `BASE_CLASSES_SPLIT3`].
-For COCO, we support [`ALL_CLASSES`, `NOVEL_CLASSES`, `BASE_CLASSES`]
+`BASE_CLASSES_SPLIT2`, `BASE_CLASSES_SPLIT3`\].
+For COCO, we support \[`ALL_CLASSES`, `NOVEL_CLASSES`, `BASE_CLASSES`\]
 
 Here is an example of config:
+
 ```python
 data = dict(
     train=dict(type='FewShotVOCDataset', classes='ALL_CLASSES_SPLIT1'),
@@ -77,12 +88,15 @@ data = dict(
 
 Also, the class splits can be used to report the evaluation results on different class splits.
 Here is an example of config:
+
 ```python
 evaluation = dict(class_splits=['BASE_CLASSES_SPLIT1', 'NOVEL_CLASSES_SPLIT1'])
 ```
 
 ### Customize the number of annotations
+
 For FewShotDataset, we support two ways to filter extra annotations.
+
 - `ann_shot_filter`: use a dict to specify the class, and
   the corresponding maximum number of instances when loading
   the annotation file.
@@ -105,8 +119,10 @@ For FewShotDataset, we support two ways to filter extra annotations.
   ```
 
 ### Customize the organization of annotations
+
 We also support to split the annotation into instance wise, i.e. each image only have one instance,
 and the images can be repeated.
+
 ```python
 dataset=dict(
     type='FewShotVOCDataset',
@@ -115,9 +131,11 @@ dataset=dict(
 ```
 
 ### Customize pipeline
+
 To support different pipelines in single dataset, we can use `multi_pipelines`.
 In config file, `multi_pipelines` use the name of keys to indicate specific piplines.
 Here is an example of config:
+
 ```python
 multi_pipelines = dict(
     query=[
@@ -145,20 +163,23 @@ train=dict(
         ...
         multi_pipelines=train_multi_pipelines))
 ```
+
 When `multi_pipelines` is used, we need to specific the pipeline names in
 `prepare_train_img` to fetch the image.
 For example
+
 ```python
 dataset.prepare_train_img(self, idx, 'query')
 ```
 
-
 ## Customize a new dataset wrapper
+
 In few shot setting, the various sampling logic is implemented by
 dataset wrapper.
 An example of customizing query-support data sampling logic for training:
 
 #### Create a new dataset wrapper
+
 We can create a new dataset wrapper in mmfewshot/detection/datasets/dataset_wrappers.py to customize sampling logic.
 
 ```python
@@ -185,9 +206,9 @@ class MyDatasetWrapper:
 ```
 
 #### Update dataset builder
+
 We need to add the building code in mmfewshot/detection/datasets/builder.py
 for our customize dataset wrapper.
-
 
 ```python
 def build_dataset(cfg, default_args=None):
@@ -209,10 +230,10 @@ def build_dataset(cfg, default_args=None):
 ```
 
 #### Update dataloader builder
+
 We need to add the building code of dataloader in mmfewshot/detection/datasets/builder.py,
 when the customize dataset wrapper will return list of Tensor.
 We can use `multi_pipeline_collate_fn` to handle this case.
-
 
 ```python
 def build_dataset(cfg, default_args=None):
@@ -234,7 +255,6 @@ def build_dataset(cfg, default_args=None):
     ...
 ```
 
-
 #### Update the arguments in model
 
 The argument names in forward function need to be consistent with the customize dataset wrapper.
@@ -247,7 +267,9 @@ class MyDetector(BaseDetector):
 ```
 
 #### using customize dataset wrapper in config
+
 Then in the config, to use `MyDatasetWrapper` you can modify the config as the following,
+
 ```python
 dataset_A_train = dict(
         type='MyDatasetWrapper',
@@ -262,12 +284,14 @@ dataset_A_train = dict(
     )
 ```
 
-
 ## Customize a dataloader wrapper
+
 We also support to iterate two different dataset simultaneously by dataloader wrapper.
 
 An example of customizing dataloader wrapper for query and support dataset:
+
 #### Create a new dataloader wrapper
+
 We can create a new dataset wrapper in mmfewshot/detection/datasets/dataloader_wrappers.py to customize sampling logic.
 
 ```python
@@ -293,9 +317,9 @@ class MyDataloader:
 ```
 
 #### Update dataloader builder
+
 We need to add the build code in mmfewshot/detection/datasets/builder.py
 for our customize dataset wrapper.
-
 
 ```python
 def build_dataloader(dataset, ...):

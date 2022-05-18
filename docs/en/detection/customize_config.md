@@ -5,7 +5,6 @@ If you wish to inspect the config file, you may run `python tools/misc/print_con
 The detection part of mmfewshot is built upon the [mmdet](https://github.com/open-mmlab/mmdetection),
 thus it is highly recommended learning the basic of [mmdet](https://mmdetection.readthedocs.io/en/latest/).
 
-
 ## Modify a config through script arguments
 
 When submitting jobs using "tools/train.py" or "tools/test.py", you may specify `--cfg-options` to in-place modify the config.
@@ -24,7 +23,7 @@ When submitting jobs using "tools/train.py" or "tools/test.py", you may specify 
 - Update values of list/tuples.
 
   If the value to be updated is a list or a tuple. For example, the config file normally sets `workflow=[('train', 1)]`. If you want to
-  change this key, you may specify `--cfg-options workflow="[(train,1),(val,1)]"`. Note that the quotation mark \" is necessary to
+  change this key, you may specify `--cfg-options workflow="[(train,1),(val,1)]"`. Note that the quotation mark " is necessary to
   support list/tuple data types, and that **NO** white space is allowed inside the quotation marks in the specified value.
 
 ## Config file naming convention
@@ -42,7 +41,7 @@ We follow the below style to name config files. Contributors are advised to foll
 - `{backbone}`: backbone type like `r50` (ResNet-50), `x101` (ResNeXt-101).
 - `{neck}`: neck type like `fpn`,  `c4`.
 - `[norm_setting]`: `bn` (Batch Normalization) is used unless specified, other norm layer type could be `gn` (Group Normalization), `syncbn` (Synchronized Batch Normalization).
-    `gn-head`/`gn-neck` indicates GN is applied in head/neck only, while `gn-all` means GN is applied in the entire model, e.g. backbone, neck, head.
+  `gn-head`/`gn-neck` indicates GN is applied in head/neck only, while `gn-all` means GN is applied in the entire model, e.g. backbone, neck, head.
 - `[misc]`: miscellaneous setting/plugins of model, e.g. `dconv`, `gcb`, `attention`, `albu`, `mstrain`.
 - `[gpu x batch_per_gpu]`: GPUs and samples per GPU, `8xb2` is used by default.
 - `{dataset}`: dataset like `coco`, `voc-split1`, `voc-split2` and `voc-split3`.

@@ -31,7 +31,6 @@ English | [简体中文](README_zh-CN.md)
 [![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
 [![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
 
-
 mmfewshot is an open source few shot learning toolbox based on PyTorch. It is a part of the [OpenMMLab](https://open-mmlab.github.io/) project.
 
 The master branch works with **PyTorch 1.5+**.
@@ -44,6 +43,7 @@ Documentation: https://mmfewshot.readthedocs.io/en/latest/.
 </div>
 
 ### Major features
+
 - **Support multiple tasks in Few Shot Learning**
 
   MMFewShot provides unified implementation and evaluation of few shot classification and detection.
@@ -57,11 +57,9 @@ Documentation: https://mmfewshot.readthedocs.io/en/latest/.
 
   The toolbox provides strong baselines and state-of-the-art methods in few shot classification and detection.
 
-
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
-
 
 ## Model Zoo
 
@@ -93,9 +91,7 @@ Supported algorithms:
 
 </details>
 
-
 ## Changelog
-
 
 ## Installation & Dataset Preparation
 
@@ -107,22 +103,23 @@ Please refer to [install.md](/docs/en/install.md) for installation of MMFewShot 
 If you are new of few shot learning, you can start with [learn the basics](docs/en/intro.md).
 If you are familiar with it, check out [getting_started.md](docs/en/get_started.md) for the basic usage of mmfewshot.
 
-
 Refer to the below tutorials to dive deeper:
 
 - Few Shot Classification
-    - [Overview](docs/classification/overview.md)
-    - [Config](docs/classification/customize_config.md)
-    - [Customize Dataset](docs/classification/customize_dataset.md)
-    - [Customize Model](docs/classification/customize_models.md)
-    - [Customize Runtime](docs/classification/customize_runtime.md)
+
+  - [Overview](docs/classification/overview.md)
+  - [Config](docs/classification/customize_config.md)
+  - [Customize Dataset](docs/classification/customize_dataset.md)
+  - [Customize Model](docs/classification/customize_models.md)
+  - [Customize Runtime](docs/classification/customize_runtime.md)
 
 - Few Shot Detection
-    - [Overview](docs/detection/overview.md)
-    - [Config](docs/detection/customize_config.md)
-    - [Customize Dataset](docs/detection/customize_dataset.md)
-    - [Customize Model](docs/detection/customize_models.md)
-    - [Customize Runtime](docs/detection/customize_runtime.md)
+
+  - [Overview](docs/detection/overview.md)
+  - [Config](docs/detection/customize_config.md)
+  - [Customize Dataset](docs/detection/customize_dataset.md)
+  - [Customize Model](docs/detection/customize_models.md)
+  - [Customize Runtime](docs/detection/customize_runtime.md)
 
 ## Citation
 
@@ -136,7 +133,6 @@ If you find this project useful in your research, please consider cite:
     year={2021}
 }
 ```
-
 
 ## Contributing
 

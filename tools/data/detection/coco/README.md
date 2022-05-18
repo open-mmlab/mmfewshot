@@ -21,12 +21,14 @@
 ```
 
 ## download coco dataset
+
 The coco14/coco17 dataset can be downloaded from [here](https://cocodataset.org/#download).
 
 In mmfewshot, coco14 is used as default setting, while coco17 is optional.
 Some methods (attention rpn) were proposed with coco17 data split, which is also evaluated in mmfewshot.
 
 The data structure is as follows:
+
 ```none
 mmfewshot
 ├── mmfewshot
@@ -42,6 +44,7 @@ mmfewshot
 ```
 
 ## download few shot annotations
+
 In mmfewshot, we use the train/val/few shot split of coco14 released in TFA [repo](https://github.com/ucbdrive/few-shot-object-detection).
 The original data spilt can be found in [here](http://dl.yf.io/fs-det/datasets/cocosplit/).
 
@@ -50,6 +53,7 @@ Please download [coco.tar.gz](https://download.openmmlab.com/mmfewshot/few_shot_
 and unzip them into `$MMFEWSHOT/data/few_shot_ann`.
 
 The final data structure is as follows:
+
 ```none
 mmfewshot
 ├── mmfewshot

@@ -53,13 +53,9 @@ MMFewShot 是一款基于 PyTorch 的少样本学习代码库，是 [OpenMMLab](
   <img src="resources/demo.png"/>
 </div>
 
-
-
 ## 开源许可证
 
 该项目采用 [Apache 2.0 开源许可证](LICENSE)
-
-
 
 ## 基准测试和模型库
 
@@ -101,30 +97,31 @@ MMFewShot 依赖 [PyTorch](https://pytorch.org/) 和 [MMCV](https://github.com/o
 请参考[安装文档](docs/zh_cn/install.md)进行安装和参考[数据准备](tools/data/README.md)准备数据集。
 
 ## 快速入门
+
 如果初次了解少样本学习，你可以从[基础介绍](docs/en/intro.md)开始了解少样本学习的基本概念和 MMFewShot 的框架。
 如果对少样本学习很熟悉，请参考[使用教程](docs/en/get_started.md)获取MMFewShot的基本用法。
 
 MMFewShot 也提供了其他更详细的教程，包括：
 
 - 少样本分类
-    - [概览](docs/classification/overview.md)
-    - [配置文件](docs/classification/customize_config.md)
-    - [添加数据集](docs/classification/customize_dataset.md)
-    - [添加新模型](docs/classification/customize_models.md)
-    - [自定义模型运行环境](docs/classification/customize_runtime.md)。
+
+  - [概览](docs/classification/overview.md)
+  - [配置文件](docs/classification/customize_config.md)
+  - [添加数据集](docs/classification/customize_dataset.md)
+  - [添加新模型](docs/classification/customize_models.md)
+  - [自定义模型运行环境](docs/classification/customize_runtime.md)。
 
 - 少样本检测
-    - [概览](docs/detection/overview.md)
-    - [配置文件](docs/detection/customize_config.md)
-    - [添加数据集](docs/detection/customize_dataset.md)
-    - [添加新模型](docs/detection/customize_models.md)
-    - [自定义模型运行环境](docs/detection/customize_runtime.md)。
 
+  - [概览](docs/detection/overview.md)
+  - [配置文件](docs/detection/customize_config.md)
+  - [添加数据集](docs/detection/customize_dataset.md)
+  - [添加新模型](docs/detection/customize_models.md)
+  - [自定义模型运行环境](docs/detection/customize_runtime.md)。
 
 ## 贡献指南
 
 我们感谢所有的贡献者为改进和提升 MMFewShot 所作出的努力。请参考[贡献指南](https://github.com/open-mmlab/mmfewshot/blob/main/.github/CONTRIBUTING.md)来了解参与项目贡献的相关指引。
-
 
 ## 致谢
 
@@ -132,8 +129,8 @@ MMFewShot 是一款由不同学校和公司共同贡献的开源项目。我们�
 
 我们希望该工具箱和基准测试可以为社区提供灵活的代码工具，供用户复现现有算法并开发自己的新模型，从而不断为开源社区提供贡献。
 
-
 ## 引用
+
 如果您发现此项目对您的研究有用，请考虑引用：
 
 ```bibtex
@@ -144,7 +141,6 @@ MMFewShot 是一款由不同学校和公司共同贡献的开源项目。我们�
     year={2021}
 }
 ```
-
 
 ## OpenMMLab 的其他项目
 
@@ -169,7 +165,7 @@ MMFewShot 是一款由不同学校和公司共同贡献的开源项目。我们�
 
 ## 欢迎加入 OpenMMLab 社区
 
- 扫描下方的二维码可关注 OpenMMLab 团队的 [知乎官方账号](https://www.zhihu.com/people/openmmlab)，加入 OpenMMLab 团队的 [官方交流 QQ 群](https://jq.qq.com/?_wv=1027&k=aCvMxdr3)
+扫描下方的二维码可关注 OpenMMLab 团队的 [知乎官方账号](https://www.zhihu.com/people/openmmlab)，加入 OpenMMLab 团队的 [官方交流 QQ 群](https://jq.qq.com/?_wv=1027&k=aCvMxdr3)
 
 <div align="center">
 <img src="resources/zhihu_qrcode.jpg" height="400" />  <img src="resources/qq_group_qrcode.jpg" height="400" />
