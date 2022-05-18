@@ -204,7 +204,6 @@ model = dict(
 
 ### Add new loss
 
-
 To add a new loss function, the users need implement it in `mmfewshot/classification/models/losses/my_loss.py`.
 The decorator `weighted_loss` enable the loss to be weighted for each element.
 

@@ -5,8 +5,8 @@ is the data usage.
 Therefore, the design of MMFewShot target at data sampling, meta test and models apis for few shot setting based on [mmcls](https://github.com/open-mmlab/mmclassification).
 Additionally, the modules in [mmcls](https://github.com/open-mmlab/mmclassification) can be imported and reused in the code or config.
 
-
 ## Design of Data Sampling
+
 In MMFewShot, we suggest customizing the data pipeline using a dataset wrapper and modify the arguments in forward
 function when returning the dict with customize keys.
 
@@ -26,10 +26,11 @@ class CustomizeDataset:
             'query_data': [self.dataset[i] for i in self.customize_list]
         }
 ```
+
 More details can refer to [Tutorial 2: Adding New Dataset](https://mmfewshot.readthedocs.io/en/latest/classification/customize_dataset.html)
 
-
 ## Design of Models API
+
 Each model in MMFewShot should implement following functions to support meta testing.
 More details can refer to [Tutorial 3: Customize Models](https://mmfewshot.readthedocs.io/en/latest/classification/customize_models.html)
 
@@ -67,8 +68,8 @@ class BaseFewShotClassifier(BaseModule):
 
 ```
 
-
 ## Design of Meta Testing
+
 Meta testing performs prediction on random sampled tasks multiple times.
 Each task contains support and query data.
 More details can refer to `mmfewshot/classification/apis/test.py`.
@@ -96,6 +97,7 @@ Here is the basic pipeline for meta testing:
 ```
 
 ### meta testing on multiple gpus
+
 In MMFewShot, we also support multi-gpu meta testing during
 validation or testing phase.
 In multi-gpu meta testing, the model will be copied and wrapped with `MetaTestParallel`, which will
@@ -104,6 +106,7 @@ Thus, the original model will not be affected by the operations in Meta Testing.
 More details can refer to `mmfewshot/classification/utils/meta_test_parallel.py`
 Specifically, each gpu will be assigned with (num_test_tasks / world_size) task.
 Here is the distributed logic for multi gpu meta testing:
+
 ```python
 sub_num_test_tasks = num_test_tasks // world_size
 sub_num_test_tasks += 1 if num_test_tasks % world_size != 0 else 0
@@ -114,4 +117,5 @@ for i in range(sub_num_test_tasks):
     # test task with task_id
     ...
 ```
+
 If user want to customize the way to test a task, more details can refer to [Tutorial 4: Customize Runtime Settings](https://mmfewshot.readthedocs.io/en/latest/classification/customize_runtime.html)

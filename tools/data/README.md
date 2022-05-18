@@ -3,7 +3,6 @@
 It is recommended to symlink the dataset root to `$MMFEWSHOT/data`.
 If your folder structure is different, you may need to change the corresponding paths in config files.
 
-
 # Few Shot Classification
 
 Datasets supported in MMFewShot:

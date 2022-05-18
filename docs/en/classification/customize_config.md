@@ -5,7 +5,6 @@ If you wish to inspect the config file, you may run `python tools/misc/print_con
 The classification part of mmfewshot is built upon the [mmcls](https://github.com/open-mmlab/mmclassification),
 thus it is highly recommended learning the basic of mmcls.
 
-
 ## Modify config through script arguments
 
 When submitting jobs using "tools/classification/train.py" or "tools/classification/test.py", you may specify `--cfg-options` to in-place modify the config.
@@ -24,7 +23,7 @@ When submitting jobs using "tools/classification/train.py" or "tools/classificat
 - Update values of list/tuples.
 
   If the value to be updated is a list or a tuple. For example, the config file normally sets `workflow=[('train', 1)]`. If you want to
-  change this key, you may specify `--cfg-options workflow="[(train,1),(val,1)]"`. Note that the quotation mark \" is necessary to
+  change this key, you may specify `--cfg-options workflow="[(train,1),(val,1)]"`. Note that the quotation mark " is necessary to
   support list/tuple data types, and that **NO** white space is allowed inside the quotation marks in the specified value.
 
 ## Config name style
@@ -41,14 +40,11 @@ We follow the below style to name config files. Contributors are advised to foll
 - `[algorithm setting]`: specific setting for some model, like `without_semantic` for `htc`, `moment` for `reppoints`, etc.
 - `{backbone}`: backbone type like `conv4`, `resnet12`.
 - `[norm_setting]`: `bn` (Batch Normalization) is used unless specified, other norm layer type could be `gn` (Group Normalization), `syncbn` (Synchronized Batch Normalization).
-    `gn-head`/`gn-neck` indicates GN is applied in head/neck only, while `gn-all` means GN is applied in the entire model, e.g. backbone, neck, head.
+  `gn-head`/`gn-neck` indicates GN is applied in head/neck only, while `gn-all` means GN is applied in the entire model, e.g. backbone, neck, head.
 - `[gpu x batch_per_gpu]`: GPUs and samples per GPU. For episodic training methods we use the total number of images in one episode, i.e. n classes x (support images+query images).
 - `[misc]`: miscellaneous setting/plugins of model.
 - `{dataset}`: dataset like `cub`, `mini-imagenet` and `tiered-imagenet`.
 - `{meta test setting}`: n way k shot setting like `5way_1shot` or `5way_5shot`.
-
-
-
 
 ## An example of Baseline
 
@@ -248,7 +244,6 @@ lr_config = dict(
 ```
 
 ## FAQ
-
 
 ### Use intermediate variables in configs
 

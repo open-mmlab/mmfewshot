@@ -39,7 +39,7 @@ python demo/demo_metric_classifier_1shot_inference.py \
 
 We provide a demo script to test a single query image, given directory of support instance images.
 The file names of support images will be used as class names.
-The shape of image will be used as the bbox of instance, i.e [0, 0, width, height].
+The shape of image will be used as the bbox of instance, i.e \[0, 0, width, height\].
 
 ```shell
 python demo/demo_attention_rpn_detector_inference.py \

@@ -14,17 +14,16 @@ theoretically. We find that although negative margin reduces the feature discrim
 thus benefit the discrimination of novel classes. Code is available at
 https://github.com/bl0/negative-margin.few-shot.
 
-
 <!-- [IMAGE] -->
+
 <div align=center>
 <img src="https://user-images.githubusercontent.com/15669896/142850190-c7ceab7e-468a-48ad-b8f5-e2d0e2df13ae.png" width="80%"/>
 </div>
 
-
-
 ## Citation
 
 <!-- [ALGORITHM] -->
+
 ```bibtex
 @inproceedings{liu2020negative,
     title={Negative margin matters: Understanding margin in few-shot classification},
@@ -38,16 +37,18 @@ https://github.com/bl0/negative-margin.few-shot.
 ## How to Reproduce Neg-Margin
 
 It consists of two steps:
+
 - **Step1: Base training**
-   - use all the images of base classes to train a base model.
-   - conduct meta testing on validation set to select the best model.
+
+  - use all the images of base classes to train a base model.
+  - conduct meta testing on validation set to select the best model.
 
 - **Step2: Meta Testing**:
-   - use best model from step1, the best model are saved into `${WORK_DIR}/${CONFIG}/best_accuracy_mean.pth` in default.
 
-
+  - use best model from step1, the best model are saved into `${WORK_DIR}/${CONFIG}/best_accuracy_mean.pth` in default.
 
 ### An example of CUB dataset with Conv4
+
 ```bash
 # base training
 python ./tools/classification/train.py \
@@ -60,6 +61,7 @@ python ./tools/classification/test.py \
 ```
 
 **Note**:
+
 - All the result are trained with single gpu.
 - The configs of 1 shot and 5 shot use same training setting,
   but different meta test setting on validation set and test set.
@@ -72,27 +74,27 @@ python ./tools/classification/test.py \
 
 ## Results on CUB dataset with 2000 episodes
 
-| Arch  | Input Size | Batch Size | way | shot | mean Acc | std | ckpt | log |
-| :-------------- | :-----------: | :------: | :------: | :------: | :------: | :------: |:------: |:------: |
-| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py)  | 84x84 | 64 | 5  | 1 | 64.08 | 0.48 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot_20211120_100620-5415a152.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.log.json) |
-| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 5 | 80.69 | 0.34 | &uArr; | &uArr; |
-| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 1 | 78.54 | 0.46 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/cub/neg-margin_cosine_resnet12_1xb64_cub_5way-1shot_20211120_100620-b4ab9cc1.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/cub/neg-margin_cosine_resnet12_1xb64_cub_5way-1shot.log.json) |
-| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 5 | 90.19 | 0.24 | &uArr; | &uArr; |
+| Arch                                                                                               | Input Size | Batch Size | way | shot | mean Acc | std  |                                                                            ckpt                                                                             |                                                                  log                                                                   |
+| :------------------------------------------------------------------------------------------------- | :--------: | :--------: | :-: | :--: | :------: | :--: | :---------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------: |
+| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py)    |   84x84    |     64     |  5  |  1   |  64.08   | 0.48 |  [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot_20211120_100620-5415a152.pth)   |  [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.log.json)   |
+| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py)    |   84x84    |     64     |  5  |  5   |  80.69   | 0.34 |                                                                              ⇑                                                                              |                                                                   ⇑                                                                    |
+| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) |   84x84    |     64     |  5  |  1   |  78.54   | 0.46 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/cub/neg-margin_cosine_resnet12_1xb64_cub_5way-1shot_20211120_100620-b4ab9cc1.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/cub/neg-margin_cosine_resnet12_1xb64_cub_5way-1shot.log.json) |
+| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) |   84x84    |     64     |  5  |  5   |  90.19   | 0.24 |                                                                              ⇑                                                                              |                                                                   ⇑                                                                    |
 
 ## Results on Mini ImageNet dataset with 2000 episodes
 
-| Arch  | Input Size | Batch Size | way | shot | mean Acc | std | ckpt | log |
-| :-------------- | :-----------: | :------: | :------: | :------: | :------: | :------: |:------: |:------: |
-| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 1 | 51.15 | 0.42 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/mini_imagenet/neg-margin_cosine_conv4_1xb64_mini-imagenet_5way-1shot_20211120_104933-8a1340d3.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/mini_imagenet/neg-margin_cosine_conv4_1xb64_mini-imagenet_5way-1shot.log.json) |
-| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 5 | 67.32 | 0.37 | &uArr; | &uArr; |
-| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 1 | 61.7 | 0.46 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/mini_imagenet/neg-margin_cosine_resnet12_1xb64_mini-imagenet_5way-1shot_20211120_110018-e3aae9b5.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/mini_imagenet/neg-margin_cosine_resnet12_1xb64_mini-imagenet_5way-1shot.log.json) |
-| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 5 | 78.03 | 0.33 | &uArr; | &uArr; |
+| Arch                                                                                               | Input Size | Batch Size | way | shot | mean Acc | std  |                                                                                      ckpt                                                                                       |                                                                            log                                                                             |
+| :------------------------------------------------------------------------------------------------- | :--------: | :--------: | :-: | :--: | :------: | :--: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py)    |   84x84    |     64     |  5  |  1   |  51.15   | 0.42 |  [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/mini_imagenet/neg-margin_cosine_conv4_1xb64_mini-imagenet_5way-1shot_20211120_104933-8a1340d3.pth)   |  [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/mini_imagenet/neg-margin_cosine_conv4_1xb64_mini-imagenet_5way-1shot.log.json)   |
+| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py)    |   84x84    |     64     |  5  |  5   |  67.32   | 0.37 |                                                                                        ⇑                                                                                        |                                                                             ⇑                                                                              |
+| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) |   84x84    |     64     |  5  |  1   |   61.7   | 0.46 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/mini_imagenet/neg-margin_cosine_resnet12_1xb64_mini-imagenet_5way-1shot_20211120_110018-e3aae9b5.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/mini_imagenet/neg-margin_cosine_resnet12_1xb64_mini-imagenet_5way-1shot.log.json) |
+| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) |   84x84    |     64     |  5  |  5   |  78.03   | 0.33 |                                                                                        ⇑                                                                                        |                                                                             ⇑                                                                              |
 
 ## Results on Tiered ImageNet dataset with 2000 episodes
 
-| Arch  | Input Size | Batch Size | way | shot | mean Acc | std | ckpt | log |
-| :-------------- | :-----------: | :------: | :------: | :------: | :------: | :------: |:------: |:------: |
-| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py)  | 84x84 | 64 | 5  | 1 | 54.07 | 0.49 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-1shot_20211120_110238-7a81ac2a.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-1shot.log.json) |
-| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 5 | 70.25 | 0.41 | &uArr; | &uArr; |
-| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 1 | 65.88 | 0.53  | [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot_20211120_111912-344342e6.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot.log.json) |
-| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) | 84x84 | 64 | 5 | 5 | 81.06 | 0.39  | &uArr; | &uArr; |
+| Arch                                                                                               | Input Size | Batch Size | way | shot | mean Acc | std  |                                                                                        ckpt                                                                                         |                                                                              log                                                                               |
+| :------------------------------------------------------------------------------------------------- | :--------: | :--------: | :-: | :--: | :------: | :--: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py)    |   84x84    |     64     |  5  |  1   |  54.07   | 0.49 |  [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-1shot_20211120_110238-7a81ac2a.pth)   |  [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_conv4_1xb64_tiered-imagenet_5way-1shot.log.json)   |
+| [conv4](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py)    |   84x84    |     64     |  5  |  5   |  70.25   | 0.41 |                                                                                          ⇑                                                                                          |                                                                               ⇑                                                                                |
+| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) |   84x84    |     64     |  5  |  1   |  65.88   | 0.53 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot_20211120_111912-344342e6.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/neg_margin/tiered_imagenet/neg-margin_cosine_resnet12_1xb64_tiered-imagenet_5way-1shot.log.json) |
+| [resnet12](/configs/classification/neg_margin/cub/neg-margin_cosine_conv4_1xb64_cub_5way-1shot.py) |   84x84    |     64     |  5  |  5   |  81.06   | 0.39 |                                                                                          ⇑                                                                                          |                                                                               ⇑                                                                                |

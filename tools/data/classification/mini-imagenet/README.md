@@ -26,6 +26,7 @@ The split files of mini-imagenet can be downloaded from [here](https://github.co
 The whole imagenet dataset can be downloaded from [here](https://image-net.org/challenges/LSVRC/2012/index.php).
 
 The data structure is as follows:
+
 ```text
 mmfewshot
 ├── mmfewshot

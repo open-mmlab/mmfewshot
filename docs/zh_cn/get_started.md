@@ -22,7 +22,6 @@ sh ./tools/dist_test.sh ${CONFIG_FILE} ${CHECKPOINT_FILE} ${GPU_NUM} [optional a
 python tools/test.py ${CONFIG_FILE} ${CHECKPOINT_FILE} [optional arguments] --launcher slurm
 ```
 
-
 Examples:
 
 For classification, inference Baseline on CUB under 5way 1shot setting.
@@ -64,7 +63,6 @@ python tools/train.py ${CONFIG_FILE} [optional arguments]
 
 We do not recommend users to use CPU for training because it is too slow. We support this feature to allow users to debug on machines without GPU for convenience.
 
-
 ### Train with multiple GPUs
 
 ```shell
@@ -82,6 +80,7 @@ Difference between `resume-from` and `load-from`:
 `load-from` only loads the model weights and the training epoch starts from 0. It is usually used for finetuning.
 
 ### Train with multiple machines
+
 If you launch with multiple machines simply connected with ethernet, you can simply run following commands:
 
 On the first machine:
@@ -97,8 +96,6 @@ NNODES=2 NODE_RANK=1 PORT=$MASTER_PORT MASTER_ADDR=$MASTER_ADDR sh tools/dist_tr
 ```
 
 Usually it is slow if you do not have high speed networking like InfiniBand.
-
-
 
 If you run MMClassification on a cluster managed with [slurm](https://slurm.schedmd.com/), you can use the script `slurm_train.sh`. (This script also supports single machine training.)
 

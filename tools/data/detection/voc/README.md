@@ -23,11 +23,13 @@
 ```
 
 ## download VOC dataset
+
 The VOC 2007/2012 dataset can be downloaded from [here](http://host.robots.ox.ac.uk/pascal/VOC/).
 
 In mmfewshot, VOC 2007(trainval) + 2012 (trainval) are used for training and VOC 2007(test) is used for evaluation.
 
 The data structure is as follows:
+
 ```none
 mmfewshot
 ├── mmfewshot
@@ -40,6 +42,7 @@ mmfewshot
 ```
 
 ## download few shot annotations
+
 In mmfewshot, we use the VOC few shot split released in TFA [repo](https://github.com/ucbdrive/few-shot-object-detection).
 The original data spilt can be found in [here](http://dl.yf.io/fs-det/datasets/vocsplit/).
 
@@ -47,9 +50,8 @@ We provide a re-organized data split.
 Please download [voc.tar.gz](https://download.openmmlab.com/mmfewshot/few_shot_ann/voc.tar.gz)
 and unzip them into `$MMFEWSHOT/data/few_shot_ann`.
 
-
-
 The final data structure is as follows:
+
 ```none
 mmfewshot
 ├── mmfewshot

@@ -18,16 +18,15 @@ Extensive experiments on five benchmarks demonstrate that
 our simple approach provides a unified and effective approach for both of these two tasks.
 
 <!-- [IMAGE] -->
+
 <div align=center>
 <img src="https://user-images.githubusercontent.com/15669896/142848503-5a97747b-7462-4d52-b4b0-7697c452a973.png" width="80%"/>
 </div>
 
-
-
 ## Citation
 
-
 <!-- [ALGORITHM] -->
+
 ```bibtex
 @inproceedings{sung2018learning,
     title={Learning to compare: Relation network for few-shot learning},
@@ -41,16 +40,18 @@ our simple approach provides a unified and effective approach for both of these 
 ## How to Reproduce RelationNet
 
 It consists of two steps:
+
 - **Step1: Base training**
-   - use all the images of base classes to train a base model.
-   - conduct meta testing on validation set to select the best model.
+
+  - use all the images of base classes to train a base model.
+  - conduct meta testing on validation set to select the best model.
 
 - **Step2: Meta Testing**:
-   - use best model from step1, the best model are saved into `${WORK_DIR}/${CONFIG}/best_accuracy_mean.pth` in default.
 
-
+  - use best model from step1, the best model are saved into `${WORK_DIR}/${CONFIG}/best_accuracy_mean.pth` in default.
 
 ### An example of CUB dataset with Conv4
+
 ```bash
 # base training
 python ./tools/classification/train.py \
@@ -63,6 +64,7 @@ python ./tools/classification/test.py \
 ```
 
 **Note**:
+
 - All the result are trained with single gpu.
 - The config of 1 shot and 5 shot use same training setting,
   but different meta test setting on validation set and test set.
@@ -74,31 +76,29 @@ python ./tools/classification/test.py \
   Anyway, we will continue to improve it.
 - The training batch size is calculated by `num_support_way` * (`num_support_shots` + `num_query_shots`)
 
-
-
 ## Results on CUB dataset with 2000 episodes
 
-| Arch  | Input Size | Batch Size | way | shot | mean Acc | std | ckpt | log |
-| :-------------- | :-----------: | :------: | :------: | :------: | :------: | :------: |:------: |:------: |
-| [conv4](/configs/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot.py) | 84x84 | 105 | 5  | 1 | 65.53 | 0.51 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot_20211120_101425-63bfa087.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot.log.json) |
-| [conv4](/configs/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-5shot.py) | 84x84 | 105 | 5 | 5 | 82.05 | 0.34 | &uArr; | &uArr; |
-| [resnet12](/configs/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot.py) | 84x84 | 105 | 5 | 1 | 73.22 | 0.48 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot_20211120_101425-d67efa62.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot.log.json) |
-| [resnet12](/configs/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-5shot.py) | 84x84 | 105 | 5 | 5 | 86.94 | 0.28 | &uArr; | &uArr; |
+| Arch                                                                                                | Input Size | Batch Size | way | shot | mean Acc | std  |                                                                           ckpt                                                                            |                                                                 log                                                                  |
+| :-------------------------------------------------------------------------------------------------- | :--------: | :--------: | :-: | :--: | :------: | :--: | :-------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------: |
+| [conv4](/configs/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot.py)       |   84x84    |    105     |  5  |  1   |  65.53   | 0.51 |  [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot_20211120_101425-63bfa087.pth)   |  [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-1shot.log.json)   |
+| [conv4](/configs/classification/relation_net/cub/relation-net_conv4_1xb105_cub_5way-5shot.py)       |   84x84    |    105     |  5  |  5   |  82.05   | 0.34 |                                                                             ⇑                                                                             |                                                                  ⇑                                                                   |
+| [resnet12](/configs/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot.py) |   84x84    |    105     |  5  |  1   |  73.22   | 0.48 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot_20211120_101425-d67efa62.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-1shot.log.json) |
+| [resnet12](/configs/classification/relation_net/cub/relation-net_resnet12_1xb105_cub_5way-5shot.py) |   84x84    |    105     |  5  |  5   |  86.94   | 0.28 |                                                                             ⇑                                                                             |                                                                  ⇑                                                                   |
 
 ## Results on Mini-ImageNet dataset with 2000 episodes
 
-| Arch  | Input Size | Batch Size | way | shot | mean Acc | std | ckpt | log |
-| :-------------- | :-----------: | :------: | :------: | :------: | :------: | :------: |:------: |:------: |
-| [conv4](/configs/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-1shot.py) | 84x84 | 105 | 5  | 1 | 49.69 | 0.43 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-1shot_20211120_105359-c4256d35.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-1shot.log.json) |
-| [conv4](/configs/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-5shot.py) | 84x84 | 105 | 5 | 5 | 68.14 | 0.37 | &uArr; | &uArr; |
-| [resnet12](/configs/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-1shot.py) | 84x84 | 105 | 5 | 1 | 54.12 | 0.46 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-1shot_20211120_110716-c73a3f81.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-1shot.log.json) |
-| [resnet12](/configs/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-5shot.py) | 84x84 | 105 | 5 | 5 | 71.31 | 0.37 | &uArr; | &uArr; |
+| Arch                                                                                                                    | Input Size | Batch Size | way | shot | mean Acc | std  |                                                                                     ckpt                                                                                      |                                                                           log                                                                            |
+| :---------------------------------------------------------------------------------------------------------------------- | :--------: | :--------: | :-: | :--: | :------: | :--: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| [conv4](/configs/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-1shot.py)       |   84x84    |    105     |  5  |  1   |  49.69   | 0.43 |  [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-1shot_20211120_105359-c4256d35.pth)   |  [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-1shot.log.json)   |
+| [conv4](/configs/classification/relation_net/mini_imagenet/relation-net_conv4_1xb105_mini-imagenet_5way-5shot.py)       |   84x84    |    105     |  5  |  5   |  68.14   | 0.37 |                                                                                       ⇑                                                                                       |                                                                            ⇑                                                                             |
+| [resnet12](/configs/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-1shot.py) |   84x84    |    105     |  5  |  1   |  54.12   | 0.46 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-1shot_20211120_110716-c73a3f81.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-1shot.log.json) |
+| [resnet12](/configs/classification/relation_net/mini_imagenet/relation-net_resnet12_1xb105_mini-imagenet_5way-5shot.py) |   84x84    |    105     |  5  |  5   |  71.31   | 0.37 |                                                                                       ⇑                                                                                       |                                                                            ⇑                                                                             |
 
 ## Results on Tiered-ImageNet dataset with 2000 episodes
 
-| Arch  | Input Size | Batch Size | way | shot | mean Acc | std | ckpt | log |
-| :-------------- | :-----------: | :------: | :------: | :------: | :------: | :------: |:------: |:------: |
-| [conv4](/configs/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-1shot.py) | 84x84 | 105 | 5  | 1 | 47.6 | 0.48 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-1shot_20211120_141404-b41abf4d.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-1shot.log.json) |
-| [conv4](/configs/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-5shot.py) | 84x84 | 105 | 5 | 5 | 64.09 | 0.43 | &uArr; | &uArr; |
-| [resnet12](/configs/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-1shot.py) | 84x84 | 105 | 5 | 1 | 57.46 | 0.52 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-1shot_20211120_145035-7df8c4d3.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-1shot.log.json) |
-| [resnet12](/configs/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-5shot.py) | 84x84 | 105 | 5 | 5 | 72.84 | 0.43 | &uArr; | &uArr; |
+| Arch                                                                                                                        | Input Size | Batch Size | way | shot | mean Acc | std  |                                                                                       ckpt                                                                                        |                                                                             log                                                                              |
+| :-------------------------------------------------------------------------------------------------------------------------- | :--------: | :--------: | :-: | :--: | :------: | :--: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| [conv4](/configs/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-1shot.py)       |   84x84    |    105     |  5  |  1   |   47.6   | 0.48 |  [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-1shot_20211120_141404-b41abf4d.pth)   |  [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-1shot.log.json)   |
+| [conv4](/configs/classification/relation_net/tiered_imagenet/relation-net_conv4_1xb105_tiered-imagenet_5way-5shot.py)       |   84x84    |    105     |  5  |  5   |  64.09   | 0.43 |                                                                                         ⇑                                                                                         |                                                                              ⇑                                                                               |
+| [resnet12](/configs/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-1shot.py) |   84x84    |    105     |  5  |  1   |  57.46   | 0.52 | [ckpt](https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-1shot_20211120_145035-7df8c4d3.pth) | [log](https://download.openmmlab.com/mmfewshot/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-1shot.log.json) |
+| [resnet12](/configs/classification/relation_net/tiered_imagenet/relation-net_resnet12_1xb105_tiered-imagenet_5way-5shot.py) |   84x84    |    105     |  5  |  5   |  72.84   | 0.43 |                                                                                         ⇑                                                                                         |                                                                              ⇑                                                                               |

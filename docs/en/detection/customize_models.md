@@ -8,7 +8,6 @@ We basically categorize model components into 5 types the same as mmdet.
 - roi extractor: the part for extracting RoI features from feature maps, e.g., RoI Align.
 - loss: the component in head for calculating losses, e.g., FocalLoss, L1Loss, and GHMLoss.
 
-
 ## Develop new components
 
 ### Add a new detector
@@ -371,6 +370,7 @@ loss_bbox=dict(type='MyLoss', loss_weight=1.0))
 We support `frozen_parameters` to freeze the parameters during training by parameters' prefix.
 For example, in `roi_head` if we only want to freeze the `shared_fcs` in `bbox_head`,
 we can add `roi_head.bbox_head.shared_fcs` into `frozen_parameters` list.
+
 ```python
 model = dict(
     frozen_parameters=[
@@ -379,6 +379,7 @@ model = dict(
 ```
 
 ## Customize a query-support based detector
+
 Here we show how to develop a new query-support based detector with the example.
 
 ### 1. Define a new detector
@@ -437,8 +438,10 @@ model = dict(
 ```
 
 ### Customize an aggregation layer
+
 we also support to reuse the code of feature fusion from different data usually used in query support based methods.
 Here we show how to develop a new aggregator with the example.
+
 #### 1. Define a new aggregator
 
 Add customize code in `mmfewshot/detection/models/utils/aggregation_layer.py`.

@@ -41,8 +41,8 @@ To find the above module defined above, this module should be imported into the 
 
 - Modify `mmfewshot/classification/core/optimizer/__init__.py` to import it.
 
-    The newly defined module should be imported in `mmfewshot/classification/core/optimizer/__init__.py` so that the registry will
-    find the new module and add it:
+  The newly defined module should be imported in `mmfewshot/classification/core/optimizer/__init__.py` so that the registry will
+  find the new module and add it:
 
 ```python
 from .my_optimizer import MyOptimizer
@@ -106,31 +106,31 @@ The default optimizer constructor is implemented [here](https://github.com/open-
 Tricks not implemented by the optimizer should be implemented through optimizer constructor (e.g., set parameter-wise learning rates) or hooks. We list some common settings that could stabilize the training or accelerate the training. Feel free to create PR, issue for more settings.
 
 - __Use gradient clip to stabilize training__:
-    Some models need gradient clip to clip the gradients to stabilize the training process. An example is as below:
+  Some models need gradient clip to clip the gradients to stabilize the training process. An example is as below:
 
-    ```python
-    optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
-    ```
+  ```python
+  optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+  ```
 
 - __Use momentum schedule to accelerate model convergence__:
-    We support momentum scheduler to modify model's momentum according to learning rate, which could make the model converge in a faster way.
-    Momentum scheduler is usually used with LR scheduler, for example, the following config is used in 3D detection to accelerate convergence.
-    For more details, please refer to the implementation of [CyclicLrUpdater](https://github.com/open-mmlab/mmcv/blob/f48241a65aebfe07db122e9db320c31b685dc674/mmcv/runner/hooks/lr_updater.py#L327) and [CyclicMomentumUpdater](https://github.com/open-mmlab/mmcv/blob/f48241a65aebfe07db122e9db320c31b685dc674/mmcv/runner/hooks/momentum_updater.py#L130).
+  We support momentum scheduler to modify model's momentum according to learning rate, which could make the model converge in a faster way.
+  Momentum scheduler is usually used with LR scheduler, for example, the following config is used in 3D detection to accelerate convergence.
+  For more details, please refer to the implementation of [CyclicLrUpdater](https://github.com/open-mmlab/mmcv/blob/f48241a65aebfe07db122e9db320c31b685dc674/mmcv/runner/hooks/lr_updater.py#L327) and [CyclicMomentumUpdater](https://github.com/open-mmlab/mmcv/blob/f48241a65aebfe07db122e9db320c31b685dc674/mmcv/runner/hooks/momentum_updater.py#L130).
 
-    ```python
-    lr_config = dict(
-        policy='cyclic',
-        target_ratio=(10, 1e-4),
-        cyclic_times=1,
-        step_ratio_up=0.4,
-    )
-    momentum_config = dict(
-        policy='cyclic',
-        target_ratio=(0.85 / 0.95, 1),
-        cyclic_times=1,
-        step_ratio_up=0.4,
-    )
-    ```
+  ```python
+  lr_config = dict(
+      policy='cyclic',
+      target_ratio=(10, 1e-4),
+      cyclic_times=1,
+      step_ratio_up=0.4,
+  )
+  momentum_config = dict(
+      policy='cyclic',
+      target_ratio=(0.85 / 0.95, 1),
+      cyclic_times=1,
+      step_ratio_up=0.4,
+  )
+  ```
 
 ## Customize training schedules
 
@@ -139,20 +139,20 @@ We support many other learning rate schedule [here](https://github.com/open-mmla
 
 - Poly schedule:
 
-    ```python
-    lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
-    ```
+  ```python
+  lr_config = dict(policy='poly', power=0.9, min_lr=1e-4, by_epoch=False)
+  ```
 
 - ConsineAnnealing schedule:
 
-    ```python
-    lr_config = dict(
-        policy='CosineAnnealing',
-        warmup='linear',
-        warmup_iters=1000,
-        warmup_ratio=1.0 / 10,
-        min_lr_ratio=1e-5)
-    ```
+  ```python
+  lr_config = dict(
+      policy='CosineAnnealing',
+      warmup='linear',
+      warmup_iters=1000,
+      warmup_ratio=1.0 / 10,
+      min_lr_ratio=1e-5)
+  ```
 
 ## Customize workflow
 
@@ -186,6 +186,7 @@ so that 1 epoch for training and 1 epoch for validation will be run iteratively.
 #### 1. Implement a new hook
 
 Here we give an example of creating a new hook in MMFewShot and using it in training.
+
 ```python
 from mmcv.runner import HOOKS, Hook
 
@@ -223,8 +224,8 @@ Then we need to make `MyHook` imported. Assuming the file is in `mmfewshot/class
 
 - Modify `mmfewshot/core/utils/__init__.py` to import it.
 
-    The newly defined module should be imported in `mmfewshot/classification/core/utils/__init__.py` so that the registry will
-    find the new module and add it:
+  The newly defined module should be imported in `mmfewshot/classification/core/utils/__init__.py` so that the registry will
+  find the new module and add it:
 
 ```python
 from .my_hook import MyHook
@@ -264,11 +265,11 @@ custom_hooks =  [
 ]
 ```
 
-
 ### Customize self-implemented eval hooks with a dataset
 
 Here we give an example of creating a new hook in MMFewShot and using it to evaluate a dataset.
 To achieve this, we can add following code in `mmfewshot/classification/apis/test.py`.
+
 ```python
 if validate:
     ...
@@ -295,8 +296,6 @@ data = dict(
 ```
 
 Then we can replace the `test_single_task` with customized `test_my_single_task` in `single_gpu_meta_test` and `multiple_gpu_meta_test`
-
-
 
 ### Modify default runtime hooks
 
@@ -345,7 +344,6 @@ Except the key `interval`, other arguments such as `metric` will be passed to th
 ```python
 evaluation = dict(interval=1, metric='bbox')
 ```
-
 
 ## Customize Meta Testing
 

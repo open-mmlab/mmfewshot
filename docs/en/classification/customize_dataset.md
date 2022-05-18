@@ -126,6 +126,7 @@ dataset_A_train = dict(
 An example of customizing data sampling logic for training:
 
 #### Create a new dataset wrapper
+
 We can create a new dataset wrapper in mmfewshot/classification/datasets/dataset_wrappers.py to customize sampling logic.
 
 ```python
@@ -162,9 +163,9 @@ class MyDatasetWrapper:
 ```
 
 #### Update dataset builder
+
 We need to add the build code in mmfewshot/classification/datasets/builder.py
 for our customize dataset wrapper.
-
 
 ```python
 def build_dataset(cfg, default_args=None):
@@ -206,7 +207,9 @@ class MyClassifier(BaseFewShotClassifier):
 ```
 
 #### Using customize dataset wrapper in config
+
 Then in the config, to use `MyDatasetWrapper` you can modify the config as the following,
+
 ```python
 dataset_A_train = dict(
         type='MyDatasetWrapper',
