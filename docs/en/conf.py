@@ -46,6 +46,10 @@ extensions = [
     'sphinx_markdown_tables',
 ]
 
+# Enable ::: for my_st
+myst_enable_extensions = ['colon_fence']
+myst_heading_anchors = 3
+
 autodoc_mock_imports = ['matplotlib', 'mmfewshot.version', 'mmcv.ops']
 
 # Add any paths that contain templates here, relative to this directory.
