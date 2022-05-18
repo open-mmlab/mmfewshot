@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from __future__ import annotations
 import os.path as osp
-from typing import Dict, List, Mapping, Optional, Tuple
+from typing import Mapping
 
 import numpy as np
 from torch import Tensor
@@ -41,7 +41,7 @@ class EpisodicDataset:
                  num_ways: int,
                  num_shots: int,
                  num_queries: int,
-                 episodes_seed: Optional[int] = None) -> None:
+                 episodes_seed: int | None = None) -> None:
         self.dataset = dataset
         self.num_ways = num_ways
         self.num_shots = num_shots
@@ -55,7 +55,7 @@ class EpisodicDataset:
         self.episode_idxes, self.episode_class_ids = \
             self.generate_episodic_idxes()
 
-    def generate_episodic_idxes(self) -> Tuple[List[Mapping], List[List[int]]]:
+    def generate_episodic_idxes(self) -> tuple[list[Mapping], list[list[int]]]:
         """Generate batch indices for each episodic."""
         episode_idxes, episode_class_ids = [], []
         class_ids = [i for i in range(len(self.CLASSES))]
@@ -81,7 +81,7 @@ class EpisodicDataset:
                 })
         return episode_idxes, episode_class_ids
 
-    def __getitem__(self, idx: int) -> Dict:
+    def __getitem__(self, idx: int) -> dict:
         """Return a episode data at the same time.
 
         For `EpisodicDataset`, this function would return num_ways *
@@ -99,11 +99,11 @@ class EpisodicDataset:
         """The length of the dataset is the number of generated episodes."""
         return self.num_episodes
 
-    def evaluate(self, *args, **kwargs) -> List:
+    def evaluate(self, *args, **kwargs) -> list:
         """Evaluate prediction."""
         return self.dataset.evaluate(*args, **kwargs)
 
-    def get_episode_class_ids(self, idx: int) -> List[int]:
+    def get_episode_class_ids(self, idx: int) -> list[int]:
         """Return class ids in one episode."""
         return self.episode_class_ids[idx]
 
@@ -140,7 +140,7 @@ class MetaTestDataset(EpisodicDataset):
         from same episode."""
         self._task_id = task_id
 
-    def __getitem__(self, idx: int) -> Dict:
+    def __getitem__(self, idx: int) -> dict:
         """Return data according to mode.
 
         For mode `test_set`, this function would return single image as regular
@@ -166,7 +166,7 @@ class MetaTestDataset(EpisodicDataset):
         else:
             return self.dataset[idx]
 
-    def get_task_class_ids(self) -> List[int]:
+    def get_task_class_ids(self) -> list[int]:
         return self.get_episode_class_ids(self._task_id)
 
     def test_set(self) -> MetaTestDataset:
@@ -189,7 +189,7 @@ class MetaTestDataset(EpisodicDataset):
         elif self._mode == 'query':
             return self.num_ways * self.num_queries
 
-    def cache_feats(self, feats: Tensor, img_metas: Dict) -> None:
+    def cache_feats(self, feats: Tensor, img_metas: dict) -> None:
         """Cache extracted feats into dataset."""
         idx_map = {
             osp.join(data_info['img_prefix'],

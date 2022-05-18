@@ -265,7 +265,7 @@ class QueryAwareDataset:
 
 
 @DATASETS.register_module()
-class NWayKShotDataset(object):
+class NWayKShotDataset:
     """A dataset wrapper of NWayKShotDataset.
 
     Building NWayKShotDataset requires query and support dataset, the behavior

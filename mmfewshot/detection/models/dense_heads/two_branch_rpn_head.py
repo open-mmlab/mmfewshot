@@ -25,7 +25,7 @@ class TwoBranchRPNHead(RPNHead):
 
     def __init__(self, mid_channels: int = 64, **kwargs) -> None:
         self.mid_channels = mid_channels
-        super(TwoBranchRPNHead, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def _init_layers(self) -> None:
         """Initialize layers of the head."""

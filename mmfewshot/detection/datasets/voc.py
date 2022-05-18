@@ -277,7 +277,7 @@ class FewShotVOCDataset(BaseFewShotDataset):
                 height = int(size.find('height').text)
             else:
                 img_path = osp.join(self.img_prefix, dataset_year,
-                                    'JPEGImages', '{}.jpg'.format(img_id))
+                                    'JPEGImages', f'{img_id}.jpg')
                 img = mmcv.imread(img_path)
                 width, height = img.size
             ann_info = self._get_xml_ann_info(dataset_year, img_id, classes)

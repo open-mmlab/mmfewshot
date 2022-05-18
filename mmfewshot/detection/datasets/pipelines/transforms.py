@@ -307,7 +307,7 @@ class ResizeToMultiScale(Resize):
 
     def __init__(self, multi_scales: List[Tuple[int]], *args,
                  **kwargs) -> None:
-        super(ResizeToMultiScale, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         assert isinstance(multi_scales, list)
         assert len(multi_scales) > 1
         self.multi_scales = multi_scales

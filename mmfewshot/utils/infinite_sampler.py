@@ -57,8 +57,7 @@ class InfiniteSampler(Sampler):
         yield from itertools.islice(self._infinite_indices(), 0, None)
 
     def __iter__(self) -> Iterator:
-        for idx in self.indices:
-            yield idx
+        yield from self.indices
 
     def __len__(self) -> int:
         """Length of dataset."""
@@ -213,8 +212,7 @@ class DistributedInfiniteSampler(Sampler):
                                     self.num_replicas)
 
     def __iter__(self) -> Iterator:
-        for idx in self.indices:
-            yield idx
+        yield from self.indices
 
     def __len__(self):
         """return length of dataset."""

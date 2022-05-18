@@ -392,8 +392,8 @@ class BaseFewShotDataset(CustomDataset):
         new_data_infos = []
         for idx, data_info in enumerate(data_infos):
             selected_instance_indices = \
-                sorted([instance[1] for instance in keep_instances_indices
-                        if instance[0] == idx])
+                sorted(instance[1] for instance in keep_instances_indices
+                       if instance[0] == idx)
             if len(selected_instance_indices) == 0:
                 continue
             ann = data_info['ann']
