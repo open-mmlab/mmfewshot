@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="resources/mmfewshot-logo.png" width="500px"/>
+  <img src="resources/mmfewshot-logo.png" width="500"/>
   <div>&nbsp;</div>
   <div align="center">
     <b><font size="5">OpenMMLab website</font></b>
@@ -17,26 +17,34 @@
     </sup>
   </div>
   <div>&nbsp;</div>
+
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mmfewshot)](https://pypi.org/project/mmfewshot/)
+[![PyPI](https://img.shields.io/pypi/v/mmfewshot)](https://pypi.org/project/mmfewshot)
+[![docs](https://img.shields.io/badge/docs-latest-blue)](https://mmfewshot.readthedocs.io/en/latest/)
+[![badge](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
+[![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/master/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
+[![license](https://img.shields.io/github/license/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE)
+
+[📘Documentation](https://mmfewshot.readthedocs.io/) |
+[🛠️Installation](https://mmfewshot.readthedocs.io/en/latest/install.html) |
+[👀Model Zoo](https://mmfewshot.readthedocs.io/en/latest/model_zoo.html) |
+[🆕Update News](https://mmfewshot.readthedocs.io/en/latest/changelog.html) |
+[🤔Reporting Issues](https://github.com/open-mmlab/mmfewshot/issues/new/choose)
+
 </div>
 
-## Introduction
+<div align="center">
 
 English | [简体中文](README_zh-CN.md)
 
-[![Documentation](https://readthedocs.org/projects/mmfewshot/badge/?version=latest)](https://mmfewshot.readthedocs.io/en/latest/?badge=latest)
-[![actions](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
-[![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/main/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
-[![PyPI](https://badge.fury.io/py/mmfewshot.svg)](https://pypi.org/project/mmfewshot/)
-[![LICENSE](https://img.shields.io/github/license/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE)
-[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
-[![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
+</div>
+
+## Introduction
 
 mmfewshot is an open source few shot learning toolbox based on PyTorch. It is a part of the [OpenMMLab](https://open-mmlab.github.io/) project.
 
 The master branch works with **PyTorch 1.5+**.
 The compatibility to earlier versions of PyTorch is not fully tested.
-
-Documentation: https://mmfewshot.readthedocs.io/en/latest/.
 
 <div align="left">
   <img src="resources/demo.png"/>
@@ -57,12 +65,42 @@ Documentation: https://mmfewshot.readthedocs.io/en/latest/.
 
   The toolbox provides strong baselines and state-of-the-art methods in few shot classification and detection.
 
-## License
+## What's New
 
-This project is released under the [Apache 2.0 license](LICENSE).
+v0.1.0 was released in 24/11/2021.
+Please refer to [changelog.md](docs/en/changelog.md) for details and release history.
 
-## Model Zoo
+## Installation & Dataset Preparation
 
+MMFewShot depends on [PyTorch](https://pytorch.org/) and [MMCV](https://github.com/open-mmlab/mmcv).
+Please refer to [install.md](/docs/en/install.md) for installation of MMFewShot and [data preparation](tools/data/README.md) for dataset preparation.
+
+## Getting Started
+
+If you are new of few shot learning, you can start with [learn the basics](docs/en/intro.md).
+If you are familiar with it, check out [getting_started.md](docs/en/get_started.md) for the basic usage of mmfewshot.
+
+Refer to the below tutorials to dive deeper:
+
+- Few Shot Classification
+
+  - [Overview](docs/en/classification/overview.md)
+  - [Config](docs/en/classification/customize_config.md)
+  - [Customize Dataset](docs/en/classification/customize_dataset.md)
+  - [Customize Model](docs/en/classification/customize_models.md)
+  - [Customize Runtime](docs/en/classification/customize_runtime.md)
+
+- Few Shot Detection
+
+  - [Overview](docs/en/detection/overview.md)
+  - [Config](docs/en/detection/customize_config.md)
+  - [Customize Dataset](docs/en/detection/customize_dataset.md)
+  - [Customize Model](docs/en/detection/customize_models.md)
+  - [Customize Runtime](docs/en/detection/customize_runtime.md)
+
+## Benchmark and model zoo
+
+Results and models are available in the [model zoo](docs/en/model_zoo.md).
 Supported algorithms:
 
 <details open>
@@ -91,35 +129,13 @@ Supported algorithms:
 
 </details>
 
-## Changelog
+## Contributing
 
-## Installation & Dataset Preparation
+We appreciate all contributions to improve mmfewshot. Please refer to [CONTRIBUTING.md](https://github.com/open-mmlab/mmfewshot/blob/main/.github/CONTRIBUTING.md) in MMFewShot for the contributing guideline.
 
-MMFewShot depends on [PyTorch](https://pytorch.org/) and [MMCV](https://github.com/open-mmlab/mmcv).
-Please refer to [install.md](/docs/en/install.md) for installation of MMFewShot and [data preparation](tools/data/README.md) for dataset preparation.
+## Acknowledgement
 
-## Getting Started
-
-If you are new of few shot learning, you can start with [learn the basics](docs/en/intro.md).
-If you are familiar with it, check out [getting_started.md](docs/en/get_started.md) for the basic usage of mmfewshot.
-
-Refer to the below tutorials to dive deeper:
-
-- Few Shot Classification
-
-  - [Overview](docs/classification/overview.md)
-  - [Config](docs/classification/customize_config.md)
-  - [Customize Dataset](docs/classification/customize_dataset.md)
-  - [Customize Model](docs/classification/customize_models.md)
-  - [Customize Runtime](docs/classification/customize_runtime.md)
-
-- Few Shot Detection
-
-  - [Overview](docs/detection/overview.md)
-  - [Config](docs/detection/customize_config.md)
-  - [Customize Dataset](docs/detection/customize_dataset.md)
-  - [Customize Model](docs/detection/customize_models.md)
-  - [Customize Runtime](docs/detection/customize_runtime.md)
+mmfewshot is an open source project that is contributed by researchers and engineers from various colleges and companies. We appreciate all the contributors who implement their methods or add new features, as well as users who give valuable feedbacks. We wish that the toolbox and benchmark could serve the growing research community by providing a flexible toolkit to reimplement existing methods and develop their own new methods.
 
 ## Citation
 
@@ -134,31 +150,28 @@ If you find this project useful in your research, please consider cite:
 }
 ```
 
-## Contributing
+## License
 
-We appreciate all contributions to improve mmfewshot. Please refer to [CONTRIBUTING.md](https://github.com/open-mmlab/mmfewshot/blob/main/.github/CONTRIBUTING.md) in MMFewShot for the contributing guideline.
-
-## Acknowledgement
-
-mmfewshot is an open source project that is contributed by researchers and engineers from various colleges and companies. We appreciate all the contributors who implement their methods or add new features, as well as users who give valuable feedbacks. We wish that the toolbox and benchmark could serve the growing research community by providing a flexible toolkit to reimplement existing methods and develop their own new methods.
+This project is released under the [Apache 2.0 license](LICENSE).
 
 ## Projects in OpenMMLab
 
+- [MMCV](https://github.com/open-mmlab/mmcv): OpenMMLab foundational library for computer vision.
 - [MIM](https://github.com/open-mmlab/mim): MIM installs OpenMMLab packages.
 - [MMClassification](https://github.com/open-mmlab/mmclassification): OpenMMLab image classification toolbox and benchmark.
 - [MMDetection](https://github.com/open-mmlab/mmdetection): OpenMMLab detection toolbox and benchmark.
 - [MMDetection3D](https://github.com/open-mmlab/mmdetection3d): OpenMMLab's next-generation platform for general 3D object detection.
 - [MMRotate](https://github.com/open-mmlab/mmrotate): OpenMMLab rotated object detection toolbox and benchmark.
 - [MMSegmentation](https://github.com/open-mmlab/mmsegmentation): OpenMMLab semantic segmentation toolbox and benchmark.
-- [MMOCR](https://github.com/open-mmlab/mmocr): OpenMMLab text detection, recognition, and understanding toolbox.
+- [MMOCR](https://github.com/open-mmlab/mmocr): OpenMMLab text detection, recognition and understanding toolbox.
 - [MMPose](https://github.com/open-mmlab/mmpose): OpenMMLab pose estimation toolbox and benchmark.
 - [MMHuman3D](https://github.com/open-mmlab/mmhuman3d): OpenMMLab 3D human parametric model toolbox and benchmark.
-- [MMSelfSup](https://github.com/open-mmlab/mmselfsup): OpenMMLab self-supervised learning toolbox and benchmark.
-- [MMRazor](https://github.com/open-mmlab/mmrazor): OpenMMLab model compression toolbox and benchmark.
-- [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab fewshot learning toolbox and benchmark.
+- [MMSelfSup](https://github.com/open-mmlab/mmselfsup): OpenMMLab self-supervised learning Toolbox and Benchmark.
+- [MMRazor](https://github.com/open-mmlab/mmrazor): OpenMMLab Model Compression Toolbox and Benchmark.
+- [MMFewShot](https://github.com/open-mmlab/mmfewshot): OpenMMLab FewShot Learning Toolbox and Benchmark.
 - [MMAction2](https://github.com/open-mmlab/mmaction2): OpenMMLab's next-generation action understanding toolbox and benchmark.
 - [MMTracking](https://github.com/open-mmlab/mmtracking): OpenMMLab video perception toolbox and benchmark.
 - [MMFlow](https://github.com/open-mmlab/mmflow): OpenMMLab optical flow toolbox and benchmark.
 - [MMEditing](https://github.com/open-mmlab/mmediting): OpenMMLab image and video editing toolbox.
-- [MMGeneration](https://github.com/open-mmlab/mmgeneration): OpenMMLab image and video generative models toolbox.
-- [MMDeploy](https://github.com/open-mmlab/mmdeploy): OpenMMLab model deployment framework.
+- [MMGeneration](https://github.com/open-mmlab/mmgeneration):  OpenMMLab Generative Model toolbox and benchmark.
+- [MMDeploy](https://github.com/open-mmlab/mmdeploy): OpenMMlab deep learning model deployment toolset.
