@@ -2,14 +2,14 @@
   <img src="resources/mmfewshot-logo.png" width="500px"/>
   <div>&nbsp;</div>
   <div align="center">
-    <b><font size="5">OpenMMLab website</font></b>
+    <b><font size="5">OpenMMLab 官网</font></b>
     <sup>
       <a href="https://openmmlab.com">
         <i><font size="4">HOT</font></i>
       </a>
     </sup>
     &nbsp;&nbsp;&nbsp;&nbsp;
-    <b><font size="5">OpenMMLab platform</font></b>
+    <b><font size="5">OpenMMLab 开放平台</font></b>
     <sup>
       <a href="https://platform.openmmlab.com">
         <i><font size="4">TRY IT OUT</font></i>
@@ -17,23 +17,37 @@
     </sup>
   </div>
   <div>&nbsp;</div>
+
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mmfewshot)](https://pypi.org/project/mmfewshot/)
+[![PyPI](https://img.shields.io/pypi/v/mmfewshot)](https://pypi.org/project/mmfewshot)
+[![docs](https://img.shields.io/badge/docs-latest-blue)](https://mmfewshot.readthedocs.io/en/latest/)
+[![badge](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
+[![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/master/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
+[![license](https://img.shields.io/github/license/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE)
+
+[📘Documentation](https://mmfewshot.readthedocs.io/zh_CN/latest/) |
+[🛠️Installation](https://mmfewshot.readthedocs.io/zh_CN/latest/install.html) |
+[👀Model Zoo](https://mmfewshot.readthedocs.io/zh_CN/latest/model_zoo.html) |
+[🆕Update News](https://mmfewshot.readthedocs.io/zh_CN/latest/changelog.html) |
+[🤔Reporting Issues](https://github.com/open-mmlab/mmfewshot/issues/new/choose)
+
+</div>
+
+<div align="center">
+
+[English](/README.md) | 简体中文
+
 </div>
 
 ## Introduction
 
-[English](README.md) | 简体中文
-
-[![Documentation](https://readthedocs.org/projects/mmfewshot/badge/?version=latest)](https://mmfewshot.readthedocs.io/en/latest/?badge=latest)
-[![actions](https://github.com/open-mmlab/mmfewshot/workflows/build/badge.svg)](https://github.com/open-mmlab/mmfewshot/actions)
-[![codecov](https://codecov.io/gh/open-mmlab/mmfewshot/branch/main/graph/badge.svg)](https://codecov.io/gh/open-mmlab/mmfewshot)
-[![PyPI](https://badge.fury.io/py/mmfewshot.svg)](https://pypi.org/project/mmfewshot/)
-[![LICENSE](https://img.shields.io/github/license/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/blob/master/LICENSE)
-[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
-[![Percentage of issues still open](https://isitmaintained.com/badge/open/open-mmlab/mmfewshot.svg)](https://github.com/open-mmlab/mmfewshot/issues)
-
 MMFewShot 是一款基于 PyTorch 的少样本学习代码库，是 [OpenMMLab](http://openmmlab.org/) 项目的成员之一。
 
 主分支代码目前支持 **PyTorch 1.5 以上**的版本。
+
+<div align="left">
+  <img src="resources/demo.png"/>
+</div>
 
 ### 主要特性
 
@@ -49,17 +63,41 @@ MMFewShot 是一款基于 PyTorch 的少样本学习代码库，是 [OpenMMLab](
 
   MMFewShot 提供了少样本分类和检测任务中最先进的算法和强大的基准模型.
 
-<div align="left">
-  <img src="resources/demo.png"/>
-</div>
+## 更新
 
-## 开源许可证
+v0.1.0 版本已于 2021 年 11 月 24 日发布，可通过查阅[更新日志](docs/zh_cn/changelog.md)了解更多细节以及发布历史。
 
-该项目采用 [Apache 2.0 开源许可证](LICENSE)
+## 安装与准备数据集
+
+MMFewShot 依赖 [PyTorch](https://pytorch.org/) 和 [MMCV](https://github.com/open-mmlab/mmcv) 。
+请参考[安装文档](docs/zh_cn/install.md)进行安装和参考[数据准备](tools/data/README.md)准备数据集。
+
+## 开始使用 MMFewShot
+
+如果初次了解少样本学习，你可以从[基础介绍](docs/en/intro.md)开始了解少样本学习的基本概念和 MMFewShot 的框架。
+如果对少样本学习很熟悉，请参考[使用教程](docs/zh_cn/get_started.md)获取MMFewShot的基本用法。
+
+MMFewShot 也提供了其他更详细的教程，包括：
+
+- 少样本分类
+
+  - [概览](docs/zh_cn/classification/overview.md)
+  - [配置文件](docs/zh_cn/classification/customize_config.md)
+  - [添加数据集](docs/zh_cn/classification/customize_dataset.md)
+  - [添加新模型](docs/zh_cn/classification/customize_models.md)
+  - [自定义模型运行环境](docs/zh_cn/classification/customize_runtime.md)。
+
+- 少样本检测
+
+  - [概览](docs/zh_cn/detection/overview.md)
+  - [配置文件](docs/zh_cn/detection/customize_config.md)
+  - [添加数据集](docs/zh_cn/detection/customize_dataset.md)
+  - [添加新模型](docs/zh_cn/detection/customize_models.md)
+  - [自定义模型运行环境](docs/zh_cn/detection/customize_runtime.md)。
 
 ## 基准测试和模型库
 
-测试结果和模型可以在[模型库](docs/model_zoo.md)中找到。
+本工具箱支持的各个模型的结果和设置都可以在[模型库](docs/en/model_zoo.md)页面中查看。
 
 已支持的算法：
 
@@ -89,37 +127,7 @@ MMFewShot 是一款基于 PyTorch 的少样本学习代码库，是 [OpenMMLab](
 
 </details>
 
-## 更新记录
-
-## 安装与准备数据集
-
-MMFewShot 依赖 [PyTorch](https://pytorch.org/) 和 [MMCV](https://github.com/open-mmlab/mmcv) 。
-请参考[安装文档](docs/zh_cn/install.md)进行安装和参考[数据准备](tools/data/README.md)准备数据集。
-
-## 快速入门
-
-如果初次了解少样本学习，你可以从[基础介绍](docs/en/intro.md)开始了解少样本学习的基本概念和 MMFewShot 的框架。
-如果对少样本学习很熟悉，请参考[使用教程](docs/en/get_started.md)获取MMFewShot的基本用法。
-
-MMFewShot 也提供了其他更详细的教程，包括：
-
-- 少样本分类
-
-  - [概览](docs/classification/overview.md)
-  - [配置文件](docs/classification/customize_config.md)
-  - [添加数据集](docs/classification/customize_dataset.md)
-  - [添加新模型](docs/classification/customize_models.md)
-  - [自定义模型运行环境](docs/classification/customize_runtime.md)。
-
-- 少样本检测
-
-  - [概览](docs/detection/overview.md)
-  - [配置文件](docs/detection/customize_config.md)
-  - [添加数据集](docs/detection/customize_dataset.md)
-  - [添加新模型](docs/detection/customize_models.md)
-  - [自定义模型运行环境](docs/detection/customize_runtime.md)。
-
-## 贡献指南
+## 参与贡献
 
 我们感谢所有的贡献者为改进和提升 MMFewShot 所作出的努力。请参考[贡献指南](https://github.com/open-mmlab/mmfewshot/blob/main/.github/CONTRIBUTING.md)来了解参与项目贡献的相关指引。
 
@@ -142,15 +150,20 @@ MMFewShot 是一款由不同学校和公司共同贡献的开源项目。我们�
 }
 ```
 
+## 许可
+
+该项目遵循[Apache 2.0 license](/LICENSE)开源协议。
+
 ## OpenMMLab 的其他项目
 
+- [MMCV](https://github.com/open-mmlab/mmcv): OpenMMLab计算机视觉基础库
 - [MIM](https://github.com/open-mmlab/mim): MIM 是 OpenMMlab 项目、算法、模型的统一入口
 - [MMClassification](https://github.com/open-mmlab/mmclassification): OpenMMLab 图像分类工具箱
 - [MMDetection](https://github.com/open-mmlab/mmdetection): OpenMMLab 目标检测工具箱
 - [MMDetection3D](https://github.com/open-mmlab/mmdetection3d): OpenMMLab 新一代通用 3D 目标检测平台
 - [MMRotate](https://github.com/open-mmlab/mmrotate): OpenMMLab 旋转框检测工具箱与测试基准
 - [MMSegmentation](https://github.com/open-mmlab/mmsegmentation): OpenMMLab 语义分割工具箱
-- [MMOCR](https://github.com/open-mmlab/mmocr): OpenMMLab 全流程文字检测识别理解工具箱
+- [MMOCR](https://github.com/open-mmlab/mmocr): OpenMMLab 全流程文字检测识别理解工具包
 - [MMPose](https://github.com/open-mmlab/mmpose): OpenMMLab 姿态估计工具箱
 - [MMHuman3D](https://github.com/open-mmlab/mmhuman3d): OpenMMLab 人体参数化模型工具箱与测试基准
 - [MMSelfSup](https://github.com/open-mmlab/mmselfsup): OpenMMLab 自监督学习工具箱与测试基准
@@ -168,7 +181,7 @@ MMFewShot 是一款由不同学校和公司共同贡献的开源项目。我们�
 扫描下方的二维码可关注 OpenMMLab 团队的 [知乎官方账号](https://www.zhihu.com/people/openmmlab)，加入 OpenMMLab 团队的 [官方交流 QQ 群](https://jq.qq.com/?_wv=1027&k=aCvMxdr3)
 
 <div align="center">
-<img src="resources/zhihu_qrcode.jpg" height="400" />  <img src="resources/qq_group_qrcode.jpg" height="400" />
+<img src="https://user-images.githubusercontent.com/24663779/116371114-a8005e80-a83d-11eb-9123-17fc9cfe7475.jpg" height="400" />  <img src="https://user-images.githubusercontent.com/24663779/116371171-b8b0d480-a83d-11eb-9514-247f0e5dbfa3.jpg" height="400" />
 </div>
 
 我们会在 OpenMMLab 社区为大家
