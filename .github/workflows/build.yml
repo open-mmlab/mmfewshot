@@ -69,13 +69,12 @@ jobs:
           coverage xml
           coverage report -m
 
-  build_cuda:
-    runs-on: ubuntu-latest
-
-    env:
-      CUDA: 10.1.105-1
-      CUDA_SHORT: 10.1
-      UBUNTU_VERSION: ubuntu1804
+  build_cuda101:
+    runs-on: ubuntu-18.04
+    container:
+      image: pytorch/pytorch:1.6.0-cuda10.1-cudnn7-devel
+      env:
+        LANG: C.UTF-8
     strategy:
       matrix:
         python-version: [3.7]
