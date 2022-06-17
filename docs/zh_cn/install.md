@@ -11,9 +11,9 @@
 
 MMFewShot 和 MMCV, MMCls, MMDet 版本兼容性如下所示，需要安装正确的版本以避免安装出现问题。
 
-| MMFewShot 版本 |      MMCV 版本      | MMClassification 版本 | MMDetection 版本 |
-| :----------: | :---------------: | :-----------------: | :------------: |
-|    master    | mmcv-full>=1.3.12 |   mmdet >= 2.16.0   | mmcls >=0.15.0 |
+| MMFewShot 版本 |     MMCV 版本     | MMClassification 版本 | MMDetection 版本 |
+| :------------: | :---------------: | :-------------------: | :--------------: |
+|     master     | mmcv-full>=1.3.12 |    mmdet >= 2.16.0    |  mmcls >=0.15.0  |
 
 \*\*注意：\*\*如果已经安装了 mmcv，首先需要使用 `pip uninstall mmcv` 卸载已安装的 mmcv，如果同时安装了 mmcv 和 mmcv-full，将会报 `ModuleNotFoundError` 错误。
 
