@@ -133,7 +133,7 @@ def compat_loader_args(cfg):
                                                   'Please only set it in '
                                                   '`data.test_dataloader`. ')
         samples_per_gpu = max(
-            [ds_cfg.pop('samples_per_gpu', 1) for ds_cfg in cfg.data.test])
+            ds_cfg.pop('samples_per_gpu', 1) for ds_cfg in cfg.data.test)
         cfg.data.test_dataloader['samples_per_gpu'] = samples_per_gpu
 
     return cfg

@@ -126,7 +126,7 @@ class MiniImageNetDataset(BaseFewShotDataset):
             ann_file = osp.join(self.data_prefix, f'{subset_}.csv')
             assert osp.exists(ann_file), \
                 f'Please download ann_file through {self.resource}.'
-            with open(ann_file, 'r') as f:
+            with open(ann_file) as f:
                 for i, line in enumerate(f):
                     # skip file head
                     if i == 0:

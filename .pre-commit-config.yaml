@@ -49,3 +49,8 @@ repos:
           - mdformat-openmmlab
           - mdformat_frontmatter
           - linkify-it-py
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.32.1
+    hooks:
+      - id: pyupgrade
+        args: ["--py36-plus"]

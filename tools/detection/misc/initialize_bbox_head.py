@@ -282,7 +282,7 @@ def main():
         raise ValueError(f'not support method: {args.method}')
 
     torch.save(checkpoint, save_path)
-    print('save changed checkpoint to {}'.format(save_path))
+    print(f'save changed checkpoint to {save_path}')
 
 
 if __name__ == '__main__':
