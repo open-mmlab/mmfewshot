@@ -48,6 +48,9 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install Pillow
+        run: python -m pip install Pillow==6.2.2
+        if: ${{matrix.torchvision < 0.5}}
       - name: Install PyTorch
         run: pip install torch==${{matrix.torch}}+cpu torchvision==${{matrix.torchvision}}+cpu -f https://download.pytorch.org/whl/torch_stable.html
       - name: Install MMCV
@@ -111,18 +114,21 @@ jobs:
           apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub
       - name: Install system dependencies
         run: apt-get update && apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxrender-dev libxext6
+      - name: Install Pillow
+        run: python -m pip install Pillow==6.2.2
+        if: ${{matrix.torchvision < 0.5}}
       - name: Install python-dev
         run: apt-get update && apt-get install -y python${{matrix.python-version}}-dev
         if: ${{matrix.python-version != '3.9'}}
       - name: Install PyTorch
         run: python -m pip install torch==${{matrix.torch}} torchvision==${{matrix.torchvision}} -f https://download.pytorch.org/whl/torch_stable.html
-      - name: Install MMCV
+      - name: Install mmfewshot dependencies
         run: |
-          pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch${{matrix.mmcv}}/index.html
-          pip install -r requirements.txt
+          python -V
+          python -m pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu102/torch${{matrix.mmcv}}/index.html
+          python -m pip install -r requirements.txt
           python -c 'import mmcv; print(mmcv.__version__)'
-      - name: Install MMCLS and MMDET
-        run: pip install mmcls mmdet
+          python -m pip install mmcls mmdet
       - name: Build and install
         run: |
           rm -rf .eggs
@@ -183,6 +189,9 @@ jobs:
           apt-get update && apt-get install -y ffmpeg libsm6 libxext6 git ninja-build libglib2.0-0 libsm6 libxrender-dev libxext6
           apt-get clean
           rm -rf /var/lib/apt/lists/*
+      - name: Install Pillow
+        run: python -m pip install Pillow==6.2.2
+        if: ${{matrix.torchvision < 0.5}}
       - name: Install PyTorch
         run: python -m pip install torch==${{matrix.torch}} torchvision==${{matrix.torchvision}} -f https://download.pytorch.org/whl/torch_stable.html
       - name: Install dependencies for compiling onnx when python=3.9
