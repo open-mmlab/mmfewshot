@@ -92,7 +92,7 @@ def parse_args():
             'refers to https://mmclassification.readthedocs.io/en/latest/'
             'getting_started.html#inference-with-pretrained-models')
 
-    assert args.metrics or args.out, \
+    assert args.metrics or args.work_dir, \
         'Please specify at least one of output path and evaluation metrics.'
     return args
 
