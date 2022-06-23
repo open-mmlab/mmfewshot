@@ -86,6 +86,10 @@ class MetaTestEvalHook(Hook):
                 warnings.warn('runner.meta is None. Creating an empty one.')
                 runner.meta = dict()
             runner.meta.setdefault('hook_msgs', dict())
+            if runner.meta['hook_msgs'].get('best_score', False):
+                self.best_score = runner.meta['hook_msgs']['best_score']
+                runner.logger.info(
+                    f'Previous best score is: {self.best_score}.')
             self.best_ckpt_path = runner.meta['hook_msgs'].get(
                 'best_ckpt', None)
 
