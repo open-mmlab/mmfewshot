@@ -69,14 +69,14 @@ def single_gpu_test(model: nn.Module,
                 if is_module_wrapper(model):
                     model.module.show_result(
                         img_show,
-                        result[i],
+                        result[j],
                         show=show,
                         out_file=out_file,
                         score_thr=show_score_thr)
                 else:
                     model.show_result(
                         img_show,
-                        result[i],
+                        result[j],
                         show=show,
                         out_file=out_file,
                         score_thr=show_score_thr)
