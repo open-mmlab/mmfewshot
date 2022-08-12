@@ -49,7 +49,7 @@ We follow the below style to name config files. Contributors are advised to foll
 
 ## An example of TFA
 
-To help the users have a basic idea of a complete config and the modules in a modern classification system,
+To help the users have a basic idea of a complete config and the modules in a modern detection system,
 we make brief comments on the config of TFA in coco 10 shot fine-tuning setting as the following.
 For more detailed usage and the corresponding alternative for each module, please refer to the API documentation.
 
