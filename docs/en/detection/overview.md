@@ -1,6 +1,6 @@
 # Tutorial 0: Overview of MMFewShot Detection
 
-The main difference between general classification task and few shot classification task
+The main difference between general detection task and few shot detection task
 is the data usage.
 Therefore, the design of MMFewShot targets at data flows for few shot setting based on [mmdet](https://github.com/open-mmlab/mmdetection).
 Additionally, the modules in [mmdet](https://github.com/open-mmlab/mmdetection) can be imported and reused in the code or config.
