@@ -73,7 +73,7 @@ bash ./tools/detection/dist_train.sh \
 # step2: reshape the bbox head of base model for few shot fine-tuning
 python -m tools.detection.misc.initialize_bbox_head \
     --src1 work_dirs/fsce_r101_fpn_voc-split1_base-training/latest.pth \
-    --method randinit \
+    --method random_init \
     --save-dir work_dirs/fsce_r101_fpn_voc-split1_base-training
 
 # step3: few shot fine-tuning
